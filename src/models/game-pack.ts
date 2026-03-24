@@ -1,4 +1,4 @@
-import type { GamePackId } from "./ids.ts";
+import type { GamePackId, ItemId, RecipeId, NodeTemplateId, CategoryId } from "./ids.ts";
 import type { Metadata } from "./common.ts";
 import type { Item, Category } from "./items.ts";
 import type { Recipe } from "./recipes.ts";
@@ -38,10 +38,10 @@ export interface GamePack {
  */
 export interface GamePackIndex {
   readonly pack: GamePack;
-  readonly itemsById: ReadonlyMap<string, Item>;
-  readonly recipesById: ReadonlyMap<string, Recipe>;
-  readonly nodeTemplatesById: ReadonlyMap<string, NodeTemplate>;
-  readonly categoriesById: ReadonlyMap<string, Category>;
-  readonly recipesByNodeType: ReadonlyMap<string, readonly Recipe[]>;
-  readonly itemsByCategory: ReadonlyMap<string, readonly Item[]>;
+  readonly itemsById: ReadonlyMap<ItemId, Item>;
+  readonly recipesById: ReadonlyMap<RecipeId, Recipe>;
+  readonly nodeTemplatesById: ReadonlyMap<NodeTemplateId, NodeTemplate>;
+  readonly categoriesById: ReadonlyMap<CategoryId, Category>;
+  readonly recipesByNodeType: ReadonlyMap<NodeTemplateId, readonly Recipe[]>;
+  readonly itemsByCategory: ReadonlyMap<CategoryId, readonly Item[]>;
 }

@@ -25,7 +25,7 @@ export interface NodeStatsOverride {
   readonly speedMultiplier?: number;
   readonly powerConsumption?: number;
   readonly moduleSlots?: number;
-  readonly metadata?: Metadata;
+  readonly metadata: Metadata;
 }
 
 /**

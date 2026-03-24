@@ -1,3 +1,4 @@
+import type { GraphId, GamePackId } from "../ids.ts";
 import type { Graph } from "../graph/graph.ts";
 import type { GamePack } from "../game-pack.ts";
 
@@ -23,9 +24,9 @@ export interface ProcessrDocument {
  * the full graph. Used for the document list / "Open" dialog.
  */
 export interface DocumentSummary {
-  readonly graphId: string;
+  readonly graphId: GraphId;
   readonly name: string;
-  readonly gamePackId: string;
+  readonly gamePackId: GamePackId;
   readonly gamePackName: string;
   readonly updatedAt: string;
   readonly nodeCount: number;

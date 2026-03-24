@@ -36,7 +36,7 @@ export interface DslNode {
   readonly templateRef: string;
   readonly recipeRef?: string;
   readonly count?: number;
-  readonly properties: Record<string, string | number | boolean>;
+  readonly properties: Readonly<Record<string, string | number | boolean>>;
 }
 
 export interface DslEdge {
