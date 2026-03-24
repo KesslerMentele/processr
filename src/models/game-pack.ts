@@ -1,0 +1,47 @@
+import type { GamePackId } from "./ids.ts";
+import type { Metadata } from "./common.ts";
+import type { Item, Category } from "./items.ts";
+import type { Recipe } from "./recipes.ts";
+import type { NodeTemplate } from "./nodes.ts";
+
+export type SemVer = `${number}.${number}.${number}`;
+
+/**
+ * A GamePack is the complete static data package for a specific game.
+ * It contains all items, recipes, node templates, categories, and metadata
+ * needed to plan production for that game.
+ *
+ * JSON-serializable by design — stored as .json files, loaded from URLs,
+ * or bundled as static imports.
+ */
+export interface GamePack {
+  readonly id: GamePackId;
+  readonly name: string;
+  readonly gameName: string;
+  readonly version: SemVer;
+  readonly gameVersion?: string;
+  readonly description?: string;
+  readonly author?: string;
+  readonly url?: string;
+
+  readonly items: readonly Item[];
+  readonly recipes: readonly Recipe[];
+  readonly nodeTemplates: readonly NodeTemplate[];
+  readonly categories: readonly Category[];
+
+  readonly metadata: Metadata;
+}
+
+/**
+ * Indexed/normalized form of a GamePack for efficient lookups.
+ * Created at load time from the raw GamePack arrays. Not serialized.
+ */
+export interface GamePackIndex {
+  readonly pack: GamePack;
+  readonly itemsById: ReadonlyMap<string, Item>;
+  readonly recipesById: ReadonlyMap<string, Recipe>;
+  readonly nodeTemplatesById: ReadonlyMap<string, NodeTemplate>;
+  readonly categoriesById: ReadonlyMap<string, Category>;
+  readonly recipesByNodeType: ReadonlyMap<string, readonly Recipe[]>;
+  readonly itemsByCategory: ReadonlyMap<string, readonly Item[]>;
+}
