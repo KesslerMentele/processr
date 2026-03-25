@@ -42,10 +42,10 @@ export interface NodeStatsOverride {
 export interface ProcessorNode {
   readonly id: ProcessorNodeId;
   readonly templateId: NodeTemplateId;
-  /** User-assigned label. Falls back to template name if not set. */
+  /** User-assigned label. Falls back to the template name if not set. */
   readonly label?: string;
   readonly position: Position;
-  /** Currently assigned recipe. Null if no recipe is set. */
+  /** The Currently assigned recipe. Null if no recipe is set. */
   readonly recipeId: RecipeId | null;
   readonly statsOverride: NodeStatsOverride;
   readonly ports: readonly PortInstance[];

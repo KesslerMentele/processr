@@ -55,3 +55,6 @@ export type {
   DslNode,
   DslEdge,
 } from "./serialization/dsl.ts";
+
+// ---- State ----
+export type { GraphStateValue, GraphDispatchValue, GraphAction, ProcessorNodeData } from "./graph/graph-react-connector.ts";
