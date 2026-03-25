@@ -12,8 +12,8 @@ import {
 
 export const factorioPack: GamePack = {
   id: gamePackId('faketorio'),
-  name: "",
-  gameName: "",
+  name: "faketorio",
+  gameName: "factorio",
   version: '0.0.1',
   categories: [
     {
