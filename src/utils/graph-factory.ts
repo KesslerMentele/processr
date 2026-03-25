@@ -33,8 +33,8 @@ export const createProcessorNode = (
     position,
     recipeId: null,
     statsOverride: {metadata: {}},
-    ports: [],
-    count: 0,
+    ports: template.ports.map((p) => ({ id: p.id, definitionId: p.id })),
+    count: 1,
     metadata: template.metadata
   }
 }
