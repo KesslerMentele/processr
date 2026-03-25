@@ -1,59 +1,98 @@
 # Processr
 
-A game-agnostic production planner, calculator, and layout tool for factory games.
+A game-agnostic factory production planner. Build and visualize production graphs — place processr nodes, connect them, assign recipes, and plan your factory layout/ratios.
 
-Processr helps players of games like Factorio, Satisfactory, Shapez, and others plan production chains, calculate ratios, and design factory layouts — all from the browser.
+Client-side only. Your graph is saved in local storage.
 
-## Features (Planned)
+## Stack
+- **React 19** + **TypeScript** (strict, ES2023)
+- **Vite 8** — dev server + bundler
+- **@xyflow/react** (React Flow v12) — interactive node canvas
+- **ESLint 9** — functional-style linting (no `let`, no classes, no loops)
 
-- **Visual Production Planner** — Build and visualize production chains as node-based graphs. Connect inputs, outputs, and intermediates to map out your entire factory.
-- **Ratio & Throughput Calculator** — Compute optimal machine counts, belt throughput, and resource requirements for any production target.
-- **Layout Designer** — Design and arrange factory blueprints with a spatial editor.
-- **Community Data Packs** — Import predefined recipe and item data for popular factory games. Community-maintained packs keep data up to date as games evolve.
-- **Client-Side** — Everything runs locally in the browser. Your data stays on your machine.
+## Getting started
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js (LTS recommended)
-- npm
-
-### Development
-
-```bash
+```sh
 npm install
-npm run dev
+npm run dev        # dev server with HMR at http://localhost:5173
+npm run dev-host   # same, but exposed on the network (useful for LAN/mobile)
+npm run build      # type-check + bundle
+npm run preview    # preview production build locally
+npm run lint       # ESLint check (add -- --fix to auto-fix)
 ```
 
-### Build
+No test framework is configured yet.
 
-```bash
-npm run build
-npm run preview   # preview the production build locally
+## How it works
+
+**Sidebar** — lists all node templates and recipes from the active game pack. Click a template to add a node to the canvas.
+
+**Canvas** — Uses React Flow canvas to render nodes and edges.
+
+**Game packs** — A game pack is a JSON file that defines all available items, recipes, and processr nodes. 
+
+**Persistence** — the graph auto-saves to `localStorage` on every change and reloads on page refresh.
+
+## Project structure
+
+```
+src/
+  components/
+    App.tsx                    # Root layout (sidebar + canvas)
+    Canvas.tsx                 # React Flow wrapper — drag, connect, select
+    ProcessrNodeComponent.tsx  # Custom React Flow node renderer
+    Sidebar.tsx                # Template palette, recipe panel, pack import/export
+  data/                        # Static data (demo game pack)
+  models/                      # Pure type definitions — no runtime side effects
+    ids.ts                     # Branded ID types (ItemId, RecipeId, …)
+    items.ts                   # Item, Category, ItemForm
+    recipes.ts                 # Recipe, RecipeItemStack
+    nodes.ts                   # NodeTemplate, PortDefinition, NodeStats
+    game-pack.ts               # GamePack (top-level container), GamePackIndex
+    graph/
+      processor-node.ts        # ProcessorNode — a placed instance of a NodeTemplate
+      edge.ts                  # Edge — connection between two nodes
+      graph.ts                 # Graph — top-level document (nodes, edges, viewport)
+    serialization/
+      document.ts              # ProcessrDocument — JSON persistence format
+      dsl.ts                   # DslDocument — conceptual text DSL (future)
+    index.ts                   # Barrel re-exports
+  state/
+    graph-reducer.ts           # useReducer actions + reducer (ADD_NODE, ADD_EDGE, …)
+    GraphContext.tsx            # Context provider — reducer, auto-save, pack index
+    useGraph.ts                # Consumer hooks (useGraphState, useGraphDispatch, useLoadPack)
+  utils/
+    id.ts                      # Branded ID factory functions (wraps crypto.randomUUID)
+    game-pack-index.ts         # Builds GamePackIndex lookup maps from a GamePack
+    graph-factory.ts           # Creates Graph, ProcessorNode, Edge from templates
+    persistence.ts             # localStorage save/load of ProcessrDocument
+    reactflow-bridge.ts        # Converts model types <-> React Flow types
+    pack-io.ts                 # File-based game pack import/export (JSON)
+  index.css                    # Global styles, CSS properties for light/dark theme
+  main.tsx                     # Entry point
 ```
 
-### Lint
+## Data model
 
-```bash
-npm run lint
-```
+Two layers separate static game definitions from mutable user state.
 
-## Tech Stack
+**Game Pack** — loaded once, immutable during a session. Defines all available items, recipes, and node types. Can be swapped at runtime via the import button.
 
-- React 19
-- TypeScript
-- Vite 8
+**Graph** — the user's production plan. `ProcessorNode` instances reference a `NodeTemplate` by ID; `Edge` connects two nodes with optional port-level routing.
+
+## Architecture pattern
+
+**Functional Core, Imperative Shell**
+
+- `src/models/` and `src/utils/` contain pure functions.
+- Side effects exist only in components and hooks.
 
 ## Roadmap
 
-1. **Core data model** — Define the schema for items, recipes, machines, and production chains
-2. **Visual production planner** — Node-based graph editor for building and connecting production chains
-3. **Ratio calculator** — Compute optimal machine counts and throughput from a production graph
-4. **Data pack system** — Import/export format for community-maintained game data packs
-5. **Layout designer** — Spatial editor for arranging factory blueprints
-6. **Community data packs** — Publish starter packs for popular factory games
-
-## License
-
-TBD
+- Ratio / throughput calculator
+- Drag-from-sidebar to place nodes
+- Undo/redo history
+- DSL text editor (Mermaid-like)
+- Multi-document support
+- Community data packs for popular factory games
+- Layout / blueprint designer
