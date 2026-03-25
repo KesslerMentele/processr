@@ -1,4 +1,4 @@
-import type {Graph, ProcessrDocument} from "../models";
+import type { GamePack, Graph, ProcessrDocument } from "../models";
 import { DOCUMENT_FORMAT_VERSION } from "../models";
 
 const STORAGE_KEY = "processr:document"
@@ -8,7 +8,7 @@ export const saveDocument = (graph: Graph): void => {
     formatVersion: DOCUMENT_FORMAT_VERSION,
     graph
   };
-  localStorage.setItem("processr-document", JSON.stringify(doc));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(doc));
 }
 
 export const loadDocument = (): Graph | null => {
@@ -23,7 +23,13 @@ export const clearDocument = (): void => {
   localStorage.removeItem(STORAGE_KEY);
 }
 
-// TODO
-// export const exportDocument = (graph:Graph, gamepack: GamePack): string => {
-//
-// }
+const PACK_KEY = "processr:game-pack";
+
+export const saveGamePack = (pack: GamePack): void => {
+  localStorage.setItem(PACK_KEY, JSON.stringify(pack));
+};
+
+export const loadGamePack = (): GamePack | null => {
+  const raw = localStorage.getItem(PACK_KEY);
+  return raw === null ? null : JSON.parse(raw) as GamePack;
+};
