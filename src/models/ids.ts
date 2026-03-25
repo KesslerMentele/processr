@@ -4,23 +4,24 @@
  * prevents mixing up an ItemId with a RecipeId.
  */
 declare const __brand: unique symbol;
+interface Brand<B> { [__brand]: B}
 
-type Brand<T, B extends string> = T & { readonly [__brand]: B };
+export type Branded<T, B extends string> = T & Brand<B>;
 
 // ---- Game Pack IDs (static definitions) ----
 
-export type ItemId = Brand<string, "ItemId">;
-export type RecipeId = Brand<string, "RecipeId">;
-export type NodeTemplateId = Brand<string, "NodeTemplateId">;
-export type CategoryId = Brand<string, "CategoryId">;
-export type GamePackId = Brand<string, "GamePackId">;
+export type ItemId = Branded<string, "ItemId">;
+export type RecipeId = Branded<string, "RecipeId">;
+export type NodeTemplateId = Branded<string, "NodeTemplateId">;
+export type CategoryId = Branded<string, "CategoryId">;
+export type GamePackId = Branded<string, "GamePackId">;
 
 // ---- Graph IDs (user-mutable instances) ----
 
-export type ProcessorNodeId = Brand<string, "ProcessorNodeId">;
-export type EdgeId = Brand<string, "EdgeId">;
-export type GraphId = Brand<string, "GraphId">;
-export type PortId = Brand<string, "PortId">;
+export type ProcessorNodeId = Branded<string, "ProcessorNodeId">;
+export type EdgeId = Branded<string, "EdgeId">;
+export type GraphId = Branded<string, "GraphId">;
+export type PortId = Branded<string, "PortId">;
 
 // ---- ID factory functions ----
 // Cast a plain string to a branded type.
