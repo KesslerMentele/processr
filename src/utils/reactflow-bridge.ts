@@ -1,16 +1,16 @@
-import {type Edge, edgeId, portId, type ProcessrNode, type ProcessorNodeData, processrNodeId} from "../models";
+import {type Edge, edgeId, portId, type ProcessrNode, type ProcessrNodeData, processrNodeId} from "../models";
 import type { Node as RFNode, Edge as RFEdge } from "@xyflow/react"
 
-export const toRFNode = (node:ProcessrNode): RFNode<ProcessorNodeData> => {
+export const toRFNode = (node:ProcessrNode): RFNode<ProcessrNodeData> => {
   return {
     id: node.id,
     type: "processor",
     position: node.position,
-    data: node as ProcessorNodeData,
+    data: node as ProcessrNodeData,
   }
 }
 
-export const fromRFNode = (rfNode:RFNode<ProcessorNodeData>): ProcessrNode => {
+export const fromRFNode = (rfNode:RFNode<ProcessrNodeData>): ProcessrNode => {
   return {...rfNode.data, position: rfNode.position}
 }
 

@@ -9,16 +9,16 @@ import type {AddNodeFunc} from "../models/nodes.ts";
 const App: FC = () => {
   const [selectedNodeId, setSelectedNodeId] = useState<ProcessrNodeId | null>(null)
   const addNodeAtCenterRef = useRef<AddNodeFunc | null>(null)
-  const onAddNode:AddNodeFunc = (template) => {
-    addNodeAtCenterRef.current?.(template)
-  }
+  // const onAddNode:AddNodeFunc = (template) => {
+  //   addNodeAtCenterRef.current?.(template)
+  // }
 
   return (
     <div className="app-root">
       <GraphProvider>
         <ReactFlowProvider>
           <div className='app-layout'>
-            <Sidebar selectedNodeId={selectedNodeId} onAddNode={onAddNode} />
+            <Sidebar selectedNodeId={selectedNodeId} />
             <Canvas onNodeSelect={setSelectedNodeId} onAddNodeReady={ (fn) => {
               // eslint-disable-next-line
               addNodeAtCenterRef.current = fn

@@ -5,11 +5,9 @@ import type {FC} from "react";
 import {useGraphDispatch, useGraphState, useLoadPack} from "../state/useGraph.ts";
 import {createProcessorNode} from "../utils/graph-factory.ts";
 import {exportPackToFile, importPackFromFile} from "../utils/pack-io.ts";
-import type {AddNodeFunc} from "../models/nodes.ts";
 
 interface SidebarProps {
   readonly selectedNodeId: ProcessrNodeId | null;
-  readonly onAddNode: AddNodeFunc;
 }
 
 
