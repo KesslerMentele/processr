@@ -1,7 +1,7 @@
-import {type Edge, edgeId, portId, type ProcessorNode, type ProcessorNodeData, processorNodeId} from "../models";
+import {type Edge, edgeId, portId, type ProcessrNode, type ProcessorNodeData, processrNodeId} from "../models";
 import type { Node as RFNode, Edge as RFEdge } from "@xyflow/react"
 
-export const toRFNode = (node:ProcessorNode): RFNode<ProcessorNodeData> => {
+export const toRFNode = (node:ProcessrNode): RFNode<ProcessorNodeData> => {
   return {
     id: node.id,
     type: "processor",
@@ -10,7 +10,7 @@ export const toRFNode = (node:ProcessorNode): RFNode<ProcessorNodeData> => {
   }
 }
 
-export const fromRFNode = (rfNode:RFNode<ProcessorNodeData>): ProcessorNode => {
+export const fromRFNode = (rfNode:RFNode<ProcessorNodeData>): ProcessrNode => {
   return {...rfNode.data, position: rfNode.position}
 }
 
@@ -28,8 +28,8 @@ export const toRFEdge = (edge:Edge): RFEdge => {
 export const fromRFConnection = (rfEge:RFEdge): Edge => {
   const base = {
     id: edgeId(rfEge.id),
-    sourceNodeId: processorNodeId(rfEge.source),
-    targetNodeId: processorNodeId(rfEge.target),
+    sourceNodeId: processrNodeId(rfEge.source),
+    targetNodeId: processrNodeId(rfEge.target),
     metadata: {},
   }
 

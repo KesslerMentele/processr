@@ -1,6 +1,6 @@
 import type { GraphId, GamePackId } from "../ids.ts";
 import type { Metadata } from "../common.ts";
-import type { ProcessorNode } from "./processor-node.ts";
+import type { ProcessrNode } from "./processr-node.ts";
 import type { Edge } from "./edge.ts";
 
 /** Canvas viewport state (pan/zoom). */
@@ -26,7 +26,7 @@ export interface Graph {
   readonly name: string;
   readonly description?: string;
   readonly gamePackId: GamePackId;
-  readonly nodes: readonly ProcessorNode[];
+  readonly nodes: readonly ProcessrNode[];
   readonly edges: readonly Edge[];
   readonly viewport: Viewport;
   /** ISO 8601 timestamps. */

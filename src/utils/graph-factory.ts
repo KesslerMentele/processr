@@ -7,8 +7,8 @@ import type {
   NodeTemplate,
   PortId,
   Position,
-  ProcessorNode,
-  ProcessorNodeId
+  ProcessrNode,
+  ProcessrNodeId
 } from "../models";
 import {newEdgeId, newGraphId, newProcessorNodeId} from "./id.ts";
 
@@ -26,7 +26,7 @@ const newViewport = () => ({ x: 0, y: 0, zoom: 1 });
 export const createProcessorNode = (
   template: NodeTemplate,
   position:Position
-): ProcessorNode => {
+): ProcessrNode => {
   return {
     id: newProcessorNodeId(),
     templateId: template.id,
@@ -40,8 +40,8 @@ export const createProcessorNode = (
 }
 
 export const createEdge = (
-  sourceNodeId: ProcessorNodeId,
-  targetNodeId: ProcessorNodeId,
+  sourceNodeId: ProcessrNodeId,
+  targetNodeId: ProcessrNodeId,
   options: CreateEdgeOptions
 ): Edge => {
   const base = {

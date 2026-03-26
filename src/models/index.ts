@@ -5,7 +5,7 @@ export type {
   NodeTemplateId,
   CategoryId,
   GamePackId,
-  ProcessorNodeId,
+  ProcessrNodeId,
   EdgeId,
   GraphId,
   PortId,
@@ -17,7 +17,7 @@ export {
   nodeTemplateId,
   categoryId,
   gamePackId,
-  processorNodeId,
+  processrNodeId,
   edgeId,
   graphId,
   portId,
@@ -37,10 +37,10 @@ export type { GamePack, GamePackIndex, SemVer } from "./game-pack.ts";
 
 // ---- Graph layer (user-mutable instances) ----
 export type {
-  ProcessorNode,
+  ProcessrNode,
   PortInstance,
   NodeStatsOverride,
-} from "./graph/processor-node.ts";
+} from "./graph/processr-node.ts";
 export type { Edge } from "./graph/edge.ts";
 export type { Graph, Viewport } from "./graph/graph.ts";
 
@@ -57,4 +57,4 @@ export type {
 } from "./serialization/dsl.ts";
 
 // ---- State ----
-export type { GraphStateValue, GraphDispatchValue, GraphAction, ProcessorNodeData } from "./graph/graph-react-connector.ts";
+export type { GraphStateValue, GraphDispatchValue, GraphAction, ProcessrNodeData } from "./graph/graph-react-connector.ts";

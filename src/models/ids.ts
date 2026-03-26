@@ -18,7 +18,7 @@ export type GamePackId = Branded<string, "GamePackId">;
 
 // ---- Graph IDs (user-mutable instances) ----
 
-export type ProcessorNodeId = Branded<string, "ProcessorNodeId">;
+export type ProcessrNodeId = Branded<string, "ProcessrNodeId">;
 export type EdgeId = Branded<string, "EdgeId">;
 export type GraphId = Branded<string, "GraphId">;
 export type PortId = Branded<string, "PortId">;
@@ -47,8 +47,8 @@ export function gamePackId(id: string): GamePackId {
   return id as GamePackId;
 }
 
-export function processorNodeId(id: string): ProcessorNodeId {
-  return id as ProcessorNodeId;
+export function processrNodeId(id: string): ProcessrNodeId {
+  return id as ProcessrNodeId;
 }
 
 export function edgeId(id: string): EdgeId {

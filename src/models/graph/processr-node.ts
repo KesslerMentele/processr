@@ -1,5 +1,5 @@
 import type {
-  ProcessorNodeId,
+  ProcessrNodeId,
   NodeTemplateId,
   RecipeId,
   PortId,
@@ -39,8 +39,8 @@ export interface NodeStatsOverride {
  *   Node.position -> ProcessorNode.position
  *   Node.data     -> the ProcessorNode itself
  */
-export interface ProcessorNode {
-  readonly id: ProcessorNodeId;
+export interface ProcessrNode {
+  readonly id: ProcessrNodeId;
   readonly templateId: NodeTemplateId;
   /** User-assigned label. Falls back to the template name if not set. */
   readonly label?: string;

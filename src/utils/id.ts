@@ -1,4 +1,4 @@
-import { edgeId, type EdgeId, graphId, type GraphId, processorNodeId, type ProcessorNodeId } from "../models";
+import { edgeId, type EdgeId, graphId, type GraphId, processrNodeId, type ProcessrNodeId } from "../models";
 
 function randomUUID(): string {
   const bytes = Array.from(crypto.getRandomValues(new Uint8Array(16))).map((b, i) =>
@@ -11,5 +11,5 @@ function randomUUID(): string {
 }
 
 export function newGraphId(): GraphId { return graphId(randomUUID()); }
-export function newProcessorNodeId(): ProcessorNodeId { return processorNodeId(randomUUID()); }
+export function newProcessorNodeId(): ProcessrNodeId { return processrNodeId(randomUUID()); }
 export function newEdgeId(): EdgeId { return edgeId(randomUUID()); }

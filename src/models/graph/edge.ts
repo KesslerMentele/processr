@@ -1,11 +1,11 @@
-import type { EdgeId, ProcessorNodeId, PortId, ItemId } from "../ids.ts";
+import type { EdgeId, ProcessrNodeId, PortId, ItemId } from "../ids.ts";
 import type { Metadata } from "../common.ts";
 
 /** Fields shared by all edge variants. */
 interface EdgeBase {
   readonly id: EdgeId;
-  readonly sourceNodeId: ProcessorNodeId;
-  readonly targetNodeId: ProcessorNodeId;
+  readonly sourceNodeId: ProcessrNodeId;
+  readonly targetNodeId: ProcessrNodeId;
   /**
    * The item being transported. Optional — can be inferred from the
    * source node's recipe output. Explicit when a node produces
