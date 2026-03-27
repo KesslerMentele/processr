@@ -8,7 +8,8 @@
     "dev-host": "vite --host",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview --host"
+    "preview": "vite preview --host",
+    "verify": "eslint . && tsc -b && vite build"
   },
   "dependencies": {
     "@xyflow/react": "^12.10.1",
