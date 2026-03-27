@@ -88,6 +88,13 @@ export const factorioPack: GamePack = {
       form: ItemForm.Fluid,
       metadata: {},
     },
+    {
+      id: itemId("coal"),
+      name: "Coal",
+      display: { label: "Coal", icon: "/icons/coal.png", color: "#190d06" },
+      form: ItemForm.Solid,
+      metadata: {},
+    },
   ],
   nodeTemplates: [
     {
@@ -105,6 +112,56 @@ export const factorioPack: GamePack = {
         },
         {
           id: portId("stone-furnace/out"),
+          name: "Output",
+          direction: PortDirection.Output,
+          position: 0.5,
+          metadata: {},
+        },
+      ],
+      stats: {
+        speedMultiplier: 1.0,
+        powerConsumption: 90, // kW
+        metadata: {fuel_type: "solid"},
+      },
+      metadata: {},
+      tags: []
+    },
+    {
+      id: nodeTemplateId("water-pump"),
+      name: "Water Pump",
+      display: {label: "Water Pump", icon: "/icons/water-pump.png", color: "#8ca2ae"},
+      categoryId: categoryId("machines"),
+      ports: [
+        {
+          id: portId("water-pump/out"),
+          name: "Output",
+          direction: PortDirection.Output,
+          position: 0.5,
+          metadata: {},
+        },
+      ],
+      stats: {
+        speedMultiplier: 1.0,
+        metadata: {},
+      },
+      metadata: {},
+      tags: []
+    },
+    {
+      id: nodeTemplateId("burner-mining-drill"),
+      name: "Burner Mining Drill",
+      display: {label: "Burner Mining Drill", icon: "/icons/burner-mining-drill.png", color: "#63564d"},
+      categoryId: categoryId("machines"),
+      ports: [
+        {
+          id: portId("burner-mining-drill/in"),
+          name: "Input",
+          direction: PortDirection.Input,
+          position: 0.5,
+          metadata: {},
+        },
+        {
+          id: portId("burner-mining-drill/out"),
           name: "Output",
           direction: PortDirection.Output,
           position: 0.5,
@@ -198,6 +255,7 @@ export const factorioPack: GamePack = {
       compatibleNodeTypes: [nodeTemplateId("stone-furnace")],
       metadata: {},
     },
+
     {
       id: recipeId("smelt-copper-plate"),
       name: "Copper Plate",
@@ -228,6 +286,17 @@ export const factorioPack: GamePack = {
       outputs: [{ itemId: itemId("steam"), amount: 60 }],
       duration: 1,
       compatibleNodeTypes: [nodeTemplateId("boiler")],
+      metadata: {},
+    },
+    {
+      id: recipeId("pump-water"),
+      name: "Pump Water",
+      display: { label: "Pump Water", icon: "/icons/water.png" },
+      categoryId: categoryId("intermediates"),
+      inputs: [],
+      outputs: [{ itemId: itemId("water"), amount: 100 }],
+      duration: 1,
+      compatibleNodeTypes: [nodeTemplateId("water-pump")],
       metadata: {},
     },
   ],
