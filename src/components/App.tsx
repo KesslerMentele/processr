@@ -1,31 +1,37 @@
-import {type FC, useRef, useState} from 'react';
+import {type FC, useEffect} from 'react';
 import {ReactFlowProvider} from "@xyflow/react";
 import Canvas from "./Canvas.tsx";
-import type {ProcessrNodeId} from "../models";
 import Sidebar from "./Sidebar.tsx";
-import {GraphProvider} from "../state/GraphContext.tsx";
-import type {AddNodeFunc} from "../models/nodes.ts";
+import {saveDocument} from "../utils/persistence.ts";
+
+import {useGraphStore} from "../state/graph-store.ts";
+
 
 const App: FC = () => {
-  const [selectedNodeId, setSelectedNodeId] = useState<ProcessrNodeId | null>(null)
-  const addNodeAtCenterRef = useRef<AddNodeFunc | null>(null)
-  // const onAddNode:AddNodeFunc = (template) => {
-  //   addNodeAtCenterRef.current?.(template)
-  // }
+
+
+  const graph = useGraphStore.use.graph()
+
+  useEffect(() => {
+
+    const timer = setTimeout(() => {
+      saveDocument(graph)
+    }, 100)
+
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [graph]);
+
 
   return (
     <div className="app-root">
-      <GraphProvider>
-        <ReactFlowProvider>
+      <ReactFlowProvider>
           <div className='app-layout'>
-            <Sidebar selectedNodeId={selectedNodeId} />
-            <Canvas onNodeSelect={setSelectedNodeId} onAddNodeReady={ (fn) => {
-              // eslint-disable-next-line
-              addNodeAtCenterRef.current = fn
-            }}/>
+            <Sidebar />
+            <Canvas />
           </div>
         </ReactFlowProvider>
-      </GraphProvider>
     </div>
   )
 }

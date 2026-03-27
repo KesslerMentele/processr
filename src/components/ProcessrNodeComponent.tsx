@@ -1,10 +1,10 @@
-import {PortDirection, type ProcessorNodeData} from "../models";
+import {PortDirection, type ProcessrNodeData} from "../models";
 import {Handle, type Node as RFNode, type NodeProps as RFNodeProps, Position as RFPosition} from "@xyflow/react";
-import {useGraphState} from "../state/useGraph.ts";
+import {useGraphStore} from "../state/graph-store.ts";
 
 
-const ProcessrNodeComponent = ({ data, selected }:RFNodeProps<RFNode<ProcessorNodeData>>) => {
-  const { packIndex } = useGraphState();
+const ProcessrNodeComponent = ({ data, selected }:RFNodeProps<RFNode<ProcessrNodeData>>) => {
+  const packIndex = useGraphStore.use.packIndex()
   const template = packIndex.nodeTemplatesById.get(data.templateId);
   const recipe = data.recipeId === null ? undefined : packIndex.recipesById.get(data.recipeId);
 

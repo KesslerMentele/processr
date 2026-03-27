@@ -21,6 +21,5 @@ export type GraphAction =
   | { readonly type: "ADD_EDGE";              readonly edge: Edge }
   | { readonly type: "REMOVE_EDGE";           readonly edgeId: EdgeId }
   | { readonly type: "SET_VIEWPORT";          readonly viewport: Viewport }
-  | { readonly type: "LOAD_GRAPH";            readonly graph: Graph }
 
 export type ProcessrNodeData = ProcessrNode & Record<string, unknown>;

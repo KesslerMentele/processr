@@ -1,23 +1,26 @@
-import {
-  type ProcessrNodeId,
-} from "../models";
 import type {FC} from "react";
-import {useGraphDispatch, useGraphState, useLoadPack} from "../state/useGraph.ts";
-import {createProcessorNode} from "../utils/graph-factory.ts";
+import {createGraph, createProcessorNode} from "../utils/graph-factory.ts";
 import {exportPackToFile, importPackFromFile} from "../utils/pack-io.ts";
-
-interface SidebarProps {
-  readonly selectedNodeId: ProcessrNodeId | null;
-}
+import {useGraphStore} from "../state/graph-store.ts";
+import {buildGamePackIndex} from "../utils/game-pack-index.ts";
 
 
-const Sidebar: FC<SidebarProps> = ({ selectedNodeId }) => {
-  const {state, packIndex } = useGraphState();
-  const dispatch = useGraphDispatch();
-  const loadPack = useLoadPack()
-  const handleImport = () => { void importPackFromFile().then(loadPack)}
+const Sidebar: FC = () => {
+  const selectedNodeId = useGraphStore.use.selectedNodeId()
+  const selectedNode = useGraphStore.use.graph().nodes.find(node => node.id === selectedNodeId)
+  const packIndex = useGraphStore.use.packIndex()
+  const addNode = useGraphStore.use.addNode();
+  const setNodeRecipe = useGraphStore.use.setNodeRecipe();
+  const handleImport = () => {
+    void importPackFromFile().then((pack) => {
+      useGraphStore.getState().loadGraph(
+        createGraph(pack.id, pack.name),
+        buildGamePackIndex(pack)
+      )
+    })
+  }
 
-  const selectedNode = state.nodes.find((n) => n.id === selectedNodeId)
+
   const compatibleRecipes = selectedNode
     ? (packIndex.recipesByNodeType.get(selectedNode.templateId) ?? [])
     : [];
@@ -30,7 +33,9 @@ const Sidebar: FC<SidebarProps> = ({ selectedNodeId }) => {
         {packIndex.pack.nodeTemplates.map(template => (
           <button
             key={template.id}
-            onClick={() => {dispatch( {type: "ADD_NODE", node: createProcessorNode( template, {x:100, y:100} ) } )}}
+            onClick={() => {
+              addNode(createProcessorNode( template, {x:100, y:100}))
+            }}
           >
             {template.name}
           </button>
@@ -44,7 +49,7 @@ const Sidebar: FC<SidebarProps> = ({ selectedNodeId }) => {
               key={recipe.id}
               className={selectedNode.recipeId === recipe.id ? "active" : ""}
               onClick={() => {
-                dispatch({type: "SET_NODE_RECIPE", nodeId: selectedNode.id, recipeId: recipe.id})
+                setNodeRecipe(selectedNode.id, recipe.id)
               }}
             >
               {recipe.name}
