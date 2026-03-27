@@ -66,4 +66,13 @@ const useGraphStoreBase = create(
   })))
 
 
+/**
+ * Provides access to the zustand store.
+ *
+ * When retrieving values from the store use:
+ * `const sateValue = useGraphStore.use.stateValue()`
+ *
+ *When accessing functions in the store use:
+ * `const storeFunction = useGraphStore.getState().storeFunction`
+ */
 export const useGraphStore = createSelectors(useGraphStoreBase)
