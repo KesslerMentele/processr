@@ -1,19 +1,19 @@
 import type {FC} from "react";
 import {createGraph, createProcessorNode} from "../utils/graph-factory.ts";
 import {exportPackToFile, importPackFromFile} from "../utils/pack-io.ts";
-import {useGraphStore} from "../state/graph-store.ts";
 import {buildGamePackIndex} from "../utils/game-pack-index.ts";
+import {useProcessrStore} from "../state/store.ts";
 
 
 const Sidebar: FC = () => {
-  const selectedNodeId = useGraphStore.use.selectedNodeId()
-  const selectedNode = useGraphStore.use.graph().nodes.find(node => node.id === selectedNodeId)
-  const packIndex = useGraphStore.use.packIndex()
-  const addNode = useGraphStore.getState().addNode;
-  const setNodeRecipe = useGraphStore.getState().setNodeRecipe
+  const selectedNodeId = useProcessrStore.use.selectedNodeId()
+  const selectedNode = useProcessrStore.use.graph().nodes.find(node => node.id === selectedNodeId)
+  const packIndex = useProcessrStore.use.packIndex()
+  const addNode = useProcessrStore.getState().addNode;
+  const setNodeRecipe = useProcessrStore.getState().setNodeRecipe
   const handleImport = () => {
     void importPackFromFile().then((pack) => {
-      useGraphStore.getState().loadGraph(
+      useProcessrStore.getState().loadGraph(
         createGraph(pack.id, pack.name),
         buildGamePackIndex(pack)
       )

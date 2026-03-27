@@ -3,14 +3,14 @@ import {ReactFlowProvider} from "@xyflow/react";
 import Canvas from "./Canvas.tsx";
 import Sidebar from "./Sidebar.tsx";
 import {saveDocument} from "../utils/persistence.ts";
+import {useProcessrStore} from "../state/store.ts";
 
-import {useGraphStore} from "../state/graph-store.ts";
 
 
 const App: FC = () => {
 
 
-  const graph = useGraphStore.use.graph()
+  const graph = useProcessrStore.use.graph()
 
   useEffect(() => {
 

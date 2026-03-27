@@ -56,3 +56,7 @@ export type {
   DslNode,
   DslEdge,
 } from "./serialization/dsl.ts";
+
+
+// ---- State ----
+export type {GraphSlice, GraphActionSlice} from "./state/graph-state.ts"

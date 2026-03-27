@@ -32,12 +32,6 @@ export interface NodeStatsOverride {
  * A ProcessorNode is a user-placed instance of a NodeTemplate on the canvas.
  * It references its template by ID and can override stats, assign a recipe,
  * set a label, etc.
- *
- * ReactFlow compatibility:
- *   Node.id       -> ProcessorNode.id
- *   Node.type     -> ProcessorNode.templateId
- *   Node.position -> ProcessorNode.position
- *   Node.data     -> the ProcessorNode itself
  */
 export interface ProcessrNode {
   readonly id: ProcessrNodeId;

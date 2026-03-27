@@ -13,7 +13,7 @@ import {fromRFConnection, toRFEdge, toRFNode} from "../utils/reactflow-bridge.ts
 import {edgeId, type ProcessrNodeData, processrNodeId} from "../models";
 import {newEdgeId} from "../utils/id.ts";
 import ProcessrNodeComponent from "./ProcessrNodeComponent.tsx";
-import {useGraphStore} from "../state/graph-store.ts";
+import {useProcessrStore} from "../state/store.ts";
 
 
 
@@ -24,14 +24,14 @@ const initialEdges:RFEdge[] = []
 
 const Canvas: FC = () => {
 
-  const graph = useGraphStore.use.graph()
+  const graph = useProcessrStore.use.graph()
 
-  const setSelectedNodeId = useGraphStore.getState().setSelectedNodeId
-  const updateNodePosition = useGraphStore.getState().updateNodePosition
-  const removeNode = useGraphStore.getState().removeNode
-  const addEdge = useGraphStore.getState().addEdge
-  const setViewport = useGraphStore.getState().setViewport
-  const removeEdge = useGraphStore.getState().removeEdge
+  const setSelectedNodeId = useProcessrStore.use.setSelectedNodeId()
+  const updateNodePosition = useProcessrStore.use.updateNodePosition()
+  const removeNode = useProcessrStore.use.removeNode()
+  const addEdge = useProcessrStore.use.addEdge()
+  const setViewport = useProcessrStore.use.setViewport()
+  const removeEdge = useProcessrStore.use.removeEdge()
 
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState(initialNodes);
   const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState(initialEdges);

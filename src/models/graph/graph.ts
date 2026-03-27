@@ -76,17 +76,3 @@ export interface Graph {
   readonly updatedAt: string;
   readonly metadata: Metadata;
 }
-
-
-/**
- * When an action is fired, it passes a new state of the nodes.
- *
- * For each action: type -> extended info
- *  ADD_NODE -> None
- *  REMOVE_NODE -> removed node
- *  UPDATE_NODE_POSITION -> previous position
- *  SET_NODE_RECIPE -> previous recipe
- *  ADD_EDGE -> None
- *  REMOVE_EDGE -> removed edge
- *  SET_VIEWPORT -> DO NOT ADD TO HISTORY
- */

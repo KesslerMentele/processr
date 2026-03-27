@@ -6,11 +6,6 @@ interface EdgeBase {
   readonly id: EdgeId;
   readonly sourceNodeId: ProcessrNodeId;
   readonly targetNodeId: ProcessrNodeId;
-  /**
-   * The item being transported. Optional — can be inferred from the
-   * source node's recipe output. Explicit when a node produces
-   * multiple outputs and disambiguation is needed.
-   */
   readonly itemId?: ItemId;
   readonly label?: string;
   readonly metadata: Metadata;
@@ -37,14 +32,5 @@ type EdgePortLevel = EdgeBase & {
 /**
  * An Edge represents a connection between two processor nodes,
  * indicating that items flow from one node's output to another's input.
- *
- * Uses a discriminated union to prevent the invalid state of having
- * only one port ID set. Either both ports are specified or neither is.
- *
- * ReactFlow compatibility:
- *   Edge.source       -> Edge.sourceNodeId
- *   Edge.target       -> Edge.targetNodeId
- *   Edge.sourceHandle -> Edge.sourcePortId
- *   Edge.targetHandle -> Edge.targetPortId
  */
 export type Edge = EdgeNodeLevel | EdgePortLevel;
