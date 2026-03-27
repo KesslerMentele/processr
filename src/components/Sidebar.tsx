@@ -9,8 +9,8 @@ const Sidebar: FC = () => {
   const selectedNodeId = useGraphStore.use.selectedNodeId()
   const selectedNode = useGraphStore.use.graph().nodes.find(node => node.id === selectedNodeId)
   const packIndex = useGraphStore.use.packIndex()
-  const addNode = useGraphStore.use.addNode();
-  const setNodeRecipe = useGraphStore.use.setNodeRecipe();
+  const addNode = useGraphStore.getState().addNode;
+  const setNodeRecipe = useGraphStore.getState().setNodeRecipe
   const handleImport = () => {
     void importPackFromFile().then((pack) => {
       useGraphStore.getState().loadGraph(
