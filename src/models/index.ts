@@ -42,7 +42,8 @@ export type {
   NodeStatsOverride,
 } from "./graph/processr-node.ts";
 export type { Edge } from "./graph/edge.ts";
-export type { Graph, Viewport } from "./graph/graph.ts";
+export type { Graph, Viewport, GraphAction, ActionType, GraphHistory } from "./graph/graph.ts";
+export type { GraphStateValue, GraphDispatchValue, ProcessrNodeData } from "./graph/graph-react-connector.ts";
 
 // ---- Serialization ----
 export type {
@@ -55,6 +56,3 @@ export type {
   DslNode,
   DslEdge,
 } from "./serialization/dsl.ts";
-
-// ---- State ----
-export type { GraphStateValue, GraphDispatchValue, GraphAction, ProcessrNodeData } from "./graph/graph-react-connector.ts";

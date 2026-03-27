@@ -70,6 +70,7 @@ export const createGraph = (
     nodes: [],
     edges: [],
     viewport: newViewport(),
+    history: {past: [], future: []},
     createdAt: now,
     updatedAt: now,
     metadata: {} as Metadata,

@@ -1,4 +1,4 @@
-import type {NodeTemplateId, PortId, CategoryId, ProcessrNodeId} from "./ids.ts";
+import type {NodeTemplateId, PortId, CategoryId} from "./ids.ts";
 import type { DisplayInfo, Metadata } from "./common.ts";
 
 /** Direction of a port on a node template. */
@@ -57,8 +57,3 @@ export interface NodeTemplate {
 }
 
 export type AddNodeFunc = (template:NodeTemplate) => void;
-
-export interface CanvasProps {
-  onNodeSelect: (id: ProcessrNodeId | null) => void;
-  onAddNodeReady: (fn: AddNodeFunc) => void;
-}

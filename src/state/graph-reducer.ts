@@ -1,11 +1,13 @@
 import type {
+  ActionType,
   Graph,
   GraphAction,
 } from "../models";
 
+
 const now = () => new Date().toISOString();
 
-export const graphReducer = (graph: Graph, action: GraphAction): Graph => {
+export const graphReducer = (graph: Graph, action: GraphAction<ActionType>): Graph => {
   switch (action.type) {
     case "ADD_NODE":
       return {...graph, nodes: [...graph.nodes, action.node], updatedAt: now() }
@@ -45,5 +47,7 @@ export const graphReducer = (graph: Graph, action: GraphAction): Graph => {
         ...graph,
         viewport: action.viewport,
       }
+    case "UNDO": { throw new Error('Not implemented yet: "UNDO" case') }
+    case "REDO": { throw new Error('Not implemented yet: "REDO" case') }
   }
 }
