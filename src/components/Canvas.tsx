@@ -106,7 +106,7 @@ const Canvas: FC = () => {
         defaultViewport={graph.viewport}
       >
         <Background/>
-        <Controls/>
+        <Controls className="canvas-controls"/>
       </ReactFlow>
     </div>
   );

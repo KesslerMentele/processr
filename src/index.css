@@ -105,6 +105,12 @@ html, body {
   height: 100%;
 }
 
+.canvas-controls {
+  background: #3a3a3a;
+  border: 1px solid #444;
+  color: #888;
+}
+
 /* ── Processr node ────────────────────────────────────── */
 .processr-node {
   background: #2e2e2e;

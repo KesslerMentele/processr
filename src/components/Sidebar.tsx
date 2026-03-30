@@ -1,9 +1,10 @@
-import type { FC } from "react";
+
 import { createGraph, createProcessrNode } from "../utils/graph-factory.ts";
 import { exportPackToFile, importPackFromFile } from "../utils/pack-io.ts";
 import { buildGamePackIndex } from "../utils/game-pack-index.ts";
 import { useProcessrStore } from "../state/store.ts";
 import { saveGamePack } from "../utils/persistence.ts";
+import type { FC } from "react";
 
 
 const Sidebar: FC = () => {
@@ -28,45 +29,56 @@ const Sidebar: FC = () => {
     ? (packIndex.recipesByNodeType.get(selectedNode.templateId) ?? [])
     : [];
 
+  const NodePicker =  (
+    <div className="sidebar__nodetemplates">
+      <h1>Nodes</h1>
+      {packIndex.pack.nodeTemplates.map(template => (
+        <button
+          key={template.id}
+          onClick={() => {
+            addNode(createProcessrNode(template, { x:100, y:100 }));
+          }}
+        >
+          {template.name}
+        </button>
+      ))}
+    </div>
+  );
+
+  const RecipePicker = (
+    <div className="sidebar__recipes">
+      <h1>Select a Recipe:</h1>
+      {selectedNode && compatibleRecipes.map(recipe => (
+        <button
+          key={recipe.id}
+          className={selectedNode.recipeId === recipe.id ? "active" : ""}
+          onClick={() => {
+            setNodeRecipe(selectedNode.id, recipe.id);
+          }}
+        >
+          {recipe.name}
+        </button>
+      ))}
+    </div>
+  );
+
+  const PackPicker = (
+    <div className="sidebar__pack">
+      <span className="sidebar__pack-name">{packIndex.pack.name}</span>
+      <button onClick={handleImport}>Import pack</button>
+      <button onClick={() => {
+        exportPackToFile(packIndex.pack);
+      }}>Export Pack</button>
+    </div>
+  );
 
   return (
     <div className="sidebar">
-      <div className="sidebar__nodetemplates">
-        <h1>Nodes</h1>
-        {packIndex.pack.nodeTemplates.map(template => (
-          <button
-            key={template.id}
-            onClick={() => {
-              addNode(createProcessrNode(template, { x:100, y:100 }));
-            }}
-          >
-            {template.name}
-          </button>
-        ))}
-      </div>
+      {NodePicker}
       <hr/>
-      <div className="sidebar__recipes">
-        <h1>Select a Recipe:</h1>
-        {selectedNode && compatibleRecipes.map(recipe => (
-            <button
-              key={recipe.id}
-              className={selectedNode.recipeId === recipe.id ? "active" : ""}
-              onClick={() => {
-                setNodeRecipe(selectedNode.id, recipe.id);
-              }}
-            >
-              {recipe.name}
-            </button>
-          ))}
-      </div>
+      {RecipePicker}
       <hr/>
-      <div className="sidebar__pack">
-        <span className="sidebar__pack-name">{packIndex.pack.name}</span>
-        <button onClick={handleImport}>Import pack</button>
-        <button onClick={() => {
-          exportPackToFile(packIndex.pack);
-        }}>Export Pack</button>
-      </div>
+      {PackPicker}
     </div>
   );
 };
