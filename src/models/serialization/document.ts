@@ -12,7 +12,7 @@ export const DOCUMENT_FORMAT_VERSION = 1;
  * Can optionally embed the full game pack (for portability/sharing)
  * or reference it by ID (for local storage where the pack is already loaded).
  */
-export interface ProcessrDocument {
+export interface ProcessrGraph {
   readonly formatVersion: number;
   readonly graph: Graph;
   /** Embedded game pack data for export/sharing. Omitted in localStorage. */

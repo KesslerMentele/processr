@@ -1,16 +1,13 @@
 import type {
   Edge,
   GamePackId,
-  Graph,
-  ItemId,
+  Graph, ItemId,
   Metadata,
-  NodeTemplate,
-  PortId,
+  NodeTemplate, PortId,
   Position,
-  ProcessrNode,
-  ProcessrNodeId
+  ProcessrNode, ProcessrNodeId,
 } from "../models";
-import {newEdgeId, newGraphId, newProcessorNodeId} from "./id.ts";
+import { newEdgeId, newGraphId, newProcessrNodeId } from "./id.ts";
 
 interface CreateEdgeOptions {
   readonly sourcePortId?: PortId;
@@ -23,21 +20,21 @@ interface CreateEdgeOptions {
 const newViewport = () => ({ x: 0, y: 0, zoom: 1 });
 
 
-export const createProcessorNode = (
+export const createProcessrNode = (
   template: NodeTemplate,
   position:Position
 ): ProcessrNode => {
   return {
-    id: newProcessorNodeId(),
+    id: newProcessrNodeId(),
     templateId: template.id,
     position,
     recipeId: null,
-    statsOverride: {metadata: {}},
+    statsOverride: { metadata: {} },
     ports: template.ports.map((p) => ({ id: p.id, definitionId: p.id })),
     count: 1,
     metadata: template.metadata
-  }
-}
+  };
+};
 
 export const createEdge = (
   sourceNodeId: ProcessrNodeId,
@@ -51,12 +48,12 @@ export const createEdge = (
    itemId: options.itemId,
    label: options.label,
    metadata: {} as Metadata
-  }
+  };
 
   return options.sourcePortId !== undefined && options.targetPortId !== undefined
-  ? {...base, sourcePortId:options.sourcePortId, targetPortId: options.targetPortId}
+  ? { ...base, sourcePortId:options.sourcePortId, targetPortId: options.targetPortId }
   : { ...base };
-}
+};
 
 export const createGraph = (
   gamePackId: GamePackId,
@@ -67,12 +64,13 @@ export const createGraph = (
     id: newGraphId(),
     name,
     gamePackId,
-    nodes: [],
-    edges: [],
+    nodes: {},
+    edges: {},
     viewport: newViewport(),
+    history: { past: [], future: [] },
     createdAt: now,
     updatedAt: now,
     metadata: {} as Metadata,
-  }
-}
+  };
+};
 

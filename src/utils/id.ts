@@ -11,5 +11,5 @@ function randomUUID(): string {
 }
 
 export function newGraphId(): GraphId { return graphId(randomUUID()); }
-export function newProcessorNodeId(): ProcessrNodeId { return processrNodeId(randomUUID()); }
+export function newProcessrNodeId(): ProcessrNodeId { return processrNodeId(randomUUID()); }
 export function newEdgeId(): EdgeId { return edgeId(randomUUID()); }
