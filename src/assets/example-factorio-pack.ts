@@ -14,7 +14,7 @@ export const factorioPack: GamePack = {
   id: gamePackId('faketorio'),
   name: "faketorio",
   gameName: "factorio",
-  version: '0.0.1',
+  version: '0.0.2',
   categories: [
     {
       id: categoryId('raw'),
@@ -31,16 +31,16 @@ export const factorioPack: GamePack = {
     {
       id: categoryId('machines'),
       name: 'Machines',
-      display: {label: "Machines", color: "#740ed3" }
+      display: { label: "Machines", color: "#740ed3" }
     }
   ],
   items: [
     {
       id: itemId('iron-ore'),
       name: "Iron Ore",
-      display: {label:"Iron Ore", icon:"/icons/iron-ore.png", color: "#0d78e6"},
+      display: { label:"Iron Ore", icon:"/icons/iron-ore.png", color: "#0d78e6" },
       form: ItemForm.Solid,
-      metadata: {stack_size: 50}
+      metadata: { stack_size: 50 }
     },
     {
       id: itemId("iron-plate"),
@@ -100,7 +100,7 @@ export const factorioPack: GamePack = {
     {
       id: nodeTemplateId("stone-furnace"),
       name: "Stone Furnace",
-      display: {label: "Stone Furnace", icon: "/icons/stone-furnace.png", color: "#888888"},
+      display: { label: "Stone Furnace", icon: "/icons/stone-furnace.png", color: "#888888" },
       categoryId: categoryId("machines"),
       ports: [
         {
@@ -121,7 +121,7 @@ export const factorioPack: GamePack = {
       stats: {
         speedMultiplier: 1.0,
         powerConsumption: 90, // kW
-        metadata: {fuel_type: "solid"},
+        metadata: { fuel_type: "solid" },
       },
       metadata: {},
       tags: []
@@ -129,7 +129,7 @@ export const factorioPack: GamePack = {
     {
       id: nodeTemplateId("water-pump"),
       name: "Water Pump",
-      display: {label: "Water Pump", icon: "/icons/water-pump.png", color: "#8ca2ae"},
+      display: { label: "Water Pump", icon: "/icons/water-pump.png", color: "#8ca2ae" },
       categoryId: categoryId("machines"),
       ports: [
         {
@@ -150,7 +150,7 @@ export const factorioPack: GamePack = {
     {
       id: nodeTemplateId("burner-mining-drill"),
       name: "Burner Mining Drill",
-      display: {label: "Burner Mining Drill", icon: "/icons/burner-mining-drill.png", color: "#63564d"},
+      display: { label: "Burner Mining Drill", icon: "/icons/burner-mining-drill.png", color: "#63564d" },
       categoryId: categoryId("machines"),
       ports: [
         {
@@ -171,7 +171,7 @@ export const factorioPack: GamePack = {
       stats: {
         speedMultiplier: 1.0,
         powerConsumption: 90, // kW
-        metadata: {fuel_type: "solid"},
+        metadata: { fuel_type: "solid" },
       },
       metadata: {},
       tags: []
@@ -179,7 +179,7 @@ export const factorioPack: GamePack = {
     {
       id: nodeTemplateId("assembling-machine-1"),
       name: "Assembling Machine 1",
-      display: {label: "Assembler Mk.1", icon: "/icons/assembler-1.png", color: "#4A6080"},
+      display: { label: "Assembler Mk.1", icon: "/icons/assembler-1.png", color: "#4A6080" },
       categoryId: categoryId("machines"),
       ports: [
         {
@@ -216,7 +216,7 @@ export const factorioPack: GamePack = {
     {
       id: nodeTemplateId("boiler"),
       name: "Boiler",
-      display: {label: "Boiler", icon: "/icons/boiler.png", color: "#805030"},
+      display: { label: "Boiler", icon: "/icons/boiler.png", color: "#805030" },
       categoryId: categoryId("machines"),
       ports: [
         {
@@ -224,20 +224,20 @@ export const factorioPack: GamePack = {
           name: "Water In",
           direction: PortDirection.Input,
           position: 0.3,
-          metadata: {fluid: true},
+          metadata: { fluid: true },
         },
         {
           id: portId("boiler/steam-out"),
           name: "Steam Out",
           direction: PortDirection.Output,
           position: 0.7,
-          metadata: {fluid: true},
+          metadata: { fluid: true },
         },
       ],
       stats: {
         speedMultiplier: 1.0,
         powerConsumption: 0, // produces power, doesn't consume it
-        metadata: {fuel_type: "solid", heat_output_kw: 1800},
+        metadata: { fuel_type: "solid", heat_output_kw: 1800 },
       },
       metadata: {},
       tags: []
@@ -301,4 +301,4 @@ export const factorioPack: GamePack = {
     },
   ],
   metadata: {},
-}
+};

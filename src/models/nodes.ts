@@ -1,4 +1,4 @@
-import type {NodeTemplateId, PortId, CategoryId} from "./ids.ts";
+import type { NodeTemplateId, PortId, CategoryId } from "./ids.ts";
 import type { DisplayInfo, Metadata } from "./common.ts";
 
 /** Direction of a port on a node template. */

@@ -8,74 +8,76 @@ import type {
   RecipeId,
   Viewport
 } from "../models";
-import type {StateCreator} from "zustand";
-import {graphReducer} from "../utils/graph-reducer.ts";
+import type { StateCreator } from "zustand";
+import { graphReducer } from "../utils/graph-reducer.ts";
 
 
 const createGraphActions: StateCreator<GraphSlice & GraphActionSlice, [], [], GraphActionSlice> =
   (set) => ({
+    addNode: (node: ProcessrNode) =>
+    {set((state) =>
+        ({ ...state, graph: graphReducer(state.graph, { type: "ADD_NODE", node }) }));
+    },
 
-  addNode: (node: ProcessrNode) => {
-    set((state) => (
-      {...state, graph: graphReducer(state.graph, {type: "ADD_NODE", node})}
-    ))
-  },
+    removeNode: (nodeId: ProcessrNodeId) =>
+    {set((state) =>
+        ({ ...state, graph: graphReducer(state.graph, { type: "REMOVE_NODE", nodeId }) }));
+    },
 
-  removeNode: (nodeId: ProcessrNodeId) => {
-    set((state) => (
-      {...state, graph: graphReducer(state.graph, {type: "REMOVE_NODE", nodeId})}
-    ))
-  },
+    updateNodePosition: (nodeId: ProcessrNodeId, position: Position) =>
+    {set((state) =>
+        ({ ...state, graph: graphReducer(state.graph, { type: "SET_NODE_POSITION", nodeId, position }) }));
+    },
 
-  updateNodePosition: (nodeId: ProcessrNodeId, position: Position) => {
-    set((state) => (
-      {...state, graph: graphReducer(state.graph, {type: "UPDATE_NODE_POSITION", nodeId, position})}
-    ))
-  },
+    setNodeRecipe: (nodeId: ProcessrNodeId, recipeId: RecipeId | null) =>
+    {set((state) =>
+      ({ ...state, graph: graphReducer(state.graph, { type: "SET_NODE_RECIPE", nodeId, recipeId }) }));
+    },
 
-  setNodeRecipe: (nodeId: ProcessrNodeId, recipeId: RecipeId | null) => {
-    set((state) => (
-      {...state, graph: graphReducer(state.graph, {type: "SET_NODE_RECIPE", nodeId, recipeId})}
-    ))
-  },
+    addEdge: (edge: Edge) =>
+    {set((state) =>
+        ({ ...state, graph: graphReducer(state.graph, { type: "ADD_EDGE", edge }) }));
+    },
 
-  addEdge: (edge: Edge) => {
-    set((state) => (
-      {...state, graph: graphReducer(state.graph, {type: "ADD_EDGE", edge})}
-    ))
-  },
+    removeEdge: (edgeId: EdgeId) =>
+    {set((state) =>
+      ({ ...state, graph: graphReducer(state.graph, { type: "REMOVE_EDGE", edgeId }) }));
+    },
 
-  removeEdge: (edgeId: EdgeId) => {
-    set((state) => (
-      {...state, graph: graphReducer(state.graph, {type: "REMOVE_EDGE", edgeId})}
-    ))
-  },
+    setViewport: (viewport: Viewport) =>
+    {set((state) =>
+        ({ ...state, graph: graphReducer(state.graph, { type: "SET_VIEWPORT", viewport }) }));
+    },
 
-  setViewport: (viewport: Viewport) => {
-    set((state) => (
-      {...state, graph: graphReducer(state.graph, {type: "SET_VIEWPORT", viewport})}
-    ))
-  },
+    setSelectedNodeId: (id: ProcessrNodeId | null) =>
+    {set((state) =>
+        ({ ...state, selectedNodeId: id }));
+    },
 
-  setSelectedNodeId: (id: ProcessrNodeId | null) => {
-    set((state) => (
-      {...state, selectedNodeId: id}
-    ))
-  },
+    setScreenToFlowPosition: (fn: ((screenPos:Position) => Position)) =>
+    {set((state) =>
+      ({ ...state, screenToFlowPosition: fn }));
+    },
 
-  setScreenToFlowPosition: (fn: ((screenPos:Position) => Position) ) => {
-    set((state) => (
-      {...state, screenToFlowPosition: fn}
-    ))
-  },
+    loadGraph: (graph: Graph, packIndex: GamePackIndex) =>
+    {set((state) =>
+        ({ ...state, graph, packIndex: packIndex }));
+    },
 
-  loadGraph: (graph: Graph, packIndex: GamePackIndex) => {
-    set((state) => (
-      {...state, graph, packIndex: packIndex}
-    ))
-  },
+    screenToFlowPosition: (screenPos:Position) => {
+      return screenPos;
+    },
 
-  screenToFlowPosition: (screenPos:Position) => screenPos
-})
+    undo: () =>
+    {set((state) =>
+      ({ ...state, graph:graphReducer(state.graph, { type: "UNDO" }) }));
+    },
+
+    redo: () =>
+    {set((state) =>
+      ({ ...state, graph:graphReducer(state.graph, { type: "REDO" }) }));
+    },
+
+});
 
 export default createGraphActions;

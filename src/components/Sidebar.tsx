@@ -1,25 +1,27 @@
-import type {FC} from "react";
-import {createGraph, createProcessorNode} from "../utils/graph-factory.ts";
-import {exportPackToFile, importPackFromFile} from "../utils/pack-io.ts";
-import {buildGamePackIndex} from "../utils/game-pack-index.ts";
-import {useProcessrStore} from "../state/store.ts";
-import {saveGamePack} from "../utils/persistence.ts";
+import type { FC } from "react";
+import { createGraph, createProcessrNode } from "../utils/graph-factory.ts";
+import { exportPackToFile, importPackFromFile } from "../utils/pack-io.ts";
+import { buildGamePackIndex } from "../utils/game-pack-index.ts";
+import { useProcessrStore } from "../state/store.ts";
+import { saveGamePack } from "../utils/persistence.ts";
 
 
 const Sidebar: FC = () => {
-  const selectedNodeId = useProcessrStore.use.selectedNodeId()
-  const selectedNode = useProcessrStore.use.graph().nodes.find(node => node.id === selectedNodeId)
-  const packIndex = useProcessrStore.use.packIndex()
+  const selectedNodeId = useProcessrStore.use.selectedNodeId();
+  const graph = useProcessrStore.use.graph();
+  const selectedNode = selectedNodeId ? (graph.nodes[selectedNodeId] ?? null) : null;
+  const packIndex = useProcessrStore.use.packIndex();
   const addNode = useProcessrStore.use.addNode();
-  const setNodeRecipe = useProcessrStore.use.setNodeRecipe()
-  const loadGraph = useProcessrStore.use.loadGraph()
+  const setNodeRecipe = useProcessrStore.use.setNodeRecipe();
+  const loadGraph = useProcessrStore.use.loadGraph();
 
   const handleImport = () => {
     void importPackFromFile().then((pack) => {
       loadGraph(createGraph(pack.id, pack.name), buildGamePackIndex(pack));
       saveGamePack(pack);
-    })
-  }
+    });
+  };
+
 
 
   const compatibleRecipes = selectedNode
@@ -35,7 +37,7 @@ const Sidebar: FC = () => {
           <button
             key={template.id}
             onClick={() => {
-              addNode(createProcessorNode( template, {x:100, y:100}))
+              addNode(createProcessrNode(template, { x:100, y:100 }));
             }}
           >
             {template.name}
@@ -50,7 +52,7 @@ const Sidebar: FC = () => {
               key={recipe.id}
               className={selectedNode.recipeId === recipe.id ? "active" : ""}
               onClick={() => {
-                setNodeRecipe(selectedNode.id, recipe.id)
+                setNodeRecipe(selectedNode.id, recipe.id);
               }}
             >
               {recipe.name}
@@ -62,11 +64,11 @@ const Sidebar: FC = () => {
         <span className="sidebar__pack-name">{packIndex.pack.name}</span>
         <button onClick={handleImport}>Import pack</button>
         <button onClick={() => {
-          exportPackToFile(packIndex.pack)
+          exportPackToFile(packIndex.pack);
         }}>Export Pack</button>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default Sidebar;

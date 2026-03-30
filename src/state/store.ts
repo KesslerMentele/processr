@@ -1,7 +1,7 @@
 import createSelectors from "../utils/state-selectors.ts";
-import {create} from "zustand/react";
+import { create } from "zustand/react";
 
-import type {GraphActionSlice, GraphSlice} from "../models";
+import type { GraphActionSlice, GraphSlice } from "../models";
 import createGraphSlice from "./graph-slice.ts";
 import createGraphActions from "./graph-actions-slice.ts";
 
@@ -9,7 +9,7 @@ import createGraphActions from "./graph-actions-slice.ts";
 const useBoundStore = create<GraphSlice & GraphActionSlice>()((setState, getState, store) => ({
   ...createGraphSlice(setState, getState, store),
   ...createGraphActions(setState, getState, store),
-}))
+}));
 
 
 /**
@@ -21,4 +21,4 @@ const useBoundStore = create<GraphSlice & GraphActionSlice>()((setState, getStat
  *When accessing functions in the store use:
  * `const storeFunction = useGraphStore.getState().storeFunction`
  */
-export const useProcessrStore = createSelectors(useBoundStore)
+export const useProcessrStore = createSelectors(useBoundStore);

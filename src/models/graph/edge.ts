@@ -15,7 +15,7 @@ interface EdgeBase {
  * Node-level edge: connects two nodes without specifying ports.
  * The default mode — sufficient when nodes have a single input/output.
  */
-type EdgeNodeLevel = EdgeBase & {
+export type EdgeNodeLevel = EdgeBase & {
   readonly sourcePortId?: never;
   readonly targetPortId?: never;
 };
@@ -24,7 +24,7 @@ type EdgeNodeLevel = EdgeBase & {
  * Port-level edge: connects specific named ports on each node.
  * Required when a node has multiple ports and routing must be explicit.
  */
-type EdgePortLevel = EdgeBase & {
+export type EdgePortLevel = EdgeBase & {
   readonly sourcePortId: PortId;
   readonly targetPortId: PortId;
 };

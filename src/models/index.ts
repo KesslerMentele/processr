@@ -41,13 +41,13 @@ export type {
   PortInstance,
   NodeStatsOverride,
 } from "./graph/processr-node.ts";
-export type { Edge } from "./graph/edge.ts";
-export type { Graph, Viewport, GraphAction, ActionType, GraphHistory } from "./graph/graph.ts";
+export type { Edge, EdgeNodeLevel, EdgePortLevel } from "./graph/edge.ts";
+export type { Graph, Viewport, GraphAction, ActionType, GraphHistory, GraphChange, ReversibleAction } from "./graph/graph.ts";
 export type { GraphStateValue, GraphDispatchValue, ProcessrNodeData } from "./graph/graph-react-connector.ts";
 
 // ---- Serialization ----
 export type {
-  ProcessrDocument,
+  ProcessrGraph,
   DocumentSummary,
 } from "./serialization/document.ts";
 export { DOCUMENT_FORMAT_VERSION } from "./serialization/document.ts";
@@ -59,4 +59,4 @@ export type {
 
 
 // ---- State ----
-export type {GraphSlice, GraphActionSlice} from "./state/graph-state.ts"
+export type { GraphSlice, GraphActionSlice } from "./state/graph-state.ts";

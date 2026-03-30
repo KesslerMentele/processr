@@ -1,5 +1,5 @@
-import type {GraphId, GamePackId, ProcessrNodeId, RecipeId, EdgeId} from "../ids.ts";
-import type {Metadata, Position} from "../common.ts";
+import type { GraphId, GamePackId, ProcessrNodeId, RecipeId, EdgeId } from "../ids.ts";
+import type { Metadata, Position } from "../common.ts";
 import type { ProcessrNode } from "./processr-node.ts";
 import type { Edge } from "./edge.ts";
 
@@ -10,47 +10,59 @@ export interface Viewport {
   readonly zoom: number;
 }
 
-type ReversibleAction =
-  | "ADD_NODE"
-  | "REMOVE_NODE"
-  | "UPDATE_NODE_POSITION"
-  | "SET_NODE_RECIPE"
-  | "ADD_EDGE"
-  | "REMOVE_EDGE"
+export const ReversibleAction = {
+  AddNode: "ADD_NODE",
+  RemoveNode: "REMOVE_NODE",
+  SetNodePosition: "SET_NODE_POSITION",
+  SetNodeRecipe: "SET_NODE_RECIPE",
+  AddEdge: "ADD_EDGE",
+  RemoveEdge: "REMOVE_EDGE",
+} as const;
 
-type TransientAction =
-  | "UNDO"
-  | "REDO"
-  | "SET_VIEWPORT"
+export const TransientAction = {
+  Undo: "UNDO",
+  Redo: "REDO",
+  SetViewport: "SET_VIEWPORT",
+} as const;
+
+export type ReversibleAction = (typeof ReversibleAction)[keyof typeof ReversibleAction];
+
+type TransientAction = (typeof TransientAction)[keyof typeof TransientAction];
 
 export type ActionType = ReversibleAction | TransientAction;
 
-export type GraphAction<T extends ActionType> =
-  T extends "ADD_NODE" ? { readonly type: T;              readonly node: ProcessrNode } :
-  T extends "REMOVE_NODE" ? { readonly type: T;           readonly nodeId: ProcessrNodeId } :
-  T extends "UPDATE_NODE_POSITION" ? { readonly type: T;  readonly nodeId: ProcessrNodeId; readonly position: Position } :
-  T extends "SET_NODE_RECIPE" ? { readonly type: T;       readonly nodeId: ProcessrNodeId; readonly recipeId: RecipeId | null } :
-  T extends "ADD_EDGE" ? { readonly type: T;              readonly edge: Edge } :
-  T extends "REMOVE_EDGE" ? { readonly type: T;           readonly edgeId: EdgeId } :
-  T extends "SET_VIEWPORT" ? { readonly type: T;          readonly viewport: Viewport } :
-  T extends "UNDO" ? { readonly type: T;} :
-  T extends "REDO" ? { readonly type: T;} :
-    never
+interface GraphActionPayloadMap {
+  [ReversibleAction.AddNode]: { readonly node: ProcessrNode };
+  [ReversibleAction.RemoveNode]: { readonly nodeId: ProcessrNodeId };
+  [ReversibleAction.SetNodePosition]: { readonly nodeId: ProcessrNodeId; readonly position: Position };
+  [ReversibleAction.SetNodeRecipe]: { readonly nodeId: ProcessrNodeId; readonly recipeId: RecipeId | null };
+  [ReversibleAction.AddEdge]: { readonly edge: Edge };
+  [ReversibleAction.RemoveEdge]: { readonly edgeId: EdgeId };
+  [TransientAction.SetViewport]: { readonly viewport: Viewport };
+  [TransientAction.Undo]: object;
+  [TransientAction.Redo]: object;
+}
 
+  export type GraphAction<T extends ActionType = ActionType> = {
+    [K in T]: { readonly type: K } & GraphActionPayloadMap[K]
+  }[T];
 
+interface GraphChangePayloadMap {
+  [ReversibleAction.AddNode]: { readonly removedNode: ProcessrNode };
+  [ReversibleAction.RemoveNode]: { readonly removedNode: ProcessrNode; readonly removedEdges: Readonly<Record<string, Edge>> };
+  [ReversibleAction.SetNodePosition]: { readonly previousPosition: Position };
+  [ReversibleAction.SetNodeRecipe]: { readonly previousRecipeId: RecipeId | null };
+  [ReversibleAction.AddEdge]: object;
+  [ReversibleAction.RemoveEdge]: { readonly removedEdge: Edge };
+}
 
-type GraphChange<T extends ReversibleAction> =
-  T extends "ADD_NODE" ? {action: GraphAction<T>} :
-  T extends "REMOVE_NODE" ? {action: GraphAction<T>, removedNode: ProcessrNode} :
-  T extends "UPDATE_NODE_POSITION" ? {action: GraphAction<T>, previousPosition: Position} :
-  T extends "SET_NODE_RECIPE" ? {action: GraphAction<T>, previousRecipeId: RecipeId | null} :
-  T extends "ADD_EDGE" ? {action: GraphAction<T>} :
-  T extends "REMOVE_EDGE" ? {action: GraphAction<T>, removedEdge: Edge} :
-    never
+export type GraphChange<T extends ReversibleAction = ReversibleAction> = {
+  [K in T]: { readonly type: K; readonly action: GraphAction<K> } & GraphChangePayloadMap[K]
+}[T];
 
 export interface GraphHistory {
-  past: GraphChange<ReversibleAction>[];
-  future: GraphChange<ReversibleAction>[]
+  past: GraphChange[];
+  future: GraphChange[];
 }
 
 /**
@@ -67,8 +79,8 @@ export interface Graph {
   readonly name: string;
   readonly description?: string;
   readonly gamePackId: GamePackId;
-  readonly nodes: readonly ProcessrNode[];
-  readonly edges: readonly Edge[];
+  readonly nodes: Readonly<Record<string, ProcessrNode>>;
+  readonly edges: Readonly<Record<string, Edge>>;
   readonly viewport: Viewport;
   readonly history: GraphHistory;
   /** ISO 8601 timestamps. */

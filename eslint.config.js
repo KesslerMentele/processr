@@ -59,6 +59,12 @@ export default defineConfig([
       'unicorn/prefer-array-find': 'error',
       'unicorn/prefer-string-slice': 'error',
       'unicorn/no-useless-spread': 'error',
+
+      // ---- Some more stylistic stuff ----
+      '@/semi': ['error', 'always'],
+      'object-curly-spacing': ['error', 'always'],
+      'array-bracket-spacing': ['error', 'never'],
+      'space-in-parens': ['error', 'never'],
     },
   },
 ])

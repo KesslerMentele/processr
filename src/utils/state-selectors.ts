@@ -1,8 +1,8 @@
 
-import type {StoreApi} from "zustand";
+import type { StoreApi } from "zustand";
 
-import type {UseBoundStore} from "zustand/react";
-import type {GraphActionSlice, GraphSlice} from "../models";
+import type { UseBoundStore } from "zustand/react";
+import type { GraphActionSlice, GraphSlice } from "../models";
 
 type WithSelectors<S> = S extends UseBoundStore<StoreApi<infer T>>
   ? S & { use: { [K in keyof T]: () => T[K] } }
@@ -17,8 +17,8 @@ const createSelectors = <T extends (GraphSlice | GraphActionSlice)>(
       [key]: () => store((state) => state[key]),
     }),
     {} as WithSelectors<typeof store>['use']
-  )
-  return {...store as object, use } as WithSelectors<typeof store>
-}
+  );
+  return { ...store as object, use } as WithSelectors<typeof store>;
+};
 
 export default createSelectors;
