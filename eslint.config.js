@@ -10,6 +10,13 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 export default defineConfig([
   globalIgnores(['dist']),
   {
+    // Relax functional rules in test files — imperative mocks and setup are fine
+    files: ['**/*.test.{ts,tsx}'],
+    rules: {
+      'functional/immutable-data': 'off',
+    },
+  },
+  {
     files: ['**/*.{ts,tsx}'],
     extends: [
       js.configs.recommended,

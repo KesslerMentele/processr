@@ -1,56 +1,56 @@
 import type {
   Edge,
   GamePackId,
-  Graph, ItemId,
+  Graph,
   Metadata,
-  NodeTemplate, PortId,
+  NodeTemplate,
   Position,
   ProcessrNode, ProcessrNodeId,
 } from "../models";
 import { newEdgeId, newGraphId, newProcessrNodeId } from "./id.ts";
 
-interface CreateEdgeOptions {
-  readonly sourcePortId?: PortId;
-  readonly targetPortId?: PortId;
-  readonly itemId?: ItemId;
-  readonly label?: string;
-}
-
 
 const newViewport = () => ({ x: 0, y: 0, zoom: 1 });
 
 
+type CreateProcessrNodeOptions = Partial<Omit<ProcessrNode, 'id' | 'templateId' | 'ports' | 'position' | 'metadata'>>
+
 export const createProcessrNode = (
   template: NodeTemplate,
-  position:Position
+  position:Position,
+  options?: CreateProcessrNodeOptions,
 ): ProcessrNode => {
   return {
     id: newProcessrNodeId(),
     templateId: template.id,
     position,
-    recipeId: null,
-    statsOverride: { metadata: {} },
+    recipeId: options?.recipeId ?? null,
+    statsOverride: options?.statsOverride ?? { metadata: {} },
     ports: template.ports.map((p) => ({ id: p.id, definitionId: p.id })),
-    count: 1,
+    count: options?.count ?? 1,
     metadata: template.metadata
   };
 };
 
+type CreateEdgeOptions = Partial<Pick<Edge, 'itemId' | 'label' | 'metadata' | 'sourcePortId' | 'targetPortId' >>
+
 export const createEdge = (
   sourceNodeId: ProcessrNodeId,
   targetNodeId: ProcessrNodeId,
-  options: CreateEdgeOptions
+  options?: CreateEdgeOptions
 ): Edge => {
   const base = {
    id: newEdgeId(),
    sourceNodeId,
    targetNodeId,
-   itemId: options.itemId,
-   label: options.label,
-   metadata: {} as Metadata
+   itemId: options?.itemId,
+   label: options?.label,
+   metadata: options?.metadata ? options.metadata : {} as Metadata,
   };
-
-  return options.sourcePortId !== undefined && options.targetPortId !== undefined
+  if ((options?.sourcePortId && options.targetPortId === undefined) || (options?.targetPortId && options.sourcePortId === undefined)) {
+    throw new Error('You must provide either both source and target port, or neither');
+  }
+  return options?.sourcePortId !== undefined && options.targetPortId !== undefined
   ? { ...base, sourcePortId:options.sourcePortId, targetPortId: options.targetPortId }
   : { ...base };
 };
