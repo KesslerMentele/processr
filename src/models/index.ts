@@ -43,7 +43,7 @@ export type {
 } from "./graph/processr-node.ts";
 export type { Edge, EdgeNodeLevel, EdgePortLevel } from "./graph/edge.ts";
 export type { Graph, Viewport, GraphAction, ActionType, GraphHistory, GraphChange, ReversibleAction } from "./graph/graph.ts";
-export type { GraphStateValue, GraphDispatchValue, ProcessrNodeData } from "./graph/graph-react-connector.ts";
+export type { ProcessrNodeData } from "./graph/graph-react-connector.ts";
 
 // ---- Serialization ----
 export type {
