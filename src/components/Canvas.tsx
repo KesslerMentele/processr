@@ -95,6 +95,7 @@ const Canvas: FC = () => {
         nodes={rfNodes}
         edges={rfEdges}
         nodeTypes={nodeTypes}
+        nodeOrigin={[0.5, 0.5]}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeDragStart={onNodeDragStart}

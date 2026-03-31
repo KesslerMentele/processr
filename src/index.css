@@ -28,7 +28,7 @@ html, body {
 
 /* ── Sidebar ───────────────────────────────────────────── */
 .sidebar {
-  width: 200px;
+  min-width: 200px;
   flex-shrink: 0;
   background: #242424;
   border-right: 1px solid #333;
@@ -39,7 +39,7 @@ html, body {
   overflow-y: auto;
 }
 
-.sidebar button {
+.sidebar .node-template {
   width: 100%;
   padding: 8px 10px;
   background: #2e2e2e;
@@ -50,11 +50,11 @@ html, body {
   text-align: left;
 }
 
-.sidebar button:hover {
+.sidebar .node-template:hover {
   background: #3a3a3a;
 }
 
-.sidebar button.active {
+.sidebar .node-template.active {
   border-color: #4a9eff;
   color: #4a9eff;
 }
@@ -97,6 +97,10 @@ html, body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.sidebar__dragging {
+  overflow: visible;
 }
 
 /* ── Canvas ────────────────────────────────────────────── */

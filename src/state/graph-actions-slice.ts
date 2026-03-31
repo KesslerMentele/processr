@@ -1,7 +1,7 @@
 import type {
   Edge,
   EdgeId, GamePackIndex,
-  Graph, GraphActionSlice, GraphSlice,
+  Graph, GraphActionSlice, GraphSlice, NodeTemplateId,
   Position,
   ProcessrNode,
   ProcessrNodeId,
@@ -16,17 +16,17 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice, [], [], Gr
   (set) => ({
     addNode: (node: ProcessrNode) =>
     {set((state) =>
-        ({ ...state, graph: graphReducer(state.graph, { type: "ADD_NODE", node }) }));
+      ({ ...state, graph: graphReducer(state.graph, { type: "ADD_NODE", node }) }));
     },
 
     removeNode: (nodeId: ProcessrNodeId) =>
     {set((state) =>
-        ({ ...state, graph: graphReducer(state.graph, { type: "REMOVE_NODE", nodeId }) }));
+      ({ ...state, graph: graphReducer(state.graph, { type: "REMOVE_NODE", nodeId }) }));
     },
 
     updateNodePosition: (nodeId: ProcessrNodeId, position: Position) =>
     {set((state) =>
-        ({ ...state, graph: graphReducer(state.graph, { type: "SET_NODE_POSITION", nodeId, position }) }));
+      ({ ...state, graph: graphReducer(state.graph, { type: "SET_NODE_POSITION", nodeId, position }) }));
     },
 
     setNodeRecipe: (nodeId: ProcessrNodeId, recipeId: RecipeId | null) =>
@@ -36,7 +36,7 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice, [], [], Gr
 
     addEdge: (edge: Edge) =>
     {set((state) =>
-        ({ ...state, graph: graphReducer(state.graph, { type: "ADD_EDGE", edge }) }));
+      ({ ...state, graph: graphReducer(state.graph, { type: "ADD_EDGE", edge }) }));
     },
 
     removeEdge: (edgeId: EdgeId) =>
@@ -46,12 +46,12 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice, [], [], Gr
 
     setViewport: (viewport: Viewport) =>
     {set((state) =>
-        ({ ...state, graph: graphReducer(state.graph, { type: "SET_VIEWPORT", viewport }) }));
+      ({ ...state, graph: graphReducer(state.graph, { type: "SET_VIEWPORT", viewport }) }));
     },
 
     setSelectedNodeId: (id: ProcessrNodeId | null) =>
     {set((state) =>
-        ({ ...state, selectedNodeId: id }));
+      ({ ...state, selectedNodeId: id }));
     },
 
     setScreenToFlowPosition: (fn: ((screenPos:Position) => Position)) =>
@@ -61,7 +61,7 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice, [], [], Gr
 
     loadGraph: (graph: Graph, packIndex: GamePackIndex) =>
     {set((state) =>
-        ({ ...state, graph, packIndex: packIndex }));
+      ({ ...state, graph, packIndex: packIndex }));
     },
 
     screenToFlowPosition: (screenPos:Position) => {
@@ -78,6 +78,11 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice, [], [], Gr
       ({ ...state, graph:graphReducer(state.graph, { type: "REDO" }) }));
     },
 
-});
+    setDraggedTemplateId: (id: NodeTemplateId | null) =>
+    {set((state) =>
+      ({ ...state, draggedTemplateId: id }));
+    },
+
+  });
 
 export default createGraphActions;
