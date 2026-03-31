@@ -1,5 +1,5 @@
 import type { ProcessrNode } from "../graph/processr-node.ts";
-import type { EdgeId, ProcessrNodeId, RecipeId } from "../ids.ts";
+import type { EdgeId, NodeTemplateId, ProcessrNodeId, RecipeId } from "../ids.ts";
 import type { Position } from "../common.ts";
 import type { Edge } from "../graph/edge.ts";
 import type { Graph, Viewport } from "../graph/graph.ts";
@@ -17,6 +17,7 @@ export interface GraphActionSlice {
   screenToFlowPosition: (screenPos:Position) => Position;
   setSelectedNodeId: (id: ProcessrNodeId | null) => void;
   setScreenToFlowPosition: (fn: ((screenPos:Position) => Position)) => void;
+  setDraggedTemplateId: (id: NodeTemplateId | null) => void;
   undo: () => void
   redo: () => void
 }
@@ -25,4 +26,5 @@ export interface GraphSlice {
   graph: Graph;
   packIndex: GamePackIndex;
   selectedNodeId: ProcessrNodeId | null;
+  draggedNodeTemplateId: NodeTemplateId | null;
 }

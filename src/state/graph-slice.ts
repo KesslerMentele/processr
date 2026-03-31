@@ -12,7 +12,8 @@ const createGraphSlice: StateCreator<GraphSlice> = (): GraphSlice => {
   return {
     graph,
     packIndex: buildGamePackIndex(pack),
-    selectedNodeId: null
+    selectedNodeId: null,
+    draggedNodeTemplateId: null,
   };
 };
 

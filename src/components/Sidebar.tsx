@@ -1,10 +1,11 @@
 
-import { createGraph, createProcessrNode } from "../utils/graph-factory.ts";
+import { createGraph } from "../utils/graph-factory.ts";
 import { exportPackToFile, importPackFromFile } from "../utils/pack-io.ts";
 import { buildGamePackIndex } from "../utils/game-pack-index.ts";
 import { useProcessrStore } from "../state/store.ts";
 import { saveGamePack } from "../utils/persistence.ts";
 import type { FC } from "react";
+import { DraggableNodeTemplate } from "./NodeTemplate.tsx";
 
 
 const Sidebar: FC = () => {
@@ -12,7 +13,6 @@ const Sidebar: FC = () => {
   const graph = useProcessrStore.use.graph();
   const selectedNode = selectedNodeId ? (graph.nodes[selectedNodeId] ?? null) : null;
   const packIndex = useProcessrStore.use.packIndex();
-  const addNode = useProcessrStore.use.addNode();
   const setNodeRecipe = useProcessrStore.use.setNodeRecipe();
   const loadGraph = useProcessrStore.use.loadGraph();
 
@@ -33,14 +33,7 @@ const Sidebar: FC = () => {
     <div className="sidebar__nodetemplates">
       <h1>Nodes</h1>
       {packIndex.pack.nodeTemplates.map(template => (
-        <button
-          key={template.id}
-          onClick={() => {
-            addNode(createProcessrNode(template, { x:100, y:100 }));
-          }}
-        >
-          {template.name}
-        </button>
+        <DraggableNodeTemplate key={template.id} template={template}/>
       ))}
     </div>
   );
