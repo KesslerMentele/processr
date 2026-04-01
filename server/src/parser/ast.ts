@@ -3,7 +3,6 @@
  * DO NOT EDIT MANUALLY!
  ******************************************************************************/
 
-/* eslint-disable */
 import * as langium from 'langium';
 
 export const AtlasTerminals = {
