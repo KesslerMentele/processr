@@ -1,0 +1,459 @@
+/* ── Reset ─────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+  background: #1a1a1a;
+  color: #e0e0e0;
+}
+
+#root {
+  height: 100%;
+}
+
+/* ── App shell ─────────────────────────────────────────── */
+.app-root {
+  height: 100%;
+}
+
+.app-layout {
+  display: flex;
+  height: 100%;
+}
+
+/* ── Sidebar ───────────────────────────────────────────── */
+.sidebar {
+  min-width: 200px;
+  flex-shrink: 0;
+  background: #242424;
+  border-right: 1px solid #333;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+}
+
+.sidebar .node-template {
+  width: 100%;
+  padding: 8px 10px;
+  background: #2e2e2e;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #e0e0e0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.sidebar .node-template:hover {
+  background: #3a3a3a;
+}
+
+.sidebar .node-template.active {
+  border-color: #4a9eff;
+  color: #4a9eff;
+}
+
+.sidebar h1 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar hr {
+  border: none;
+  border-top: 1px solid #333;
+  margin: 4px 0;
+}
+
+.sidebar__nodetemplates,
+.sidebar__recipes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar__nodetemplates {
+  flex: 1;
+}
+
+.sidebar__pack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+.sidebar__pack-name {
+  font-size: 11px;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar__dragging {
+  overflow: visible;
+}
+
+/* ── Canvas ────────────────────────────────────────────── */
+.canvas-container {
+  flex: 1;
+  height: 100%;
+}
+
+.canvas-controls {
+  background: #3a3a3a;
+  border: 1px solid #444;
+  color: #888;
+}
+
+/* ── Processr node ────────────────────────────────────── */
+.processr-node {
+  background: #2e2e2e;
+  border: 1px solid #555;
+  border-radius: 6px;
+  /* horizontal padding must exceed half the handle width so handles don't overlap text */
+  padding: 10px 28px;
+  min-width: 140px;
+}
+
+.processr-node.selected {
+  border-color: #4a9eff;
+}
+
+.processr-node__label {
+  font-weight: 600;
+  color: #e0e0e0;
+}
+
+.processr-node__recipe {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #888;
+}
+
+/* ── Ports ────────────────────────────────────────────── */
+
+/* bare port — small circle, no item */
+.port-handle {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
+  background: #555 !important;
+  border: 2px solid #777 !important;
+  transform: translateY(-50%) !important;
+}
+
+/* item port — square badge with rounded corners */
+.port-handle--has-item {
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 4px !important;
+  background: #333 !important;
+  border: 1.5px solid #666 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transform: translateY(-50%) !important;
+  padding: 3px !important;
+}
+
+.port-handle:hover,
+.port-handle--has-item:hover {
+  border-color: #4a9eff !important;
+}
+
+.port-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  display: block;
+}
+
+.port-icon--color {
+  border-radius: 2px;
+}
+
+/* ── Canvas Toolbar ────────────────────────────────────── */
+.canvas-toolbar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.canvas-toolbar__strip {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: #2e2e2e;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 3px;
+}
+
+.canvas-toolbar__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: #aaa;
+  cursor: pointer;
+  padding: 0;
+}
+
+.canvas-toolbar__btn:hover {
+  background: #3a3a3a;
+  color: #e0e0e0;
+}
+
+.canvas-toolbar__btn.active {
+  background: #1a3a5c;
+  border-color: #4a9eff;
+  color: #4a9eff;
+}
+
+.canvas-toolbar__sep {
+  width: 1px;
+  height: 20px;
+  background: #444;
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+
+/* ── Canvas Settings Panel ─────────────────────────────── */
+.canvas-settings-panel {
+  background: #2e2e2e;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 160px;
+}
+
+.canvas-settings-panel__toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 13px;
+  user-select: none;
+}
+
+.canvas-settings-panel__toggle input {
+  accent-color: #4a9eff;
+  cursor: pointer;
+}
+
+.canvas-settings-panel__section-label {
+  font-size: 11px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+
+.canvas-settings-panel__edge-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.canvas-settings-panel__edge-btn {
+  padding: 4px 6px;
+  background: #242424;
+  border: 1px solid #444;
+  border-radius: 3px;
+  color: #aaa;
+  font-size: 12px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.canvas-settings-panel__edge-btn:hover {
+  background: #3a3a3a;
+  color: #e0e0e0;
+}
+
+.canvas-settings-panel__edge-btn.active {
+  background: #1a3a5c;
+  border-color: #4a9eff;
+  color: #4a9eff;
+}
+
+/* ── Node detailed mode ────────────────────────────────── */
+.processr-node__details {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #444;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.processr-node__detail-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #aaa;
+}
+
+.processr-node__detail-row--out {
+  color: #8bcf8b;
+}
+
+.processr-node__detail-row .port-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.processr-node__detail-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90px;
+}
+
+.processr-node__detail-amount {
+  color: #e0e0e0;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.processr-node__detail-sep {
+  height: 1px;
+  background: #444;
+  margin: 2px 0;
+}
+
+.processr-node__detail-duration {
+  font-size: 11px;
+  color: #666;
+  margin-top: 1px;
+}
+
+/* ── Pack Editor ───────────────────────────────────────── */
+.pack-editor {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 420px;
+  max-height: calc(100% - 24px);
+  background: #2e2e2e;
+  border: 1px solid #444;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.pack-editor__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid #444;
+  background: #252525;
+  flex-shrink: 0;
+}
+
+.pack-editor__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e0e0e0;
+  flex: 1;
+}
+
+.pack-editor__status {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: #3a3a3a;
+  color: #888;
+}
+
+.pack-editor__status--ok {
+  background: #1a3a1a;
+  color: #4caf50;
+}
+
+.pack-editor__status--error {
+  background: #3a1a1a;
+  color: #ef5350;
+}
+
+.pack-editor__status--parsing {
+  color: #aaa;
+}
+
+.pack-editor__icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: #888;
+  cursor: pointer;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.pack-editor__icon-btn:hover {
+  background: #3a3a3a;
+  color: #e0e0e0;
+  border-color: #555;
+}
+
+.pack-editor__textarea {
+  flex: 1;
+  min-height: 260px;
+  resize: none;
+  background: #1a1a1a;
+  border: none;
+  color: #e0e0e0;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  padding: 10px 12px;
+  outline: none;
+}
+
+.pack-editor__errors {
+  border-top: 1px solid #5a1a1a;
+  background: #2a1a1a;
+  padding: 8px 10px;
+  flex-shrink: 0;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.pack-editor__error {
+  font-size: 11px;
+  color: #ef5350;
+  font-family: 'Courier New', Courier, monospace;
+  padding: 1px 0;
+}
