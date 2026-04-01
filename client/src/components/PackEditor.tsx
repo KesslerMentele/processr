@@ -31,6 +31,7 @@ const PackEditor: FC = () => {
     setText(value);
     setStatus('parsing');
     if (debounceRef.current) clearTimeout(debounceRef.current);
+    // eslint-disable-next-line functional/immutable-data
     debounceRef.current = setTimeout(async () => {
       const result = await parsePackText(value);
       if (result.errors) {
@@ -53,13 +54,14 @@ const PackEditor: FC = () => {
     } else {
       applyResult(result.pack);
     }
+    // eslint-disable-next-line functional/immutable-data
     e.target.value = '';
   }, [applyResult]);
 
   const statusLabel =
     status === 'parsing' ? 'Parsing…' :
     status === 'ok'      ? 'Pack applied' :
-    status === 'error'   ? `${errors.length} error${errors.length === 1 ? '' : 's'}` :
+    status === 'error'   ? `${errors.length.toString()} error${errors.length === 1 ? '' : 's'}` :
     'Ready';
 
   return (
@@ -86,14 +88,18 @@ const PackEditor: FC = () => {
           type="file"
           accept=".prat"
           style={{ display: 'none' }}
-          onChange={handleFileUpload}
+          onChange={(e) => {
+            void handleFileUpload(e);
+          }}
         />
       </div>
 
       <textarea
         className="pack-editor__textarea"
         value={text}
-        onChange={(e) => handleChange(e.target.value)}
+        onChange={(e) => {
+          handleChange(e.target.value);
+        }}
         spellCheck={false}
         placeholder="Paste or type .prat content here…"
       />

@@ -1,12 +1,12 @@
 import type { GamePack } from "../models";
 
-export type PackParseSuccess = { pack: GamePack; errors?: never };
-export type PackParseError = { errors: string[]; pack?: never };
+export interface PackParseSuccess { pack: GamePack; errors?: never };
+export interface PackParseError { errors: string[]; pack?: never };
 export type PackParseResult = PackParseSuccess | PackParseError;
 
 async function handleResponse(res: Response): Promise<PackParseResult> {
     if (!res.ok) {
-        return { errors: [`Server error: ${res.status} ${res.statusText}`] };
+        return { errors: [`Server error: ${res.status.toString()} ${res.statusText}`] };
     }
     const body = await res.json() as { result?: GamePack; errors?: string[] };
     if (body.errors) {

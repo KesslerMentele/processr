@@ -4,7 +4,8 @@
   "version": "0.0.3",
   "type": "module",
   "scripts": {
-    "verify": "cd ./client && npm run verify & cd ./server && npm run verify"
+    "verify": "cd ./client && npm run verify & cd ./server && npm run verify",
+    "dev": "cd ./client && npm run dev & cd ./server && npm run dev"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
