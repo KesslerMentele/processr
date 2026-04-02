@@ -115,6 +115,10 @@ html, body {
   color: #888;
 }
 
+.react-flow__attribution a {
+  color: purple;
+}
+
 /* ── Processr node ────────────────────────────────────── */
 .processr-node {
   background: #2e2e2e;
@@ -352,13 +356,14 @@ html, body {
 
 /* ── Pack Editor ───────────────────────────────────────── */
 .pack-editor {
-  position: absolute;
+  position: fixed;
   top: 5%;
   left: 25%;
   width: 600px;
   height: 500px;
   min-width: 360px;
   min-height: 200px;
+  max-height: 90%;
   background: #2e2e2e;
   border: 1px solid #444;
   border-radius: 6px;
@@ -372,6 +377,7 @@ html, body {
 
 .pack-editor--collapsed {
   height: auto !important;
+  max-height: 3%;
   min-height: unset;
   resize: none;
 }
