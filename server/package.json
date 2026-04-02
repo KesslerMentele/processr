@@ -1,0 +1,29 @@
+{
+  "name": "processr-server",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "verify": "eslint . && tsc -b"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "inquirer": "^13.3.2",
+    "langium": "~4.2.0",
+    "multer": "2.1.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^24.12.0",
+    "eslint": "^10.1.0",
+    "globals": "^17.4.0",
+    "jiti": "^2.6.1",
+    "tsx": "^4.19.4",
+    "typescript-eslint": "^8.58.0"
+  }
+}
