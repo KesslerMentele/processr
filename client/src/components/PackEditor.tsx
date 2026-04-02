@@ -88,8 +88,12 @@ const PackEditor: FC = () => {
     editorViewRef.current = view;
 
     const container = editorContainerRef.current;
-    const onFocusIn  = () => setEditorFocused(true);
-    const onFocusOut = () => setEditorFocused(false);
+    const onFocusIn  = () => {
+      setEditorFocused(true);
+    };
+    const onFocusOut = () => {
+      setEditorFocused(false);
+    };
     container.addEventListener('focusin', onFocusIn);
     container.addEventListener('focusout', onFocusOut);
 
