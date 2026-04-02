@@ -1,5 +1,5 @@
 import type { ValidationAcceptor, ValidationChecks } from 'langium';
-import type { AtlasAstType, Gamepack, Recipe } from './generated/ast.js';
+import type { AtlasAstType, Gamepack, Recipe } from './ast.js';
 import type { AtlasServices } from './atlas-module.js';
 
 export function registerValidationChecks(services: AtlasServices) {
