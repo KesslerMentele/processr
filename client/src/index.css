@@ -301,7 +301,6 @@ html, body {
 .processr-node__details {
   margin-top: 6px;
   padding-top: 6px;
-  border-top: 1px solid #444;
   display: flex;
   flex-direction: column;
   gap: 3px;
