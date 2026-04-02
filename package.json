@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "verify": "cd ./client && npm run verify & cd ./server && npm run verify",
-    "dev": "cd ./client && npm run dev & cd ./server && npm run dev"
+    "dev": "cd ./client && npm run dev & cd ./server && npm run dev",
+    "preview": "cd ./client && npm run preview & cd ./server && npm run dev"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

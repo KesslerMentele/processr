@@ -41,6 +41,16 @@ export const loadUISettings = (): PersistedUISettings | null => {
   return raw === null ? null : JSON.parse(raw) as PersistedUISettings;
 };
 
+const PACK_EDITOR_TEXT_KEY = "processr:pack-editor-text";
+
+export const savePackEditorText = (text: string): void => {
+  localStorage.setItem(PACK_EDITOR_TEXT_KEY, text);
+};
+
+export const loadPackEditorText = (): string | null => {
+  return localStorage.getItem(PACK_EDITOR_TEXT_KEY);
+};
+
 const PACK_KEY = "processr:game-pack";
 
 export const saveGamePack = (pack: GamePack): void => {

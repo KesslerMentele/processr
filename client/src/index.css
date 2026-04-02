@@ -353,10 +353,12 @@ html, body {
 /* ── Pack Editor ───────────────────────────────────────── */
 .pack-editor {
   position: absolute;
-  top: 12px;
-  left: 12px;
-  width: 420px;
-  max-height: calc(100% - 24px);
+  top: 5%;
+  left: 25%;
+  width: 600px;
+  height: 500px;
+  min-width: 360px;
+  min-height: 200px;
   background: #2e2e2e;
   border: 1px solid #444;
   border-radius: 6px;
@@ -364,7 +366,14 @@ html, body {
   flex-direction: column;
   z-index: 10;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  resize: both;
   overflow: hidden;
+}
+
+.pack-editor--collapsed {
+  height: auto !important;
+  min-height: unset;
+  resize: none;
 }
 
 .pack-editor__header {
@@ -375,6 +384,12 @@ html, body {
   border-bottom: 1px solid #444;
   background: #252525;
   flex-shrink: 0;
+  cursor: grab;
+  user-select: none;
+}
+
+.pack-editor__header:active {
+  cursor: grabbing;
 }
 
 .pack-editor__title {
@@ -421,24 +436,34 @@ html, body {
   flex-shrink: 0;
 }
 
-.pack-editor__icon-btn:hover {
+.pack-editor__icon-btn:disabled {
+  background: #252525;
+  color: #252525;
+}
+
+.pack-editor__icon-btn:not(:disabled):hover {
   background: #3a3a3a;
   color: #e0e0e0;
   border-color: #555;
 }
 
-.pack-editor__textarea {
+.pack-editor__body {
   flex: 1;
-  min-height: 260px;
-  resize: none;
-  background: #1a1a1a;
-  border: none;
-  color: #e0e0e0;
-  font-family: 'Courier New', Courier, monospace;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.pack-editor__cm {
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.pack-editor__cm .cm-editor {
+  height: 100%;
   font-size: 12px;
-  line-height: 1.6;
-  padding: 10px 12px;
-  outline: none;
 }
 
 .pack-editor__errors {
