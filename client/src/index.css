@@ -83,22 +83,6 @@ html, body {
   flex: 1;
 }
 
-.sidebar__pack {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: auto;
-  padding-top: 8px;
-}
-
-.sidebar__pack-name {
-  font-size: 11px;
-  color: #666;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .sidebar__dragging {
   overflow: visible;
 }
@@ -162,7 +146,7 @@ html, body {
   height: 22px !important;
   border-radius: 4px !important;
   background: #333 !important;
-  border: 1.5px solid #666 !important;
+  border: 0.1rem solid #666 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;

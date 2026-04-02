@@ -21,8 +21,8 @@ export const downloadPackAs = (text: string, filename: string): void => {
     URL.revokeObjectURL(url);
 };
 
-export interface PackParseSuccess { pack: GamePack; errors?: never };
-export interface PackParseError { errors: string[]; pack?: never };
+export interface PackParseSuccess { pack: GamePack; errors?: never }
+export interface PackParseError { errors: string[]; pack?: never }
 export type PackParseResult = PackParseSuccess | PackParseError;
 
 async function handleResponse(res: Response): Promise<PackParseResult> {
