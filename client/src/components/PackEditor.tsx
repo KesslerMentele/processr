@@ -9,10 +9,14 @@ import { EditorState } from '@codemirror/state';
 import { basicSetup } from 'codemirror';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { savePackEditorText, loadPackEditorText } from '../utils/persistence.ts';
+import { useShortcutPause } from 'react-keyhub';
 
 const DEBOUNCE_MS = 600;
 
 const PackEditor: FC = () => {
+  const [editorFocused, setEditorFocused] = useState(false);
+  useShortcutPause(editorFocused);
+
   const packIndex = useProcessrStore.use.packIndex();
   const loadGamePack = useProcessrStore.getState().loadGamePack;
   const togglePackEditor = useProcessrStore.use.togglePackEditor();
@@ -83,6 +87,12 @@ const PackEditor: FC = () => {
     // eslint-disable-next-line functional/immutable-data
     editorViewRef.current = view;
 
+    const container = editorContainerRef.current;
+    const onFocusIn  = () => setEditorFocused(true);
+    const onFocusOut = () => setEditorFocused(false);
+    container.addEventListener('focusin', onFocusIn);
+    container.addEventListener('focusout', onFocusOut);
+
     // On first open with no saved text, populate with the serialized current pack
     if (!savedText) {
       console.log('no pack, making from default');
@@ -94,6 +104,8 @@ const PackEditor: FC = () => {
     }
 
     return () => {
+      container.removeEventListener('focusin', onFocusIn);
+      container.removeEventListener('focusout', onFocusOut);
       view.destroy();
     };
   }, []);
