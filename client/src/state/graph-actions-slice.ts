@@ -110,8 +110,8 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice, [], [], Gr
         Object.entries(state.graph.edges).flatMap(([edgeId, edge]): [string, Edge][] => {
           if (isNodeLevelEdge(edge)) return [[edgeId, edge]];
 
-          const sourceNode = state.graph.nodes[edge.sourceNodeId];
-          const targetNode = state.graph.nodes[edge.targetNodeId];
+          const sourceNode = state.graph.nodes[edge.sourceNodeId] as ProcessrNode | undefined;
+          const targetNode = state.graph.nodes[edge.targetNodeId] as ProcessrNode | undefined;
           if (!sourceNode || !targetNode) return [];
 
           const newSourcePortId = portRemapping.get(sourceNode.templateId)?.get(edge.sourcePortId) ?? edge.sourcePortId;
