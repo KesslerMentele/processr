@@ -1,12 +1,6 @@
-
-import { createGraph } from "../utils/graph-factory.ts";
-import { exportPackToFile, importPackFromFile } from "../utils/pack-io.ts";
-import { buildGamePackIndex } from "../utils/game-pack-index.ts";
 import { useProcessrStore } from "../state/store.ts";
-import { saveGamePack } from "../utils/persistence.ts";
 import type { FC } from "react";
 import { DraggableNodeTemplate } from "./NodeTemplate.tsx";
-import { factorioPack } from "../data/example-factorio-pack.ts";
 
 
 const Sidebar: FC = () => {
@@ -15,19 +9,6 @@ const Sidebar: FC = () => {
   const selectedNode = selectedNodeId ? (graph.nodes[selectedNodeId] ?? null) : null;
   const packIndex = useProcessrStore.use.packIndex();
   const setNodeRecipe = useProcessrStore.use.setNodeRecipe();
-  const loadGraph = useProcessrStore.use.loadGraph();
-
-  const handleImport = () => {
-    void importPackFromFile().then((pack) => {
-      loadGraph(createGraph(pack.id, pack.name), buildGamePackIndex(pack));
-      saveGamePack(pack);
-    });
-  };
-
-  const handleSetExamplePack = () => {
-    loadGraph(createGraph(factorioPack.id, factorioPack.name), buildGamePackIndex(factorioPack));
-    saveGamePack(factorioPack);
-  };
 
 
     const compatibleRecipes = selectedNode
@@ -45,7 +26,7 @@ const Sidebar: FC = () => {
 
   const RecipePicker = (
     <div className="sidebar__recipes">
-      <h1>Select a Recipe:</h1>
+      {selectedNode && <h1>Select a Recipe:</h1>}
       {selectedNode && compatibleRecipes.map(recipe => (
         <button
           key={recipe.id}
@@ -60,26 +41,11 @@ const Sidebar: FC = () => {
     </div>
   );
 
-  const PackPicker = (
-    <div className="sidebar__pack">
-      <span className="sidebar__pack-name">{packIndex.pack.name}</span>
-      <button onClick={handleImport}>Import pack</button>
-      <button onClick={() => {
-        exportPackToFile(packIndex.pack);
-      }}>Export Pack</button>
-      <button onClick={() => {
-        handleSetExamplePack();
-      }}>Select Default Pack</button>
-    </div>
-  );
-
   return (
     <div className="sidebar">
       {NodePicker}
       <hr/>
       {RecipePicker}
-      <hr/>
-      {PackPicker}
     </div>
   );
 };

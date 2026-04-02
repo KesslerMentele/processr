@@ -1,9 +1,9 @@
 import type { ChangeEvent, FC, MouseEvent as ReactMouseEvent } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useProcessrStore } from '../state/store.ts';
-import { parsePackText, parsePackFile } from '../utils/pack-api.ts';
+import { parsePackText, parsePackFile, serializePackToText, downloadPackAs } from '../utils/pack-api.ts';
 import type { GamePack } from '../models';
-import { LuX, LuUpload, LuCheck, LuChevronDown, LuChevronUp } from 'react-icons/lu';
+import { LuX, LuUpload, LuDownload, LuCheck, LuChevronDown, LuChevronUp } from 'react-icons/lu';
 import { EditorView } from '@codemirror/view';
 import { EditorState } from '@codemirror/state';
 import { basicSetup } from 'codemirror';
@@ -23,6 +23,7 @@ const PackEditor: FC = () => {
   const parseGenRef = useRef(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const posRef = useRef({ x: 0, y: 0 });
+  const packRef = useRef(packIndex.pack);
   const packNameRef = useRef(packIndex.pack.name);
 
   const [pos, setPos] = useState({ x: 0, y: 0 });
@@ -35,9 +36,8 @@ const PackEditor: FC = () => {
   useEffect(() => {
     if (!editorContainerRef.current) return;
 
-    const initialText =
-      loadPackEditorText() ??
-      `// Pack: ${packNameRef.current}\n// Edit below or upload a .prat file\n`;
+    const savedText = loadPackEditorText();
+    const initialText = savedText ?? `// Pack: ${packNameRef.current}\n`;
 
     const view = new EditorView({
       state: EditorState.create({
@@ -82,6 +82,16 @@ const PackEditor: FC = () => {
 
     // eslint-disable-next-line functional/immutable-data
     editorViewRef.current = view;
+
+    // On first open with no saved text, populate with the serialized current pack
+    if (!savedText) {
+      console.log('no pack, making from default');
+      void serializePackToText(packRef.current).then((text) => {
+        const v = editorViewRef.current;
+        if (!v) return;
+        v.dispatch({ changes: { from: 0, to: v.state.doc.length, insert: text } });
+      });
+    }
 
     return () => {
       view.destroy();
@@ -158,6 +168,11 @@ const PackEditor: FC = () => {
     togglePackEditor();
   }, [getCurrentText, togglePackEditor]);
 
+  const handleDownload = useCallback(() => {
+    const filename = `${packNameRef.current.toLowerCase().replaceAll(' ', '-')}.prat`;
+    downloadPackAs(getCurrentText(), filename);
+  }, [getCurrentText]);
+
   const statusLabel =
     status === 'parsing' ? 'Parsing…' :
     status === 'ok'      ? 'Pack is valid' :
@@ -182,12 +197,18 @@ const PackEditor: FC = () => {
         </button>
         <button
           className="pack-editor__icon-btn"
+          title="Download .prat file"
+          onClick={handleDownload}
+        >
+          <LuDownload />
+        </button>
+        {status === 'ok' && <button
+          className="pack-editor__icon-btn"
           title="Apply"
           onClick={handleApplyPack}
-          disabled={status !== 'ok'}
         >
           <LuCheck />
-        </button>
+        </button>}
         <button
           className="pack-editor__icon-btn"
           title={collapsed ? 'Expand' : 'Collapse'}
