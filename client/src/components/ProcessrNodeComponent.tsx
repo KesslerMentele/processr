@@ -39,54 +39,67 @@ const ProcessrNodeComponent = ({ data, selected }: RFNodeProps<RFNode<ProcessrNo
       item: recipe ? packIndex.itemsById.get(recipe.outputs[i]?.itemId) : undefined,
     }));
 
+  const InputPorts = (<div>
+      {inputs.map(({ port, item }) => (
+        <Handle
+          key={port.id}
+          id={port.id}
+          title={item ? item.name : port.name}
+          type="target"
+          position={RFPosition.Left}
+          style={{ top: `${String((port.position ?? 0.5) * 100)}%` }}
+          className={item ? "port-handle port-handle--has-item" : "port-handle"}
+        >
+          <PortIcon item={item} />
+        </Handle>
+      ))}
+    </div>);
+
+  const OutputPorts = (<div>
+    {outputs.map(({ port, item }) => (
+    <Handle
+      key={port.id}
+      id={port.id}
+      title={item ? item.name : port.name}
+      type="source"
+      position={RFPosition.Right}
+      style={{ top: `${String((port.position ?? 0.5) * 100)}%` }}
+      className={item ? "port-handle port-handle--has-item" : "port-handle"}
+    >
+      <PortIcon item={item} />
+    </Handle>
+  ))}
+  </div>);
+
+  const NodeInfo = detailedMode && recipe ? (<div className="processr-node__details">
+      {inputs.map(({ port, item, stack }) => item && stack && (
+        <div key={port.id} className="processr-node__detail-row">
+          <PortIcon item={item}/>
+          <span className="processr-node__detail-name">{item.name}</span>
+          <span className="processr-node__detail-amount">×{stack.amount}</span>
+        </div>
+      ))}
+      {inputs.length > 0 ? <div className="processr-node__detail-sep"/> : null}
+      {outputs.map(({ port, item, stack }) => item && stack && (
+        <div key={port.id} className="processr-node__detail-row processr-node__detail-row--out">
+          <PortIcon item={item}/>
+          <span className="processr-node__detail-name">{item.name}</span>
+          <span className="processr-node__detail-amount">×{stack.amount}</span>
+        </div>
+      ))}
+      <div className="processr-node__detail-duration">{recipe.duration}s cycle</div>
+    </div>
+  ) : <br/>;
+
   return (
     <div className={`processr-node ${selected ? "selected" : ""}`}>
-
-      {inputs.map(({ port, item }) => (
-        <Handle key={port.id} id={port.id} type="target" position={RFPosition.Left}
-          style={{ top: `${String((port.position ?? 0.5) * 100)}%` }}
-          className={item ? "port-handle port-handle--has-item" : "port-handle"}
-        >
-          <PortIcon item={item} />
-        </Handle>
-      ))}
-
+      {InputPorts}
       <div className="processr-node__label">{data.label ?? template.name}</div>
-
-      {recipe !== undefined && (
+      {recipe && (
         <div className="processr-node__recipe">{recipe.name}</div>
       )}
-
-      {detailedMode && recipe !== undefined && (
-        <div className="processr-node__details">
-          {inputs.map(({ port, item, stack }) => item && stack && (
-            <div key={port.id} className="processr-node__detail-row">
-              <PortIcon item={item} />
-              <span className="processr-node__detail-name">{item.name}</span>
-              <span className="processr-node__detail-amount">×{stack.amount}</span>
-            </div>
-          ))}
-          <div className="processr-node__detail-sep" />
-          {outputs.map(({ port, item, stack }) => item && stack && (
-            <div key={port.id} className="processr-node__detail-row processr-node__detail-row--out">
-              <PortIcon item={item} />
-              <span className="processr-node__detail-name">{item.name}</span>
-              <span className="processr-node__detail-amount">×{stack.amount}</span>
-            </div>
-          ))}
-          <div className="processr-node__detail-duration">{recipe.duration}s cycle</div>
-        </div>
-      )}
-
-      {outputs.map(({ port, item }) => (
-        <Handle key={port.id} id={port.id} type="source" position={RFPosition.Right}
-          style={{ top: `${String((port.position ?? 0.5) * 100)}%` }}
-          className={item ? "port-handle port-handle--has-item" : "port-handle"}
-        >
-          <PortIcon item={item} />
-        </Handle>
-      ))}
-
+      {NodeInfo}
+      {OutputPorts}
     </div>
   );
 };
