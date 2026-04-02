@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, assert, vi } from 'vitest';
 import {
   saveProcessrGraph,
   loadProcessrGraph,
-  clearDocument,
+  clearProcessrGraph,
   saveGamePack,
   loadGamePack,
 } from './persistence.ts';
@@ -13,7 +13,9 @@ import { DOCUMENT_FORMAT_VERSION } from '../models';
 const storageMap = new Map<string, string>();
 vi.stubGlobal('localStorage', {
   getItem: (key: string) => storageMap.get(key) ?? null,
+  // eslint-disable-next-line functional/immutable-data
   setItem: (key: string, value: string) => storageMap.set(key, value),
+  // eslint-disable-next-line functional/immutable-data
   removeItem: (key: string) => storageMap.delete(key),
 });
 
@@ -32,6 +34,7 @@ const minimalPack: GamePack = {
 };
 
 beforeEach(() => {
+  // eslint-disable-next-line functional/immutable-data
   storageMap.clear();
 });
 
@@ -60,7 +63,7 @@ describe('saveProcessrGraph / loadProcessrGraph', () => {
 describe('clearDocument', () => {
   it('removes the saved graph so loadProcessrGraph returns null', () => {
     saveProcessrGraph(createGraph(packId, 'My Factory'));
-    clearDocument();
+    clearProcessrGraph();
     expect(loadProcessrGraph()).toBeNull();
   });
 });
