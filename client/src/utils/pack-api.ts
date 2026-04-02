@@ -1,5 +1,26 @@
 import type { GamePack } from "../models";
 
+export const serializePackToText = async (pack: GamePack): Promise<string> => {
+    const res = await fetch('/api/pack/serialize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pack),
+    });
+    if (!res.ok) throw new Error(`Serialize failed: ${res.statusText}`);
+    return res.text();
+};
+
+export const downloadPackAs = (text: string, filename: string): void => {
+    const url = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+    const anchor = document.createElement('a');
+    // eslint-disable-next-line functional/immutable-data
+    anchor.href = url;
+    // eslint-disable-next-line functional/immutable-data
+    anchor.download = filename;
+    anchor.click();
+    URL.revokeObjectURL(url);
+};
+
 export interface PackParseSuccess { pack: GamePack; errors?: never };
 export interface PackParseError { errors: string[]; pack?: never };
 export type PackParseResult = PackParseSuccess | PackParseError;
