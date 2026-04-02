@@ -104,15 +104,15 @@ export const factorioPack: GamePack = {
       categoryId: categoryId("machines"),
       ports: [
         {
-          id: portId("stone-furnace-in"),
-          name: "Input",
+          id: portId("Input-1"),
+          name: "Input-1",
           direction: PortDirection.Input,
           position: 0.5,
           metadata: {},
         },
         {
-          id: portId("stone-furnace-out"),
-          name: "Output",
+          id: portId("Output-1"),
+          name: "Output-1",
           direction: PortDirection.Output,
           position: 0.5,
           metadata: {},
@@ -133,8 +133,8 @@ export const factorioPack: GamePack = {
       categoryId: categoryId("machines"),
       ports: [
         {
-          id: portId("water-pump-out"),
-          name: "Output",
+          id: portId("Output-1"),
+          name: "Output-1",
           direction: PortDirection.Output,
           position: 0.5,
           metadata: {},
@@ -154,15 +154,15 @@ export const factorioPack: GamePack = {
       categoryId: categoryId("machines"),
       ports: [
         {
-          id: portId("burner-mining-drill-in"),
-          name: "Input",
+          id: portId("Input-1"),
+          name: "Input-1",
           direction: PortDirection.Input,
           position: 0.5,
           metadata: {},
         },
         {
-          id: portId("burner-mining-drill-out"),
-          name: "Output",
+          id: portId("Output-1"),
+          name: "Output-1",
           direction: PortDirection.Output,
           position: 0.5,
           metadata: {},
@@ -183,22 +183,22 @@ export const factorioPack: GamePack = {
       categoryId: categoryId("machines"),
       ports: [
         {
-          id: portId("assembler-1-in-1"),
+          id: portId("Input-1"),
           name: "Input 1",
           direction: PortDirection.Input,
           position: 0.25,
           metadata: {},
         },
         {
-          id: portId("assembler-1-in-2"),
+          id: portId("Input-2"),
           name: "Input 2",
           direction: PortDirection.Input,
           position: 0.75,
           metadata: {},
         },
         {
-          id: portId("assembler-1-out"),
-          name: "Output",
+          id: portId("Output-1"),
+          name: "Output-1",
           direction: PortDirection.Output,
           position: 0.5,
           metadata: {},
@@ -220,22 +220,22 @@ export const factorioPack: GamePack = {
       categoryId: categoryId("machines"),
       ports: [
         {
-          id: portId("boiler/water-in"),
-          name: "Water In",
+          id: portId("Input-1"),
+          name: "Input 1",
           direction: PortDirection.Input,
           position: 0.3,
           metadata: { fluid: true },
         },
         {
-          id: portId("boiler/coal-in"),
-          name: "Coal In",
+          id: portId("Input-2"),
+          name: "Input 2",
           direction: PortDirection.Input,
           position: 0.7,
           metadata: {},
         },
         {
-          id: portId("boiler/steam-out"),
-          name: "Steam Out",
+          id: portId("Output-1"),
+          name: "Output-1",
           direction: PortDirection.Output,
           position: 0.7,
           metadata: { fluid: true },

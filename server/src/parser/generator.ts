@@ -76,7 +76,7 @@ export function buildGamePackJson(gamepack: Gamepack): object {
                     const group = port.direction === 'input' ? inputPorts : outputPorts;
                     const position = (group.indexOf(port) + 1) / (group.length + 1);
                     return {
-                        id: `${node.id}-${port.id}`,
+                        id: port.id,
                         direction: port.direction,
                         label: port.label ?? inferName(port.id),
                         position,
