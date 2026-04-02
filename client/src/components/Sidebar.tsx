@@ -6,6 +6,7 @@ import { useProcessrStore } from "../state/store.ts";
 import { saveGamePack } from "../utils/persistence.ts";
 import type { FC } from "react";
 import { DraggableNodeTemplate } from "./NodeTemplate.tsx";
+import { factorioPack } from "../data/example-factorio-pack.ts";
 
 
 const Sidebar: FC = () => {
@@ -23,9 +24,13 @@ const Sidebar: FC = () => {
     });
   };
 
+  const handleSetExamplePack = () => {
+    loadGraph(createGraph(factorioPack.id, factorioPack.name), buildGamePackIndex(factorioPack));
+    saveGamePack(factorioPack);
+  };
 
 
-  const compatibleRecipes = selectedNode
+    const compatibleRecipes = selectedNode
     ? (packIndex.recipesByNodeType.get(selectedNode.templateId) ?? [])
     : [];
 
@@ -62,6 +67,9 @@ const Sidebar: FC = () => {
       <button onClick={() => {
         exportPackToFile(packIndex.pack);
       }}>Export Pack</button>
+      <button onClick={() => {
+        handleSetExamplePack();
+      }}>Select Default Pack</button>
     </div>
   );
 
