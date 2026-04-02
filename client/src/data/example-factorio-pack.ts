@@ -104,14 +104,14 @@ export const factorioPack: GamePack = {
       categoryId: categoryId("machines"),
       ports: [
         {
-          id: portId("stone-furnace/in"),
+          id: portId("stone-furnace-in"),
           name: "Input",
           direction: PortDirection.Input,
           position: 0.5,
           metadata: {},
         },
         {
-          id: portId("stone-furnace/out"),
+          id: portId("stone-furnace-out"),
           name: "Output",
           direction: PortDirection.Output,
           position: 0.5,
@@ -133,7 +133,7 @@ export const factorioPack: GamePack = {
       categoryId: categoryId("machines"),
       ports: [
         {
-          id: portId("water-pump/out"),
+          id: portId("water-pump-out"),
           name: "Output",
           direction: PortDirection.Output,
           position: 0.5,
@@ -154,14 +154,14 @@ export const factorioPack: GamePack = {
       categoryId: categoryId("machines"),
       ports: [
         {
-          id: portId("burner-mining-drill/in"),
+          id: portId("burner-mining-drill-in"),
           name: "Input",
           direction: PortDirection.Input,
           position: 0.5,
           metadata: {},
         },
         {
-          id: portId("burner-mining-drill/out"),
+          id: portId("burner-mining-drill-out"),
           name: "Output",
           direction: PortDirection.Output,
           position: 0.5,
@@ -183,21 +183,21 @@ export const factorioPack: GamePack = {
       categoryId: categoryId("machines"),
       ports: [
         {
-          id: portId("assembler-1/in-1"),
+          id: portId("assembler-1-in-1"),
           name: "Input 1",
           direction: PortDirection.Input,
           position: 0.25,
           metadata: {},
         },
         {
-          id: portId("assembler-1/in-2"),
+          id: portId("assembler-1-in-2"),
           name: "Input 2",
           direction: PortDirection.Input,
           position: 0.75,
           metadata: {},
         },
         {
-          id: portId("assembler-1/out"),
+          id: portId("assembler-1-out"),
           name: "Output",
           direction: PortDirection.Output,
           position: 0.5,
