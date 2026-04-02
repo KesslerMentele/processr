@@ -1,10 +1,8 @@
-/******************************************************************************
- * Adapted from processr-atlas. File I/O removed — server uses buildGamePackJson
- * directly and returns the result over HTTP.
- ******************************************************************************/
-
 import type { Gamepack } from './ast.js';
-
+import path from 'node:path';
+import fs from 'node:fs';
+import { extractDestinationAndName } from "./util.js";
+/** Scalar properties inside (... | )* are always arrays — grab the first value. */
 function first<T>(arr: T[]): T | undefined {
     return arr.length > 0 ? arr[0] : undefined;
 }
@@ -50,7 +48,7 @@ export function buildGamePackJson(gamepack: Gamepack): object {
             display: {
                 label: name,
                 ...(first(item.description) && { description: first(item.description) }),
-                ...(first(item.icon)        && { icon: first(item.icon) }),
+                icon: first(item.icon) ?? `/icons/${item.id}.png`,
                 ...(first(item.color)       && { color: first(item.color) }),
             },
             ...(first(item.category)?.ref && { categoryId: first(item.category)!.ref!.id }),
@@ -71,11 +69,20 @@ export function buildGamePackJson(gamepack: Gamepack): object {
                 ...(first(node.color)       && { color: first(node.color) }),
             },
             ...(first(node.category)?.ref && { categoryId: first(node.category)!.ref!.id }),
-            ports: node.ports.map(port => ({
-                id: `${node.id}-${port.id}`,
-                direction: port.direction,
-                label: port.label ?? inferName(port.id),
-            })),
+            ports: (() => {
+                const inputPorts  = node.ports.filter(p => p.direction === 'input');
+                const outputPorts = node.ports.filter(p => p.direction === 'output');
+                return node.ports.map(port => {
+                    const group = port.direction === 'input' ? inputPorts : outputPorts;
+                    const position = (group.indexOf(port) + 1) / (group.length + 1);
+                    return {
+                        id: `${node.id}-${port.id}`,
+                        direction: port.direction,
+                        label: port.label ?? inferName(port.id),
+                        position,
+                    };
+                });
+            })(),
             stats: {
                 ...(first(node.speed)       !== undefined && { speed: first(node.speed) }),
                 ...(first(node.power)       !== undefined && { power: first(node.power) }),
@@ -131,4 +138,16 @@ export function buildGamePackJson(gamepack: Gamepack): object {
         nodeTemplates,
         metadata: {},
     };
+}
+
+export function generateGamePack(gamepack: Gamepack, filePath: string, destination: string | undefined): string {
+    const data = extractDestinationAndName(filePath, destination);
+    const generatedFilePath = `${path.join(data.destination, data.name)}.json`;
+    const output = buildGamePackJson(gamepack);
+
+    if (!fs.existsSync(data.destination)) {
+        fs.mkdirSync(data.destination, { recursive: true });
+    }
+    fs.writeFileSync(generatedFilePath, JSON.stringify(output, null, 2));
+    return generatedFilePath;
 }

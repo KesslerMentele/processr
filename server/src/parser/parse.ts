@@ -1,7 +1,3 @@
-/******************************************************************************
- * Adapted from processr-atlas.
- ******************************************************************************/
-
 import type { Gamepack } from './ast.js';
 import { createAtlasServices } from './atlas-module.js';
 import { EmptyFileSystem } from 'langium';

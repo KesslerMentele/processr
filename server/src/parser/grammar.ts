@@ -47,7 +47,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "name:"
+                    "value": "name"
                   },
                   {
                     "$type": "Assignment",
@@ -68,7 +68,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "game:"
+                    "value": "game"
                   },
                   {
                     "$type": "Assignment",
@@ -89,7 +89,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "version:"
+                    "value": "version"
                   },
                   {
                     "$type": "Assignment",
@@ -110,7 +110,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "gameVersion:"
+                    "value": "gameVersion"
                   },
                   {
                     "$type": "Assignment",
@@ -131,7 +131,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "description:"
+                    "value": "description"
                   },
                   {
                     "$type": "Assignment",
@@ -152,7 +152,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "author:"
+                    "value": "author"
                   },
                   {
                     "$type": "Assignment",
@@ -173,7 +173,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "url:"
+                    "value": "url"
                   },
                   {
                     "$type": "Assignment",
@@ -292,7 +292,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                     "elements": [
                       {
                         "$type": "Keyword",
-                        "value": "name:"
+                        "value": "name"
                       },
                       {
                         "$type": "Assignment",
@@ -313,7 +313,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                     "elements": [
                       {
                         "$type": "Keyword",
-                        "value": "description:"
+                        "value": "description"
                       },
                       {
                         "$type": "Assignment",
@@ -334,7 +334,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                     "elements": [
                       {
                         "$type": "Keyword",
-                        "value": "icon:"
+                        "value": "icon"
                       },
                       {
                         "$type": "Assignment",
@@ -355,7 +355,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                     "elements": [
                       {
                         "$type": "Keyword",
-                        "value": "color:"
+                        "value": "color"
                       },
                       {
                         "$type": "Assignment",
@@ -376,7 +376,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                     "elements": [
                       {
                         "$type": "Keyword",
-                        "value": "sortOrder:"
+                        "value": "sortOrder"
                       },
                       {
                         "$type": "Assignment",
@@ -397,7 +397,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                     "elements": [
                       {
                         "$type": "Keyword",
-                        "value": "parent:"
+                        "value": "parent"
                       },
                       {
                         "$type": "Assignment",
@@ -474,7 +474,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                     "elements": [
                       {
                         "$type": "Keyword",
-                        "value": "name:"
+                        "value": "name"
                       },
                       {
                         "$type": "Assignment",
@@ -495,7 +495,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                     "elements": [
                       {
                         "$type": "Keyword",
-                        "value": "description:"
+                        "value": "description"
                       },
                       {
                         "$type": "Assignment",
@@ -516,7 +516,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                     "elements": [
                       {
                         "$type": "Keyword",
-                        "value": "icon:"
+                        "value": "icon"
                       },
                       {
                         "$type": "Assignment",
@@ -537,7 +537,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                     "elements": [
                       {
                         "$type": "Keyword",
-                        "value": "color:"
+                        "value": "color"
                       },
                       {
                         "$type": "Assignment",
@@ -558,7 +558,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                     "elements": [
                       {
                         "$type": "Keyword",
-                        "value": "category:"
+                        "value": "category"
                       },
                       {
                         "$type": "Assignment",
@@ -587,7 +587,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                     "elements": [
                       {
                         "$type": "Keyword",
-                        "value": "form:"
+                        "value": "form"
                       },
                       {
                         "$type": "Assignment",
@@ -682,7 +682,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "name:"
+                    "value": "name"
                   },
                   {
                     "$type": "Assignment",
@@ -703,7 +703,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "description:"
+                    "value": "description"
                   },
                   {
                     "$type": "Assignment",
@@ -724,7 +724,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "icon:"
+                    "value": "icon"
                   },
                   {
                     "$type": "Assignment",
@@ -745,7 +745,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "color:"
+                    "value": "color"
                   },
                   {
                     "$type": "Assignment",
@@ -766,7 +766,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "category:"
+                    "value": "category"
                   },
                   {
                     "$type": "Assignment",
@@ -795,7 +795,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "speed:"
+                    "value": "speed"
                   },
                   {
                     "$type": "Assignment",
@@ -816,7 +816,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "power:"
+                    "value": "power"
                   },
                   {
                     "$type": "Assignment",
@@ -837,7 +837,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "moduleSlots:"
+                    "value": "moduleSlots"
                   },
                   {
                     "$type": "Assignment",
@@ -858,7 +858,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "tags:"
+                    "value": "tags"
                   },
                   {
                     "$type": "Keyword",
@@ -975,7 +975,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "label:"
+                    "value": "label"
                   },
                   {
                     "$type": "Assignment",
@@ -1060,7 +1060,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "name:"
+                    "value": "name"
                   },
                   {
                     "$type": "Assignment",
@@ -1081,7 +1081,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "description:"
+                    "value": "description"
                   },
                   {
                     "$type": "Assignment",
@@ -1102,7 +1102,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "icon:"
+                    "value": "icon"
                   },
                   {
                     "$type": "Assignment",
@@ -1123,7 +1123,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "color:"
+                    "value": "color"
                   },
                   {
                     "$type": "Assignment",
@@ -1144,7 +1144,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "category:"
+                    "value": "category"
                   },
                   {
                     "$type": "Assignment",
@@ -1173,7 +1173,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "duration:"
+                    "value": "duration"
                   },
                   {
                     "$type": "Assignment",
@@ -1206,7 +1206,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "in:"
+                    "value": "in"
                   },
                   {
                     "$type": "Assignment",
@@ -1227,7 +1227,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "out:"
+                    "value": "out"
                   },
                   {
                     "$type": "Assignment",
@@ -1248,7 +1248,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "nodes:"
+                    "value": "nodes"
                   },
                   {
                     "$type": "Keyword",
@@ -1315,7 +1315,7 @@ export const AtlasGrammar = (): Grammar => loadedAtlasGrammar ?? (loadedAtlasGra
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "tags:"
+                    "value": "tags"
                   },
                   {
                     "$type": "Keyword",
