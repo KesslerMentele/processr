@@ -37,7 +37,7 @@ const Sidebar: FC = () => {
       {selectedNode && compatibleRecipes.map(recipe => (
         <button
           key={recipe.id}
-          className={selectedNode.recipeId === recipe.id ? "active" : ""}
+          className={`sidebar__recipe-btn${selectedNode.recipeId === recipe.id ? " active" : ""}`}
           onClick={() => {
             setNodeRecipe(selectedNode.id, recipe.id);
           }}
@@ -47,9 +47,9 @@ const Sidebar: FC = () => {
       ))}
     </div>);
 
-  const DevTools = (<div>
-    <button onClick={handleClearGraph}>Clear Graph</button>
-    <button onClick={handleClearGamepack}>Clear Gamepack</button>
+  const DevTools = (<div className="sidebar__dev-tools">
+    <button className="sidebar__dev-btn" onClick={handleClearGraph}>Clear Graph</button>
+    <button className="sidebar__dev-btn sidebar__dev-btn--danger" onClick={handleClearGamepack}>Clear Gamepack</button>
   </div>);
 
     return (

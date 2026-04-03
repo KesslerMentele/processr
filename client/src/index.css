@@ -222,6 +222,62 @@ html, body {
   overflow: visible;
 }
 
+/* ── Sidebar recipe buttons ────────────────────────────── */
+.sidebar__recipe-btn {
+  width: 100%;
+  padding: 6px 10px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
+  border-left: 3px solid transparent;
+  border-radius: 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-align: left;
+  font-size: 12px;
+}
+
+.sidebar__recipe-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.sidebar__recipe-btn.active {
+  border-left-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+/* ── Sidebar dev tools ─────────────────────────────────── */
+.sidebar__dev-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar__dev-btn {
+  width: 100%;
+  padding: 5px 10px;
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: 4px;
+  color: var(--text-faint);
+  cursor: pointer;
+  text-align: left;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+.sidebar__dev-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text-muted);
+}
+
+.sidebar__dev-btn--danger:hover {
+  border-color: var(--status-error);
+  color: var(--status-error);
+  background: var(--status-error-bg);
+}
+
 /* ── Canvas ────────────────────────────────────────────── */
 .canvas-container {
   flex: 1;
