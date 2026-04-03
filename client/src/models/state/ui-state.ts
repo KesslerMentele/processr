@@ -5,6 +5,7 @@ export interface UISettingsSlice {
   readonly detailedMode: boolean;
   readonly edgeType: EdgeType;
   readonly toolMode: ToolMode;
+  readonly lightTheme: boolean;
   readonly settingsPanelOpen: boolean;
   readonly packEditorOpen: boolean;
 }
@@ -13,6 +14,7 @@ export interface UIActionsSlice {
   toggleDetailed: () => void;
   setEdgeType: (t: EdgeType) => void;
   setToolMode: (m: ToolMode) => void;
+  toggleLightTheme: () => void;
   toggleSettingsPanel: () => void;
   togglePackEditor: () => void;
 }

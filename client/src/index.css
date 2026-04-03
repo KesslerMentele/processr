@@ -1,3 +1,138 @@
+/* ── Color scheme ───────────────────────────────────────── */
+:root {
+  /* Surfaces */
+  --surface-base:    #1a1a1a;
+  --surface-raised:  #242424;
+  --surface-overlay: #252525;
+  --surface-card:    #2e2e2e;
+  --surface-hover:   #3a3a3a;
+
+  /* Borders */
+  --border-subtle:  #333;
+  --border-default: #444;
+  --border-strong:  #555;
+
+  /* Text */
+  --text-primary:     #e0e0e0;
+  --text-secondary:   #ccc;
+  --text-muted:       #aaa;
+  --text-faint:       #888;
+  --text-placeholder: #555;
+
+  /* Accent (blue) */
+  --accent:     #4a9eff;
+  --accent-dim: #1a3a5c;
+  --accent-rgb: 74, 158, 255;
+
+  /* Node chrome */
+  --node-bg-from:        #1c2333;
+  --node-bg-to:          #141a27;
+  --node-border:         #243040;
+  --node-border-selected:#3d5a80;
+  --node-deep:           #0d1420;
+  --node-label:          #c0cfe0;
+  --node-recipe:         #3d5872;
+  --node-detail-border:  #1a2535;
+  --node-detail-sep-mid: #1e3048;
+  --node-accent: inherit;
+
+  /* Node IO — inputs (blue-grey) */
+  --io-in-text:   #4d6a88;
+  --io-in-name:   #7a9ab8;
+  --io-in-amount: #9ab8d8;
+  --io-in-arrow:  #2d4a66;
+
+  /* Node IO — outputs (green) */
+  --io-out-name:   #5a8a6a;
+  --io-out-amount: #6aaa7a;
+  --io-out-arrow:  #2d5040;
+
+  /* Node IO — duration (amber) */
+  --io-duration: #8a6a28;
+
+  /* Default port */
+  --port-default:     #3a4d66;
+  --port-default-rgb: 58, 77, 102;
+
+  /* Status */
+  --status-ok:           #4caf50;
+  --status-ok-bg:        #1a3a1a;
+  --status-error:        #ef5350;
+  --status-error-bg:     #3a1a1a;
+  --status-error-border: #5a1a1a;
+  --status-error-bg-deep:#2a1a1a;
+
+  /* Focus ring */
+  --focus-ring: #7c3aed;
+}
+
+/* ── Light theme overrides ──────────────────────────────── */
+[data-theme="light"] {
+  /* Surfaces */
+  --surface-base:    #f0f2f5;
+  --surface-raised:  #e4e8ed;
+  --surface-overlay: #e8ecf0;
+  --surface-card:    #ffffff;
+  --surface-hover:   #d8dde5;
+
+  /* Borders */
+  --border-subtle:  #ccd2da;
+  --border-default: #b8c0cc;
+  --border-strong:  #9aa4b0;
+
+  /* Text */
+  --text-primary:     #1a1e24;
+  --text-secondary:   #3a4050;
+  --text-muted:       #6a7480;
+  --text-faint:       #8a96a0;
+  --text-placeholder: #a0aab4;
+
+  /* Accent (blue — darkened for contrast on light bg) */
+  --accent:     #1a6ed8;
+  --accent-dim: #daeeff;
+  --accent-rgb: 26, 110, 216;
+
+  /* Node chrome */
+  --node-bg-from:        #e8eef8;
+  --node-bg-to:          #dce4f5;
+  --node-border:         #b0c0d8;
+  --node-border-selected:#3d5a80;
+  --node-deep:           #c8d8f0;
+  --node-label:          #1a2840;
+  --node-recipe:         #5a7898;
+  --node-detail-border:  #c0cedc;
+  --node-detail-sep-mid: #b0c8dc;
+
+  /* Node IO — inputs */
+  --io-in-text:   #3a5878;
+  --io-in-name:   #2a4a6a;
+  --io-in-amount: #1a3c60;
+  --io-in-arrow:  #4a6888;
+
+  /* Node IO — outputs */
+  --io-out-name:   #2a6040;
+  --io-out-amount: #1a7030;
+  --io-out-arrow:  #3a6048;
+
+  /* Node IO — duration */
+  --io-duration: #7a5a10;
+
+  /* Default port */
+  --port-default:     #6a88aa;
+  --port-default-rgb: 106, 136, 170;
+
+  /* Status */
+  --status-ok:           #2e7d32;
+  --status-ok-bg:        #e8f5e9;
+  --status-error:        #c62828;
+  --status-error-bg:     #ffebee;
+  --status-error-border: #ef9a9a;
+  --status-error-bg-deep:#fce4ec;
+
+  /* Focus ring */
+  --focus-ring: #6d28d9;
+}
+
 /* ── Reset ─────────────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -8,8 +143,8 @@ html, body {
   height: 100%;
   font-family: system-ui, sans-serif;
   font-size: 14px;
-  background: #1a1a1a;
-  color: #e0e0e0;
+  background: var(--surface-base);
+  color: var(--text-primary);
 }
 
 #root {
@@ -30,8 +165,8 @@ html, body {
 .sidebar {
   min-width: 200px;
   flex-shrink: 0;
-  background: #242424;
-  border-right: 1px solid #333;
+  background: var(--surface-raised);
+  border-right: 1px solid var(--border-subtle);
   padding: 12px 8px;
   display: flex;
   flex-direction: column;
@@ -42,21 +177,21 @@ html, body {
 .sidebar .node-template {
   width: 100%;
   padding: 8px 10px;
-  background: #2e2e2e;
-  border: 1px solid #444;
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
   border-radius: 4px;
-  color: #e0e0e0;
+  color: var(--text-primary);
   cursor: pointer;
   text-align: left;
 }
 
 .sidebar .node-template:hover {
-  background: #3a3a3a;
+  background: var(--surface-hover);
 }
 
 .sidebar .node-template.active {
-  border-color: #4a9eff;
-  color: #4a9eff;
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .sidebar h1 {
@@ -68,7 +203,7 @@ html, body {
 
 .sidebar hr {
   border: none;
-  border-top: 1px solid #333;
+  border-top: 1px solid var(--border-subtle);
   margin: 4px 0;
 }
 
@@ -94,9 +229,9 @@ html, body {
 }
 
 .canvas-controls {
-  background: #3a3a3a;
-  border: 1px solid #444;
-  color: #888;
+  background: var(--surface-hover);
+  border: 1px solid var(--border-default);
+  color: var(--text-faint);
 }
 
 .react-flow__attribution a {
@@ -105,73 +240,101 @@ html, body {
 
 /* ── Processr node ────────────────────────────────────── */
 .processr-node {
-  background: #2e2e2e;
-  border: 1px solid #555;
-  border-radius: 6px;
-  /* horizontal padding must exceed half the handle width so handles don't overlap text */
-  padding: 10px 28px;
-  min-width: 140px;
+  position: relative;
+  background: linear-gradient(150deg, var(--node-bg-from) 0%, var(--node-bg-to) 100%);
+  padding: 10px 20px;
+  min-width: 150px;
+  border: 1px solid var(--node-border);
+  border-left: 3px solid var(--node-accent, #3b6ea5);
+  border-radius: 4px;
+  box-shadow:
+    0 2px 6px rgba(0,0,0,0.5),
+    0 8px 28px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.04);
 }
 
 .processr-node.selected {
-  border-color: #4a9eff;
+  border-color: var(--node-border-selected);
+  border-left-color: var(--node-accent, var(--accent));
+  box-shadow:
+    0 2px 6px rgba(0,0,0,0.5),
+    0 8px 28px rgba(0,0,0,0.35),
+    0 0 0 1px rgba(var(--accent-rgb), 0.3),
+    0 0 28px rgba(var(--accent-rgb), 0.1);
 }
 
 .processr-node__label {
-  font-weight: 600;
-  color: #e0e0e0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--node-label);
 }
 
 .processr-node__recipe {
-  margin-top: 4px;
-  font-size: 12px;
-  color: #888;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--node-recipe);
+  letter-spacing: 0.01em;
 }
 
 /* ── Ports ────────────────────────────────────────────── */
 
-/* bare port — small circle, no item */
+/* bare port — dim dot, colored by form */
 .port-handle {
+  --port-color: var(--port-default);
+  --port-rgb: var(--port-default-rgb);
   width: 10px !important;
   height: 10px !important;
   border-radius: 50% !important;
-  background: #555 !important;
-  border: 2px solid #777 !important;
-  transform: translateY(-50%) !important;
+  background: rgba(var(--port-rgb), 0.3) !important;
+  border: 1.5px solid var(--port-color) !important;
+  transition: box-shadow 0.15s !important;
 }
 
-/* item port — square badge with rounded corners */
+/* Restore React Flow's border-straddling transforms (X component) + vertical centering */
+.react-flow__handle-left.port-handle  { transform: translate(-50%, -50%) !important; }
+.react-flow__handle-right.port-handle { transform: translate(50%, -50%)  !important; }
+
+/* item port — compact badge */
 .port-handle--has-item {
-  width: 22px !important;
-  height: 22px !important;
-  border-radius: 4px !important;
-  background: #333 !important;
-  border: 0.1rem solid #666 !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 3px !important;
+  background: var(--node-deep) !important;
+  border: 1.5px solid var(--port-color) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  transform: translateY(-50%) !important;
-  padding: 3px !important;
+  padding: 4px !important;
+  box-shadow:
+    inset 0 0 8px rgba(0,0,0,0.7),
+    0 0 8px rgba(var(--port-rgb), 0.18) !important;
 }
 
 .port-handle:hover,
 .port-handle--has-item:hover {
-  border-color: #4a9eff !important;
+  box-shadow: 0 0 12px rgba(var(--port-rgb), 0.55) !important;
 }
 
-/* fluid → teardrop (water-drop pointing downward) */
+/* ── Form-coded port colors + shapes ────────────────── */
 .port-handle--fluid {
+  --port-color: #3b9eff;
+  --port-rgb: 59,158,255;
   border-radius: 50% 50% 50% 0 !important;
-  transform: translateY(-70%) rotate(-45deg) !important;
 }
+.react-flow__handle-left.port-handle--fluid  { transform: translate(-50%, -50%) !important; }
+.react-flow__handle-right.port-handle--fluid { transform: translate(50%,  -50%) !important; }
 
-/* gas → circle */
 .port-handle--gas {
+  --port-color: #4ecdc4;
+  --port-rgb: 78,205,196;
   border-radius: 50% !important;
 }
 
-/* energy → triangle */
 .port-handle--energy {
+  --port-color: #fbbf24;
+  --port-rgb: 251,191,36;
   clip-path: polygon(50% 0%, 0% 100%, 100% 100%) !important;
   border-radius: 0 !important;
 }
@@ -200,8 +363,8 @@ html, body {
   display: flex;
   align-items: center;
   gap: 2px;
-  background: #2e2e2e;
-  border: 1px solid #444;
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
   border-radius: 6px;
   padding: 3px;
 }
@@ -215,34 +378,34 @@ html, body {
   background: transparent;
   border: 1px solid transparent;
   border-radius: 4px;
-  color: #aaa;
+  color: var(--text-muted);
   cursor: pointer;
   padding: 0;
 }
 
 .canvas-toolbar__btn:hover {
-  background: #3a3a3a;
-  color: #e0e0e0;
+  background: var(--surface-hover);
+  color: var(--text-primary);
 }
 
 .canvas-toolbar__btn.active {
-  background: #1a3a5c;
-  border-color: #4a9eff;
-  color: #4a9eff;
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .canvas-toolbar__sep {
   width: 1px;
   height: 20px;
-  background: #444;
+  background: var(--border-default);
   margin: 0 2px;
   flex-shrink: 0;
 }
 
 /* ── Canvas Settings Panel ─────────────────────────────── */
 .canvas-settings-panel {
-  background: #2e2e2e;
-  border: 1px solid #444;
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
   border-radius: 6px;
   padding: 10px 12px;
   display: flex;
@@ -255,20 +418,20 @@ html, body {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #ccc;
+  color: var(--text-secondary);
   cursor: pointer;
   font-size: 13px;
   user-select: none;
 }
 
 .canvas-settings-panel__toggle input {
-  accent-color: #4a9eff;
+  accent-color: var(--accent);
   cursor: pointer;
 }
 
 .canvas-settings-panel__section-label {
   font-size: 11px;
-  color: #666;
+  color: var(--text-placeholder);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-top: 2px;
@@ -282,50 +445,63 @@ html, body {
 
 .canvas-settings-panel__edge-btn {
   padding: 4px 6px;
-  background: #242424;
-  border: 1px solid #444;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
   border-radius: 3px;
-  color: #aaa;
+  color: var(--text-muted);
   font-size: 12px;
   cursor: pointer;
   text-align: center;
 }
 
 .canvas-settings-panel__edge-btn:hover {
-  background: #3a3a3a;
-  color: #e0e0e0;
+  background: var(--surface-hover);
+  color: var(--text-primary);
 }
 
 .canvas-settings-panel__edge-btn.active {
-  background: #1a3a5c;
-  border-color: #4a9eff;
-  color: #4a9eff;
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 /* ── Node detailed mode ────────────────────────────────── */
 .processr-node__details {
-  margin-top: 6px;
-  padding-top: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--node-detail-border);
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
 }
 
 .processr-node__detail-row {
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 11px;
-  color: #aaa;
+  font-size: 10px;
+  color: var(--io-in-text);
+}
+
+.processr-node__detail-row::before {
+  content: '→';
+  font-size: 9px;
+  color: var(--io-in-arrow);
+  flex-shrink: 0;
 }
 
 .processr-node__detail-row--out {
-  color: #8bcf8b;
+  color: var(--io-in-text);
+}
+
+.processr-node__detail-row--out::after {
+  content: '→';
+  color: var(--io-out-arrow);
 }
 
 .processr-node__detail-row .port-icon {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   flex-shrink: 0;
 }
 
@@ -335,24 +511,38 @@ html, body {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 90px;
+  color: var(--io-in-name);
+}
+
+.processr-node__detail-row--out .processr-node__detail-name {
+  color: var(--io-out-name);
 }
 
 .processr-node__detail-amount {
-  color: #e0e0e0;
-  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--io-in-amount);
   white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.processr-node__detail-row--out .processr-node__detail-amount {
+  color: var(--io-out-amount);
 }
 
 .processr-node__detail-sep {
   height: 1px;
-  background: #444;
-  margin: 2px 0;
+  background: linear-gradient(90deg, transparent, var(--node-detail-sep-mid), transparent);
+  margin: 3px 0;
 }
 
 .processr-node__detail-duration {
-  font-size: 11px;
-  color: #666;
-  margin-top: 1px;
+  font-size: 10px;
+  color: var(--io-duration);
+  margin-top: 3px;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ── Pack Editor ───────────────────────────────────────── */
@@ -365,8 +555,8 @@ html, body {
   min-width: 360px;
   min-height: 200px;
   max-height: 90%;
-  background: #2e2e2e;
-  border: 1px solid #444;
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
   border-radius: 6px;
   display: flex;
   flex-direction: column;
@@ -388,8 +578,8 @@ html, body {
   align-items: center;
   gap: 6px;
   padding: 8px 10px;
-  border-bottom: 1px solid #444;
-  background: #252525;
+  border-bottom: 1px solid var(--border-default);
+  background: var(--surface-overlay);
   flex-shrink: 0;
   cursor: grab;
   user-select: none;
@@ -402,7 +592,7 @@ html, body {
 .pack-editor__title {
   font-size: 13px;
   font-weight: 600;
-  color: #e0e0e0;
+  color: var(--text-primary);
   flex: 1;
 }
 
@@ -410,22 +600,22 @@ html, body {
   font-size: 11px;
   padding: 2px 6px;
   border-radius: 3px;
-  background: #3a3a3a;
-  color: #888;
+  background: var(--surface-hover);
+  color: var(--text-faint);
 }
 
 .pack-editor__status--ok {
-  background: #1a3a1a;
-  color: #4caf50;
+  background: var(--status-ok-bg);
+  color: var(--status-ok);
 }
 
 .pack-editor__status--error {
-  background: #3a1a1a;
-  color: #ef5350;
+  background: var(--status-error-bg);
+  color: var(--status-error);
 }
 
 .pack-editor__status--parsing {
-  color: #aaa;
+  color: var(--text-muted);
 }
 
 .pack-editor__status--thinking {
@@ -449,21 +639,21 @@ html, body {
   background: transparent;
   border: 1px solid transparent;
   border-radius: 4px;
-  color: #888;
+  color: var(--text-faint);
   cursor: pointer;
   font-size: 14px;
   flex-shrink: 0;
 }
 
 .pack-editor__icon-btn:disabled {
-  background: #252525;
-  color: #252525;
+  background: var(--surface-overlay);
+  color: var(--surface-overlay);
 }
 
 .pack-editor__icon-btn:not(:disabled):hover {
-  background: #3a3a3a;
-  color: #e0e0e0;
-  border-color: #555;
+  background: var(--surface-hover);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
 }
 
 .pack-editor__body {
@@ -490,17 +680,17 @@ html, body {
   align-items: center;
   gap: 6px;
   padding: 8px 10px;
-  border-top: 1px solid #444;
-  background: #252525;
+  border-top: 1px solid var(--border-default);
+  background: var(--surface-overlay);
   flex-shrink: 0;
 }
 
 .pack-editor__prompt-input {
   flex: 1;
-  background: #1a1a1a;
-  border: 1px solid #444;
+  background: var(--surface-base);
+  border: 1px solid var(--border-default);
   border-radius: 4px;
-  color: #e0e0e0;
+  color: var(--text-primary);
   font-size: 12px;
   padding: 4px 8px;
   outline: none;
@@ -508,16 +698,16 @@ html, body {
 }
 
 .pack-editor__prompt-input:focus {
-  border-color: #7c3aed;
+  border-color: var(--focus-ring);
 }
 
 .pack-editor__prompt-input::placeholder {
-  color: #555;
+  color: var(--text-placeholder);
 }
 
 .pack-editor__errors {
-  border-top: 1px solid #5a1a1a;
-  background: #2a1a1a;
+  border-top: 1px solid var(--status-error-border);
+  background: var(--status-error-bg-deep);
   padding: 8px 10px;
   flex-shrink: 0;
   max-height: 120px;
@@ -526,7 +716,7 @@ html, body {
 
 .pack-editor__error {
   font-size: 11px;
-  color: #ef5350;
+  color: var(--status-error);
   font-family: 'Courier New', Courier, monospace;
   padding: 1px 0;
 }

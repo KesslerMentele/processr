@@ -1,3 +1,4 @@
+import type React from "react";
 import type { Item, PortDefinition, RecipeItemStack, ProcessrNodeData } from "../models";
 import { Handle, type Node as RFNode, type NodeProps as RFNodeProps, Position as RFPosition } from "@xyflow/react";
 import { useProcessrStore } from "../state/store.ts";
@@ -96,7 +97,10 @@ const ProcessrNodeComponent = ({ data, selected }: RFNodeProps<RFNode<ProcessrNo
   ) : <br/>;
 
   return (
-    <div className={`processr-node ${selected ? "selected" : ""}`}>
+    <div
+      className={`processr-node ${selected ? "selected" : ""}`}
+      style={{ '--node-accent': template.display.color ?? '#3b6ea5' } as React.CSSProperties}
+    >
       {InputPorts}
       <div className="processr-node__label">{data.label ?? template.name}</div>
       {recipe && (

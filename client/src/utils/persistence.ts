@@ -30,6 +30,7 @@ export interface PersistedUISettings {
   readonly detailedMode: boolean;
   readonly edgeType: string;
   readonly toolMode: string;
+  readonly lightTheme: boolean;
 }
 
 export const saveUISettings = (settings: PersistedUISettings): void => {
