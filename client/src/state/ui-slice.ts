@@ -12,6 +12,7 @@ export const createUISlice: StateCreator<UISettingsSlice> = () => ({
   detailedMode: saved?.detailedMode ?? false,
   edgeType: (saved?.edgeType as EdgeType | undefined) ?? 'default',
   toolMode: (saved?.toolMode as ToolMode | undefined) ?? 'pan',
+  lightTheme: saved?.lightTheme ?? false,
   settingsPanelOpen: false,
   packEditorOpen: false,
 });
@@ -22,6 +23,7 @@ const persist = (state: UISettingsSlice): void => {
     detailedMode: state.detailedMode,
     edgeType: state.edgeType,
     toolMode: state.toolMode,
+    lightTheme: state.lightTheme,
   });
 };
 
@@ -50,6 +52,13 @@ export const createUIActionsSlice: StateCreator<UISettingsSlice & UIActionsSlice
     set((state) => {
       persist({ ...state, toolMode });
       return { toolMode };
+    });
+  },
+  toggleLightTheme: () => {
+    set((state) => {
+      const next = { lightTheme: !state.lightTheme };
+      persist({ ...state, ...next });
+      return next;
     });
   },
   toggleSettingsPanel: () => {

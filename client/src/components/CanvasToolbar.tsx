@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import { Panel } from '@xyflow/react';
 import { type EdgeType } from '../state/ui-slice.ts';
 import { useProcessrStore } from "../state/store.ts";
-import { LuMove, LuLassoSelect, LuSettings2, LuPackage } from 'react-icons/lu';
+import { LuMove, LuLassoSelect, LuSettings2, LuPackage, LuSun, LuMoon } from 'react-icons/lu';
 
 interface EdgeOption  { readonly value: EdgeType; readonly label: string }
 
@@ -18,12 +18,14 @@ const CanvasToolbar: FC = () => {
   const snapToGrid = useProcessrStore.use.snapToGrid();
   const detailedMode = useProcessrStore.use.detailedMode();
   const edgeType = useProcessrStore.use.edgeType();
+  const lightTheme = useProcessrStore.use.lightTheme();
   const settingsPanelOpen = useProcessrStore.use.settingsPanelOpen();
   const packEditorOpen = useProcessrStore.use.packEditorOpen();
   const setToolMode = useProcessrStore.use.setToolMode();
   const toggleSnap = useProcessrStore.use.toggleSnap();
   const toggleDetailed = useProcessrStore.use.toggleDetailed();
   const setEdgeType = useProcessrStore.use.setEdgeType();
+  const toggleLightTheme = useProcessrStore.use.toggleLightTheme();
   const toggleSettingsPanel = useProcessrStore.use.toggleSettingsPanel();
   const togglePackEditor = useProcessrStore.use.togglePackEditor();
 
@@ -74,6 +76,11 @@ const CanvasToolbar: FC = () => {
           <label className="canvas-settings-panel__toggle">
             <input type="checkbox" checked={detailedMode} onChange={toggleDetailed} />
             Detailed mode
+          </label>
+          <label className="canvas-settings-panel__toggle">
+            <input type="checkbox" checked={lightTheme} onChange={toggleLightTheme} />
+            {lightTheme ? <LuSun size={13} /> : <LuMoon size={13} />}
+            Light theme
           </label>
           <div className="canvas-settings-panel__section-label">Edge style</div>
           <div className="canvas-settings-panel__edge-btns">

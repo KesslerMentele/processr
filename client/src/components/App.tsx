@@ -11,19 +11,23 @@ const myShortcuts = { ...defaultShortcuts };
 
 const App: FC = () => {
 
-
   const graph = useProcessrStore.use.graph();
+  const lightTheme = useProcessrStore.use.lightTheme();
 
   useEffect(() => {
-
     const timer = setTimeout(() => {
       saveProcessrGraph(graph);
     }, 100);
-
-    return () => {
-      clearTimeout(timer);
-    };
+    return () => { clearTimeout(timer); };
   }, [graph]);
+
+  useEffect(() => {
+    if (lightTheme) {
+      document.documentElement.setAttribute('data-theme', 'light');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+  }, [lightTheme]);
 
 
   return (
