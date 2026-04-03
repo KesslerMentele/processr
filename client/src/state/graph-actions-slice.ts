@@ -1,9 +1,8 @@
 import type {
-  Edge,
-  EdgeId, GamePack, GamePackIndex,
-  Graph, GraphActionSlice, GraphSlice, NodeTemplateId, PortId, Position,
-  ProcessrNode,
-  ProcessrNodeId,
+  Edge, EdgeId,
+  GamePack, GamePackIndex, GraphActionSlice, GraphSlice,
+  NodeTemplateId,
+  PortId, Position, ProcessrNode, ProcessrNodeId,
   RecipeId,
   Viewport
 } from "../models";
@@ -12,6 +11,9 @@ import type { StateCreator } from "zustand";
 import { graphReducer } from "../utils/graph-reducer.ts";
 import { buildGamePackIndex } from "../utils/game-pack-index.ts";
 import { isNodeLevelEdge } from "../utils/type-validators.ts";
+import { createGraph } from "../utils/graph-factory.ts";
+import { saveGamePack } from "../utils/persistence.ts";
+import type { SetGraphData } from "../models/state/graph-state.ts";
 
 /**
  * For each template present in both indices, builds a map from old port ID
@@ -81,9 +83,13 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice, [], [], Gr
       ({ ...state, selectedNodeId: id }));
     },
 
-    loadGraph: (graph: Graph, packIndex: GamePackIndex) =>
-    {set((state) =>
-      ({ ...state, graph, packIndex: packIndex }));
+    loadGraph: (data:SetGraphData) =>
+    {set((state) => {
+      const { graph, packIndex } = data;
+      return { ...state,
+        graph: graph ? graph : createGraph(packIndex.pack.id, "My Factory"),
+        packIndex: packIndex };
+    });
     },
 
     undo: () =>
@@ -127,6 +133,7 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice, [], [], Gr
         })
       );
 
+      saveGamePack(pack);
       const graph = { ...state.graph, edges: remappedEdges };
       return { ...state, packIndex, graph };
     });

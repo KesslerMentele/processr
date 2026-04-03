@@ -61,3 +61,8 @@ export const loadGamePack = (): GamePack | null => {
   const raw = localStorage.getItem(PACK_KEY);
   return raw === null ? null : JSON.parse(raw) as GamePack;
 };
+
+
+export const clearGamepack = (): void => {
+  localStorage.removeItem(PACK_KEY);
+};

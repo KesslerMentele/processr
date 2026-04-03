@@ -1,6 +1,7 @@
 import { useProcessrStore } from "../state/store.ts";
 import type { FC } from "react";
 import { DraggableNodeTemplate } from "./NodeTemplate.tsx";
+import { clearGamepack, clearProcessrGraph } from "../utils/persistence.ts";
 
 
 const Sidebar: FC = () => {
@@ -9,23 +10,29 @@ const Sidebar: FC = () => {
   const selectedNode = selectedNodeId ? (graph.nodes[selectedNodeId] ?? null) : null;
   const packIndex = useProcessrStore.use.packIndex();
   const setNodeRecipe = useProcessrStore.use.setNodeRecipe();
+  const loadGraph = useProcessrStore.use.loadGraph();
 
+  const compatibleRecipes = selectedNode
+  ? (packIndex.recipesByNodeType.get(selectedNode.templateId) ?? [])
+  : [];
 
-    const compatibleRecipes = selectedNode
-    ? (packIndex.recipesByNodeType.get(selectedNode.templateId) ?? [])
-    : [];
+  const handleClearGraph = () => {
+    clearProcessrGraph();
+    loadGraph({ packIndex });
+  };
+  const handleClearGamepack = () => {
+    clearGamepack();
+    handleClearGraph();
+  };
 
-  const NodePicker =  (
-    <div className="sidebar__nodetemplates">
+  const NodePicker =  (<div className="sidebar__nodetemplates">
       <h1>Nodes</h1>
       {packIndex.pack.nodeTemplates.map(template => (
         <DraggableNodeTemplate key={template.id} template={template}/>
       ))}
-    </div>
-  );
+    </div>);
 
-  const RecipePicker = (
-    <div className="sidebar__recipes">
+  const RecipePicker = (<div className="sidebar__recipes">
       {selectedNode && <h1>Select a Recipe:</h1>}
       {selectedNode && compatibleRecipes.map(recipe => (
         <button
@@ -38,14 +45,20 @@ const Sidebar: FC = () => {
           {recipe.name}
         </button>
       ))}
-    </div>
-  );
+    </div>);
 
-  return (
+  const DevTools = (<div>
+    <button onClick={handleClearGraph}>Clear Graph</button>
+    <button onClick={handleClearGamepack}>Clear Gamepack</button>
+  </div>);
+
+    return (
     <div className="sidebar">
       {NodePicker}
       <hr/>
       {RecipePicker}
+      <hr/>
+      {DevTools}
     </div>
   );
 };

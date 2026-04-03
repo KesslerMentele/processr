@@ -3,13 +3,24 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useProcessrStore } from '../state/store.ts';
 import { parsePackText, parsePackFile, serializePackToText, downloadPackAs } from '../utils/pack-api.ts';
 import type { GamePack } from '../models';
-import { LuX, LuUpload, LuDownload, LuCheck, LuChevronDown, LuChevronUp } from 'react-icons/lu';
+import {
+  LuX,
+  LuUpload,
+  LuDownload,
+  LuCheck,
+  LuChevronDown,
+  LuChevronUp,
+  LuBrainCircuit,
+  LuOctagonX,
+  LuSendHorizontal,
+} from 'react-icons/lu';
 import { EditorView } from '@codemirror/view';
 import { EditorState } from '@codemirror/state';
 import { basicSetup } from 'codemirror';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { savePackEditorText, loadPackEditorText } from '../utils/persistence.ts';
 import { useShortcutPause } from 'react-keyhub';
+import { generatePackText } from "../utils/ai-api.ts";
 
 const DEBOUNCE_MS = 600;
 
@@ -27,21 +38,23 @@ const PackEditor: FC = () => {
   const parseGenRef = useRef(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const posRef = useRef({ x: 0, y: 0 });
-  const packRef = useRef(packIndex.pack);
-  const packNameRef = useRef(packIndex.pack.name);
+  const abortRef = useRef<AbortController | null>(null);
+  const isGeneratingRef = useRef(false);
 
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [collapsed, setCollapsed] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
-  const [status, setStatus] = useState<'idle' | 'parsing' | 'ok' | 'error' | 'applied'>('idle');
+  const [status, setStatus] = useState<'idle' | 'parsing' | 'ok' | 'error' | 'applied' | 'thinking' >('idle');
   const [pack, setPack] = useState<GamePack | null>(null);
+  const [aiMode, setAiMode] = useState(false);
+  const [promptText, setPromptText] = useState('');
 
   // Initialize CodeMirror once on mount
   useEffect(() => {
     if (!editorContainerRef.current) return;
 
     const savedText = loadPackEditorText();
-    const initialText = savedText ?? `// Pack: ${packNameRef.current}\n`;
+    const initialText = savedText ?? `// Pack: ${packIndex.pack.name}\n`;
 
     const view = new EditorView({
       state: EditorState.create({
@@ -51,6 +64,7 @@ const PackEditor: FC = () => {
           oneDark,
           EditorView.updateListener.of((update) => {
             if (!update.docChanged) return;
+            if (isGeneratingRef.current) return;
             const value = update.state.doc.toString();
             setStatus('parsing');
 
@@ -100,7 +114,7 @@ const PackEditor: FC = () => {
     // On first open with no saved text, populate with the serialized current pack
     if (!savedText) {
       console.log('no pack, making from default');
-      void serializePackToText(packRef.current).then((text) => {
+      void serializePackToText(packIndex.pack).then((text) => {
         const v = editorViewRef.current;
         if (!v) return;
         v.dispatch({ changes: { from: 0, to: v.state.doc.length, insert: text } });
@@ -112,7 +126,7 @@ const PackEditor: FC = () => {
       container.removeEventListener('focusout', onFocusOut);
       view.destroy();
     };
-  }, []);
+  }, [packIndex.pack]);
 
   const getCurrentText = useCallback(
     () => editorViewRef.current?.state.doc.toString() ?? '',
@@ -185,15 +199,71 @@ const PackEditor: FC = () => {
   }, [getCurrentText, togglePackEditor]);
 
   const handleDownload = useCallback(() => {
-    const filename = `${packNameRef.current.toLowerCase().replaceAll(' ', '-')}.prat`;
+    const filename = `${packIndex.pack.name.toLowerCase().replaceAll(' ', '-')}.prat`;
     downloadPackAs(getCurrentText(), filename);
-  }, [getCurrentText]);
+  }, [getCurrentText, packIndex.pack.name]);
+
+  const appendChunk = useCallback((chunk: string) => {
+    const view = editorViewRef.current;
+    if (!view) return;
+    view.dispatch({ changes: { from: view.state.doc.length, insert: chunk } });
+  }, []);
+
+  const handleGenerate = useCallback(async (prompt: string) => {
+    const view = editorViewRef.current;
+    if (!view) return;
+
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    // eslint-disable-next-line functional/immutable-data
+    abortRef.current = controller;
+
+    const currentPackText = getCurrentText();
+    const mode = currentPackText.trim() ? 'append' : 'generate';
+
+    // Set flag before any dispatch so the editor listener never fires a parse
+    // eslint-disable-next-line functional/immutable-data
+    isGeneratingRef.current = true;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    if (mode === 'generate') {
+      view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: '' } });
+    } else {
+      view.dispatch({ changes: { from: view.state.doc.length, insert: '\n\n' } });
+    }
+
+    const stopGenerating = () => {
+      // eslint-disable-next-line functional/immutable-data
+      isGeneratingRef.current = false;
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+
+    setErrors([]);
+    setStatus('thinking');
+    await generatePackText(prompt, currentPackText, {
+      onChunk: appendChunk,
+      onDone: () => { stopGenerating(); setStatus('ok'); setAiMode(false); },
+      onError: (message) => { stopGenerating(); setErrors([message]); setStatus('error'); },
+    }, controller.signal, mode);
+    stopGenerating();
+  }, [appendChunk, getCurrentText]);
+
+  const handlePromptSubmit = useCallback(() => {
+    if (!promptText.trim()) return;
+    void handleGenerate(promptText);
+    setPromptText('');
+  }, [promptText, handleGenerate]);
+
+  const handleAIModeStart = useCallback(() => {
+    setAiMode(true);
+  }, []);
 
   const statusLabel =
     status === 'parsing' ? 'Parsing…' :
     status === 'ok'      ? 'Pack is valid' :
     status === 'error'   ? `${errors.length.toString()} error${errors.length === 1 ? '' : 's'}` :
     status === 'applied' ? 'Pack applied' :
+    status === 'thinking' ? "Thinking" :
     'Ready';
 
   return (
@@ -204,6 +274,15 @@ const PackEditor: FC = () => {
       <div className="pack-editor__header" onMouseDown={handleHeaderMouseDown}>
         <span className="pack-editor__title">Pack Editor</span>
         <span className={`pack-editor__status pack-editor__status--${status}`}>{statusLabel}</span>
+        {status === 'thinking'
+          ? <button className="pack-editor__icon-btn" title="cancel generation" onClick={() => { abortRef.current?.abort(); setStatus('idle'); setAiMode(true); }}>
+              <LuOctagonX />
+            </button>
+          : <button className="pack-editor__icon-btn" title="Generate with AI" onClick={handleAIModeStart}>
+              <LuBrainCircuit/>
+            </button>
+        }
+
         <button
           className="pack-editor__icon-btn"
           title="Upload .prat file"
@@ -252,6 +331,34 @@ const PackEditor: FC = () => {
 
       <div className="pack-editor__body">
         <div ref={editorContainerRef} className="pack-editor__cm" />
+        {aiMode && status !== 'thinking' && (
+          <div className="pack-editor__prompt">
+            <input
+              className="pack-editor__prompt-input"
+              type="text"
+              placeholder="Describe the game pack to generate…"
+              value={promptText}
+              onChange={e => { setPromptText(e.target.value); }}
+              onKeyDown={e => { if (e.key === 'Enter') handlePromptSubmit(); }}
+              autoFocus
+            />
+            <button
+              className="pack-editor__icon-btn"
+              title="Generate"
+              onClick={handlePromptSubmit}
+              disabled={!promptText.trim()}
+            >
+              <LuSendHorizontal />
+            </button>
+            <button
+              className="pack-editor__icon-btn"
+              title="Cancel"
+              onClick={() => { setAiMode(false); }}
+            >
+              <LuX />
+            </button>
+          </div>
+        )}
         {errors.length > 0 && (
           <div className="pack-editor__errors">
             {errors.map((err, i) => (

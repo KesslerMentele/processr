@@ -39,6 +39,10 @@ const ProcessrNodeComponent = ({ data, selected }: RFNodeProps<RFNode<ProcessrNo
       item: recipe ? packIndex.itemsById.get(recipe.outputs[i]?.itemId) : undefined,
     }));
 
+  const portClass = (item: Item | undefined) =>
+    ['port-handle', item && 'port-handle--has-item', item?.form && `port-handle--${item.form}`]
+      .filter(Boolean).join(' ');
+
   const InputPorts = (<div>
       {inputs.map(({ port, item }) => (
         <Handle
@@ -48,7 +52,7 @@ const ProcessrNodeComponent = ({ data, selected }: RFNodeProps<RFNode<ProcessrNo
           type="target"
           position={RFPosition.Left}
           style={{ top: `${String((port.position ?? 0.5) * 100)}%` }}
-          className={item ? "port-handle port-handle--has-item" : "port-handle"}
+          className={portClass(item)}
         >
           <PortIcon item={item} />
         </Handle>
@@ -64,7 +68,7 @@ const ProcessrNodeComponent = ({ data, selected }: RFNodeProps<RFNode<ProcessrNo
       type="source"
       position={RFPosition.Right}
       style={{ top: `${String((port.position ?? 0.5) * 100)}%` }}
-      className={item ? "port-handle port-handle--has-item" : "port-handle"}
+      className={portClass(item)}
     >
       <PortIcon item={item} />
     </Handle>
