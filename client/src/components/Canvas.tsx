@@ -35,6 +35,8 @@ const Canvas: FC = () => {
   const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const {
+    onSelectionStart,
+    onSelectionEnd,
     onNodeDragStart,
     onNodeDragStop,
     isValidConnection,
@@ -82,6 +84,8 @@ const Canvas: FC = () => {
         nodeOrigin={[0.5, 0.5]}
         onNodesChange={handleNodesChange}
         onEdgesChange={onEdgesChange}
+        onSelectionStart={onSelectionStart}
+        onSelectionEnd={onSelectionEnd}
         onNodeDragStart={onNodeDragStart}
         onNodeDragStop={onNodeDragStop}
         onNodesDelete={onNodesDelete}

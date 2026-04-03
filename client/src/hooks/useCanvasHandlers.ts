@@ -28,12 +28,35 @@ export const useCanvasHandlers = () => {
   const removeEdge = useProcessrStore.use.removeEdge();
 
   const isDragging = useRef(false);
+  const isSelectionDragging = useRef(false);
+  const pendingSelectionRef = useRef<RFNode<ProcessrNodeData>[]>([]);
 
   useOnSelectionChange({
     onChange: useCallback<OnSelectionChangeFunc<RFNode<ProcessrNodeData>>>(({ nodes }) => {
-      if (!isDragging.current) setSelectedNodeId(nodes[0] ? processrNodeId(nodes[0].id) : null);
+      if (isSelectionDragging.current) {
+        // eslint-disable-next-line functional/immutable-data
+        pendingSelectionRef.current = nodes;
+        return;
+      }
+      if (!isDragging.current && nodes.length <= 1) {
+        setSelectedNodeId(nodes[0] ? processrNodeId(nodes[0].id) : null);
+      }
     }, [setSelectedNodeId])
   });
+
+  const onSelectionStart = useCallback(() => {
+    // eslint-disable-next-line functional/immutable-data
+    isSelectionDragging.current = true;
+  }, []);
+
+  const onSelectionEnd = useCallback(() => {
+    // eslint-disable-next-line functional/immutable-data
+    isSelectionDragging.current = false;
+    const nodes = pendingSelectionRef.current;
+    if (nodes.length === 1) {
+      setSelectedNodeId(processrNodeId(nodes[0].id));
+    }
+  }, [setSelectedNodeId]);
 
   const onNodeDragStart = useCallback<OnNodeDrag<RFNode<ProcessrNodeData>>>(() => {
     // eslint-disable-next-line functional/immutable-data
@@ -67,6 +90,8 @@ export const useCanvasHandlers = () => {
   }, [removeEdge]);
 
   return {
+    onSelectionStart,
+    onSelectionEnd,
     onNodeDragStart,
     onNodeDragStop,
     isValidConnection,

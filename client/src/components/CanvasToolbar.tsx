@@ -31,9 +31,9 @@ const CanvasToolbar: FC = () => {
 
   return (
     <Panel position="top-right" className="canvas-toolbar">
-      <div className="canvas-toolbar__strip">
+      <div className="canvas-toolbar-strip">
         <button
-          className={`canvas-toolbar__btn${toolMode === 'pan' ? ' active' : ''}`}
+          className={`canvas-toolbar-btn${toolMode === 'pan' ? ' active' : ''}`}
           title="Pan tool"
           onClick={() => {
             setToolMode('pan');
@@ -42,7 +42,7 @@ const CanvasToolbar: FC = () => {
           <LuMove />
         </button>
         <button
-          className={`canvas-toolbar__btn${toolMode === 'select' ? ' active' : ''}`}
+          className={`canvas-toolbar-btn${toolMode === 'select' ? ' active' : ''}`}
           title="Select tool — drag to box-select, Shift+click to multi-select"
           onClick={() => {
             setToolMode('select');
@@ -50,16 +50,16 @@ const CanvasToolbar: FC = () => {
         >
           <LuLassoSelect />
         </button>
-        <div className="canvas-toolbar__sep" />
+        <div className="canvas-toolbar-sep" />
         <button
-          className={`canvas-toolbar__btn${packEditorOpen ? ' active' : ''}`}
+          className={`canvas-toolbar-btn${packEditorOpen ? ' active' : ''}`}
           title="Pack editor"
           onClick={togglePackEditor}
         >
           <LuPackage />
         </button>
         <button
-          className={`canvas-toolbar__btn${settingsPanelOpen ? ' active' : ''}`}
+          className={`canvas-toolbar-btn${settingsPanelOpen ? ' active' : ''}`}
           title="Display & grid settings"
           onClick={toggleSettingsPanel}
         >
@@ -69,25 +69,25 @@ const CanvasToolbar: FC = () => {
 
       {settingsPanelOpen && (
         <div className="canvas-settings-panel">
-          <label className="canvas-settings-panel__toggle">
+          <label className="canvas-settings-panel-toggle">
             <input type="checkbox" checked={snapToGrid} onChange={toggleSnap} />
             Snap to grid
           </label>
-          <label className="canvas-settings-panel__toggle">
+          <label className="canvas-settings-panel-toggle">
             <input type="checkbox" checked={detailedMode} onChange={toggleDetailed} />
             Detailed mode
           </label>
-          <label className="canvas-settings-panel__toggle">
+          <label className="canvas-settings-panel-toggle">
             <input type="checkbox" checked={lightTheme} onChange={toggleLightTheme} />
             {lightTheme ? <LuSun size={13} /> : <LuMoon size={13} />}
             Light theme
           </label>
-          <div className="canvas-settings-panel__section-label">Edge style</div>
-          <div className="canvas-settings-panel__edge-btns">
+          <div className="canvas-settings-panel-section-label">Edge style</div>
+          <div className="canvas-settings-panel-edge-btns">
             {EDGE_OPTIONS.map(({ value, label }) => (
               <button
                 key={value}
-                className={`canvas-settings-panel__edge-btn${edgeType === value ? ' active' : ''}`}
+                className={`canvas-settings-panel-edge-btn${edgeType === value ? ' active' : ''}`}
                 onClick={() => {
                   setEdgeType(value);
                 }}

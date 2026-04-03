@@ -41,7 +41,7 @@ const ProcessrNodeComponent = ({ data, selected }: RFNodeProps<RFNode<ProcessrNo
     }));
 
   const portClass = (item: Item | undefined) =>
-    ['port-handle', item && 'port-handle--has-item', item?.form && `port-handle--${item.form}`]
+    ['port-handle', item && 'port-handle-has-item', item?.form && `port-handle-${item.form}`]
       .filter(Boolean).join(' ');
 
   const InputPorts = (<div>
@@ -76,23 +76,23 @@ const ProcessrNodeComponent = ({ data, selected }: RFNodeProps<RFNode<ProcessrNo
   ))}
   </div>);
 
-  const NodeInfo = detailedMode && recipe ? (<div className="processr-node__details">
+  const NodeInfo = detailedMode && recipe ? (<div className="processr-node-details">
       {inputs.map(({ port, item, stack }) => item && stack && (
-        <div key={port.id} className="processr-node__detail-row">
+        <div key={port.id} className="processr-node-detail-row">
           <PortIcon item={item}/>
-          <span className="processr-node__detail-name">{item.name}</span>
-          <span className="processr-node__detail-amount">×{stack.amount}</span>
+          <span className="processr-node-detail-name">{item.name}</span>
+          <span className="processr-node-detail-amount">×{stack.amount}</span>
         </div>
       ))}
-      {inputs.length > 0 ? <div className="processr-node__detail-sep"/> : null}
+      {inputs.length > 0 ? <div className="processr-node-detail-sep"/> : null}
       {outputs.map(({ port, item, stack }) => item && stack && (
-        <div key={port.id} className="processr-node__detail-row processr-node__detail-row--out">
+        <div key={port.id} className="processr-node-detail-row processr-node-detail-row-out">
           <PortIcon item={item}/>
-          <span className="processr-node__detail-name">{item.name}</span>
-          <span className="processr-node__detail-amount">×{stack.amount}</span>
+          <span className="processr-node-detail-name">{item.name}</span>
+          <span className="processr-node-detail-amount">×{stack.amount}</span>
         </div>
       ))}
-      <div className="processr-node__detail-duration">{recipe.duration}s cycle</div>
+      <div className="processr-node-detail-duration">{recipe.duration}s cycle</div>
     </div>
   ) : <br/>;
 
@@ -102,9 +102,9 @@ const ProcessrNodeComponent = ({ data, selected }: RFNodeProps<RFNode<ProcessrNo
       style={{ '--node-accent': template.display.color ?? '#3b6ea5' } as React.CSSProperties}
     >
       {InputPorts}
-      <div className="processr-node__label">{data.label ?? template.name}</div>
+      <div className="processr-node-label">{data.label ?? template.name}</div>
       {recipe && (
-        <div className="processr-node__recipe">{recipe.name}</div>
+        <div className="processr-node-recipe">{recipe.name}</div>
       )}
       {NodeInfo}
       {OutputPorts}

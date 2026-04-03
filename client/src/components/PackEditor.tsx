@@ -13,6 +13,7 @@ import {
   LuBrainCircuit,
   LuOctagonX,
   LuSendHorizontal,
+  LuCircleHelp,
 } from 'react-icons/lu';
 import { EditorView } from '@codemirror/view';
 import { EditorState } from '@codemirror/state';
@@ -21,6 +22,7 @@ import { oneDark } from '@codemirror/theme-one-dark';
 import { savePackEditorText, loadPackEditorText } from '../utils/persistence.ts';
 import { useShortcutPause } from 'react-keyhub';
 import { generatePackText } from "../utils/ai-api.ts";
+import { marked } from 'marked';
 
 const DEBOUNCE_MS = 600;
 
@@ -48,6 +50,8 @@ const PackEditor: FC = () => {
   const [pack, setPack] = useState<GamePack | null>(null);
   const [aiMode, setAiMode] = useState(false);
   const [promptText, setPromptText] = useState('');
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [grammarDocs, setGrammarDocs] = useState<{ name: string; content: string }[] | null>(null);
 
   // Initialize CodeMirror once on mount
   useEffect(() => {
@@ -258,54 +262,74 @@ const PackEditor: FC = () => {
     setAiMode(true);
   }, []);
 
+  const handleToggleHelp = useCallback(() => {
+    setHelpOpen(open => {
+      if (!open && grammarDocs === null) {
+        void fetch('/api/pack/grammar')
+          .then(r => r.json())
+          .then((docs: { name: string; content: string }[]) => {
+            setGrammarDocs(docs);
+          });
+      }
+      return !open;
+    });
+  }, [grammarDocs]);
+
   const statusLabel =
     status === 'parsing' ? 'Parsing…' :
-    status === 'ok'      ? 'Pack is valid' :
+    status === 'ok'      ? 'Atlas is valid' :
     status === 'error'   ? `${errors.length.toString()} error${errors.length === 1 ? '' : 's'}` :
-    status === 'applied' ? 'Pack applied' :
+    status === 'applied' ? 'Atlas applied' :
     status === 'thinking' ? "Thinking" :
     'Ready';
 
   return (
     <div
-      className={`pack-editor${collapsed ? ' pack-editor--collapsed' : ''}`}
+      className={`pack-editor${collapsed ? ' pack-editor-collapsed' : ''}`}
       style={{ transform: `translate(${pos.x.toString()}px, ${pos.y.toString()}px)` }}
     >
-      <div className="pack-editor__header" onMouseDown={handleHeaderMouseDown}>
-        <span className="pack-editor__title">Pack Editor</span>
-        <span className={`pack-editor__status pack-editor__status--${status}`}>{statusLabel}</span>
+      <div className="pack-editor-header" onMouseDown={handleHeaderMouseDown}>
+        <span className="pack-editor-title">Atlas Editor</span>
+        <span className={`pack-editor-status pack-editor-status-${status}`}>{statusLabel}</span>
         {status === 'thinking'
-          ? <button className="pack-editor__icon-btn" title="cancel generation" onClick={() => { abortRef.current?.abort(); setStatus('idle'); setAiMode(true); }}>
+          ? <button className="pack-editor-icon-btn" title="cancel generation" onClick={() => { abortRef.current?.abort(); setStatus('idle'); setAiMode(true); }}>
               <LuOctagonX />
             </button>
-          : <button className="pack-editor__icon-btn" title="Generate with AI" onClick={handleAIModeStart}>
+          : <button className="pack-editor-icon-btn" title="Generate with AI" onClick={handleAIModeStart}>
               <LuBrainCircuit/>
             </button>
         }
+        <button
+          className={`pack-editor-icon-btn${helpOpen ? ' pack-editor-icon-btn-active' : ''}`}
+          title="Grammar reference"
+          onClick={handleToggleHelp}
+        >
+          <LuCircleHelp />
+        </button>
 
         <button
-          className="pack-editor__icon-btn"
+          className="pack-editor-icon-btn"
           title="Upload .prat file"
           onClick={() => fileInputRef.current?.click()}
         >
           <LuUpload />
         </button>
         <button
-          className="pack-editor__icon-btn"
+          className="pack-editor-icon-btn"
           title="Download .prat file"
           onClick={handleDownload}
         >
           <LuDownload />
         </button>
         {status === 'ok' && <button
-          className="pack-editor__icon-btn"
+          className="pack-editor-icon-btn"
           title="Apply"
           onClick={handleApplyPack}
         >
           <LuCheck />
         </button>}
         <button
-          className="pack-editor__icon-btn"
+          className="pack-editor-icon-btn"
           title={collapsed ? 'Expand' : 'Collapse'}
           onClick={() => {
             setCollapsed(c => !c);
@@ -314,7 +338,7 @@ const PackEditor: FC = () => {
           {collapsed ? <LuChevronDown /> : <LuChevronUp />}
         </button>
         <button
-          className="pack-editor__icon-btn"
+          className="pack-editor-icon-btn"
           title="Close"
           onClick={handleClose}
         >
@@ -329,12 +353,27 @@ const PackEditor: FC = () => {
         />
       </div>
 
-      <div className="pack-editor__body">
-        <div ref={editorContainerRef} className="pack-editor__cm" />
+      <div className="pack-editor-body">
+        <div ref={editorContainerRef} className="pack-editor-cm" style={helpOpen ? { display: 'none' } : undefined} />
+        {helpOpen && (
+          <div className="pack-editor-help">
+            {grammarDocs === null
+              ? <p className="pack-editor-help-loading">Loading…</p>
+              : grammarDocs.map(doc => (
+                  <section key={doc.name} className="pack-editor-help-section">
+                    <div
+                      className="pack-editor-help-content"
+                      dangerouslySetInnerHTML={{ __html: marked(doc.content) as string }}
+                    />
+                  </section>
+                ))
+            }
+          </div>
+        )}
         {aiMode && status !== 'thinking' && (
-          <div className="pack-editor__prompt">
+          <div className="pack-editor-prompt">
             <input
-              className="pack-editor__prompt-input"
+              className="pack-editor-prompt-input"
               type="text"
               placeholder="Describe the game pack to generate…"
               value={promptText}
@@ -343,7 +382,7 @@ const PackEditor: FC = () => {
               autoFocus
             />
             <button
-              className="pack-editor__icon-btn"
+              className="pack-editor-icon-btn"
               title="Generate"
               onClick={handlePromptSubmit}
               disabled={!promptText.trim()}
@@ -351,7 +390,7 @@ const PackEditor: FC = () => {
               <LuSendHorizontal />
             </button>
             <button
-              className="pack-editor__icon-btn"
+              className="pack-editor-icon-btn"
               title="Cancel"
               onClick={() => { setAiMode(false); }}
             >
@@ -360,9 +399,9 @@ const PackEditor: FC = () => {
           </div>
         )}
         {errors.length > 0 && (
-          <div className="pack-editor__errors">
+          <div className="pack-editor-errors">
             {errors.map((err, i) => (
-              <div key={i} className="pack-editor__error">{err}</div>
+              <div key={i} className="pack-editor-error">{err}</div>
             ))}
           </div>
         )}

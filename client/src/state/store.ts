@@ -1,17 +1,31 @@
 import createSelectors from "../utils/state-selectors.ts";
 import { create } from "zustand/react";
 
-import type { GraphActionSlice, GraphSlice, UIActionsSlice, UISettingsSlice } from "../models";
+import type {
+  GraphActionSlice,
+  GraphSlice,
+  PackEditorSlice,
+  UIActionsSlice,
+  UISettingsSlice
+} from "../models";
 import createGraphSlice from "./graph-slice.ts";
 import createGraphActions from "./graph-actions-slice.ts";
 import { createUIActionsSlice, createUISlice } from "./ui-slice.ts";
+import createPackSlice from "./pack-editor-slice.ts";
 
 
-const useBoundStore = create<GraphSlice & GraphActionSlice & UISettingsSlice & UIActionsSlice>()((setState, getState, store) => ({
+const useBoundStore = create<
+  GraphSlice
+  & GraphActionSlice
+  & UISettingsSlice
+  & UIActionsSlice
+  & PackEditorSlice
+>()((setState, getState, store) => ({
   ...createGraphSlice(setState, getState, store),
   ...createGraphActions(setState, getState, store),
   ...createUISlice(setState, getState, store),
-  ...createUIActionsSlice(setState, getState, store)
+  ...createUIActionsSlice(setState, getState, store),
+  ...createPackSlice(setState, getState, store),
 }));
 
 

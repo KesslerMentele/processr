@@ -61,3 +61,5 @@ export type {
 // ---- State ----
 export type { GraphSlice, GraphActionSlice } from "./state/graph-state.ts";
 export type { UIActionsSlice, UISettingsSlice } from "./state/ui-state.ts";
+export type { PackEditorSlice, PackEditorActionsSlice } from "./state/pack-editor-state.ts";
+export { EditorStatus } from "./state/pack-editor-state.ts"

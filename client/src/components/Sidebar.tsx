@@ -25,19 +25,19 @@ const Sidebar: FC = () => {
     handleClearGraph();
   };
 
-  const NodePicker =  (<div className="sidebar__nodetemplates">
+  const NodePicker =  (<div className="sidebar-nodetemplates">
       <h1>Nodes</h1>
       {packIndex.pack.nodeTemplates.map(template => (
         <DraggableNodeTemplate key={template.id} template={template}/>
       ))}
     </div>);
 
-  const RecipePicker = (<div className="sidebar__recipes">
+  const RecipePicker = (<div className="sidebar-recipes">
       {selectedNode && <h1>Select a Recipe:</h1>}
       {selectedNode && compatibleRecipes.map(recipe => (
         <button
           key={recipe.id}
-          className={`sidebar__recipe-btn${selectedNode.recipeId === recipe.id ? " active" : ""}`}
+          className={`sidebar-recipe-btn${selectedNode.recipeId === recipe.id ? " active" : ""}`}
           onClick={() => {
             setNodeRecipe(selectedNode.id, recipe.id);
           }}
@@ -47,9 +47,9 @@ const Sidebar: FC = () => {
       ))}
     </div>);
 
-  const DevTools = (<div className="sidebar__dev-tools">
-    <button className="sidebar__dev-btn" onClick={handleClearGraph}>Clear Graph</button>
-    <button className="sidebar__dev-btn sidebar__dev-btn--danger" onClick={handleClearGamepack}>Clear Gamepack</button>
+  const DevTools = (<div className="sidebar-dev-tools">
+    <button className="sidebar-dev-btn" onClick={handleClearGraph}>Clear Graph</button>
+    <button className="sidebar-dev-btn sidebar-dev-btn-danger" onClick={handleClearGamepack}>Clear Saved Atlas</button>
   </div>);
 
     return (
