@@ -3,11 +3,11 @@ import { EditorView } from '@codemirror/view';
 import { EditorState as CodeMirrorEditorState } from '@codemirror/state';
 import { basicSetup } from 'codemirror';
 import { oneDark } from '@codemirror/theme-one-dark';
-import { parsePackText, serializePackToText } from '../utils/pack-api.ts';
+import { parseAtlasText, serializeAtlasToText } from '../utils/pack-api.ts';
 import { loadAtlasEditorText } from '../utils/persistence.ts';
 import { generatePackText } from '../utils/ai-api.ts';
 import { logger } from '../utils/logger.ts';
-import type { Atlas, GamePackIndex } from '../models';
+import type { Atlas, AtlasIndex } from '../models';
 import { EditorState } from '../models';
 import type { EditorStatus } from '../models';
 
@@ -15,7 +15,7 @@ const DEBOUNCE_MS = 600;
 
 // eslint-disable-next-line functional/no-mixed-types
 interface UsePackEditorViewOptions {
-  readonly packIndex: GamePackIndex;
+  readonly packIndex: AtlasIndex;
   readonly setPack: (pack: Atlas | null) => void;
   readonly setEditorErrors: (errors: string[]) => void;
   readonly setEditorStatus: (status: EditorStatus) => void;
@@ -57,7 +57,7 @@ export const usePackEditorView = ({
     const savedText = loadAtlasEditorText();
     const initialText = savedText ?? `// Pack: ${packIndex.pack.name}\n`;
 
-    const handleParseResult = (result: Awaited<ReturnType<typeof parsePackText>>, gen: number) => {
+    const handleParseResult = (result: Awaited<ReturnType<typeof parseAtlasText>>, gen: number) => {
       if (gen !== parseGenRef.current) return;
       if (result.errors) {
         setEditorErrors(result.errors);
@@ -75,7 +75,7 @@ export const usePackEditorView = ({
         setEditorErrors([]);
         return;
       }
-      void parsePackText(value).then((result) => {
+      void parseAtlasText(value).then((result) => {
         handleParseResult(result, gen);
       });
     };
@@ -116,7 +116,7 @@ export const usePackEditorView = ({
 
     if (!savedText) {
       logger.debug('no pack, making from default');
-      void serializePackToText(packIndex.pack).then((text) => {
+      void serializeAtlasToText(packIndex.pack).then((text) => {
         const v = editorViewRef.current;
         if (!v) return;
         v.dispatch({ changes: { from: 0, to: v.state.doc.length, insert: text } });

@@ -46,12 +46,12 @@ router.get('/grammar', async (_req: Request, res: Response) => {
 
 router.post('/serialize', (req: Request, res: Response) => {
     console.log('/serialize was hit');
-    const pack = req.body as GamepackJson;
-    if (!pack?.id || !pack?.version) {
-        res.status(400).json({ errors: ['Invalid pack: missing id or version.'] });
+    const atlas = req.body as GamepackJson;
+    if (!atlas?.id || !atlas?.version) {
+        res.status(400).json({ errors: ['Invalid atlas: missing id or version.'] });
         return;
     }
-    res.type('text/plain').send(serializeGamepack(pack));
+    res.type('text/plain').send(serializeGamepack(atlas));
 });
 
 export default router;

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildGamePackIndex } from './game-pack-index.ts';
+import { buildAtlasIndex } from './atlas-index.ts';
 import {
   categoryId,
   gamePackId,
@@ -64,25 +64,25 @@ describe('buildGamePackIndex', () => {
   describe('lookup maps', () => {
     it('indexes items by id', () => {
       const item = makeItem('iron');
-      const index = buildGamePackIndex({ ...emptyPack, items: [item] });
+      const index = buildAtlasIndex({ ...emptyPack, items: [item] });
       expect(index.itemsById.get(item.id)).toEqual(item);
     });
 
     it('indexes recipes by id', () => {
       const recipe = makeRecipe('gear');
-      const index = buildGamePackIndex({ ...emptyPack, recipes: [recipe] });
+      const index = buildAtlasIndex({ ...emptyPack, recipes: [recipe] });
       expect(index.recipesById.get(recipe.id)).toEqual(recipe);
     });
 
     it('indexes node templates by id', () => {
       const template = makeTemplate('assembler');
-      const index = buildGamePackIndex({ ...emptyPack, nodeTemplates: [template] });
+      const index = buildAtlasIndex({ ...emptyPack, nodeTemplates: [template] });
       expect(index.nodeTemplatesById.get(template.id)).toEqual(template);
     });
 
     it('indexes categories by id', () => {
       const cat = { id: categoryId('metals'), name: 'Metals', display: { label: 'Metals' }, sortOrder: 0, metadata: {} };
-      const index = buildGamePackIndex({ ...emptyPack, categories: [cat] });
+      const index = buildAtlasIndex({ ...emptyPack, categories: [cat] });
       expect(index.categoriesById.get(cat.id)).toEqual(cat);
     });
   });
@@ -91,14 +91,14 @@ describe('buildGamePackIndex', () => {
     it('maps a recipe to its explicitly compatible node types', () => {
       const template = makeTemplate('assembler');
       const recipe = makeRecipe('gear', ['assembler']);
-      const index = buildGamePackIndex({ ...emptyPack, nodeTemplates: [template], recipes: [recipe] });
+      const index = buildAtlasIndex({ ...emptyPack, nodeTemplates: [template], recipes: [recipe] });
       expect(index.recipesByNodeType.get(template.id)).toContainEqual(recipe);
     });
 
     it('maps a recipe to node types matched by tag', () => {
       const template = makeTemplate('assembler', ['machine']);
       const recipe = makeRecipe('gear', [], ['machine']);
-      const index = buildGamePackIndex({ ...emptyPack, nodeTemplates: [template], recipes: [recipe] });
+      const index = buildAtlasIndex({ ...emptyPack, nodeTemplates: [template], recipes: [recipe] });
       expect(index.recipesByNodeType.get(template.id)).toContainEqual(recipe);
     });
 
@@ -106,7 +106,7 @@ describe('buildGamePackIndex', () => {
       const assembler = makeTemplate('assembler');
       const furnace = makeTemplate('furnace');
       const recipe = makeRecipe('wire');
-      const index = buildGamePackIndex({ ...emptyPack, nodeTemplates: [assembler, furnace], recipes: [recipe] });
+      const index = buildAtlasIndex({ ...emptyPack, nodeTemplates: [assembler, furnace], recipes: [recipe] });
       expect(index.recipesByNodeType.get(assembler.id)).toContainEqual(recipe);
       expect(index.recipesByNodeType.get(furnace.id)).toContainEqual(recipe);
     });
@@ -114,7 +114,7 @@ describe('buildGamePackIndex', () => {
     it('does not duplicate a recipe matched by both type and tag', () => {
       const template = makeTemplate('assembler', ['machine']);
       const recipe = makeRecipe('gear', ['assembler'], ['machine']);
-      const index = buildGamePackIndex({ ...emptyPack, nodeTemplates: [template], recipes: [recipe] });
+      const index = buildAtlasIndex({ ...emptyPack, nodeTemplates: [template], recipes: [recipe] });
       const recipes = index.recipesByNodeType.get(template.id) ?? [];
       expect(recipes.filter((r) => r.id === recipe.id)).toHaveLength(1);
     });
@@ -123,14 +123,14 @@ describe('buildGamePackIndex', () => {
       const assembler = makeTemplate('assembler');
       const furnace = makeTemplate('furnace');
       const recipe = makeRecipe('gear', ['assembler']);
-      const index = buildGamePackIndex({ ...emptyPack, nodeTemplates: [assembler, furnace], recipes: [recipe] });
+      const index = buildAtlasIndex({ ...emptyPack, nodeTemplates: [assembler, furnace], recipes: [recipe] });
       expect(index.recipesByNodeType.get(furnace.id) ?? []).not.toContainEqual(recipe);
     });
 
     it('matches recipes across multiple tags', () => {
       const assembler = makeTemplate('assembler', ['machine', 'electric']);
       const recipe = makeRecipe('gear', [], ['electric']);
-      const index = buildGamePackIndex({ ...emptyPack, nodeTemplates: [assembler], recipes: [recipe] });
+      const index = buildAtlasIndex({ ...emptyPack, nodeTemplates: [assembler], recipes: [recipe] });
       expect(index.recipesByNodeType.get(assembler.id)).toContainEqual(recipe);
     });
   });
@@ -140,7 +140,7 @@ describe('buildGamePackIndex', () => {
       const cat = { id: categoryId('metals'), name: 'Metals', display: { label: 'Metals' }, sortOrder: 0, metadata: {} };
       const iron = makeItem('iron', 'metals');
       const copper = makeItem('copper', 'metals');
-      const index = buildGamePackIndex({ ...emptyPack, items: [iron, copper], categories: [cat] });
+      const index = buildAtlasIndex({ ...emptyPack, items: [iron, copper], categories: [cat] });
       const grouped = index.itemsByCategory.get(cat.id) ?? [];
       expect(grouped).toContainEqual(iron);
       expect(grouped).toContainEqual(copper);
@@ -148,7 +148,7 @@ describe('buildGamePackIndex', () => {
 
     it('does not include items with no category in any group', () => {
       const water = makeItem('water');
-      const index = buildGamePackIndex({ ...emptyPack, items: [water] });
+      const index = buildAtlasIndex({ ...emptyPack, items: [water] });
       const allGrouped = [...index.itemsByCategory.values()].flat();
       expect(allGrouped).not.toContainEqual(water);
     });

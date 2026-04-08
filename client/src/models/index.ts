@@ -33,7 +33,7 @@ export { ItemForm } from "./items.ts";
 export type { Recipe, RecipeItemStack } from "./recipes.ts";
 export type { NodeTemplate, PortDefinition, NodeStats } from "./nodes.ts";
 export { PortDirection } from "./nodes.ts";
-export type { Atlas, GamePackIndex, SemVer } from "./atlas.ts";
+export type { Atlas, AtlasIndex, SemVer } from "./atlas.ts";
 
 // ---- Graph layer (user-mutable instances) ----
 export type {

@@ -1,4 +1,4 @@
-import type { GamePackIndex, Graph } from "../models";
+import type { AtlasIndex, Graph } from "../models";
 import { getInputPorts, getOutputPorts } from "./node-utils.ts";
 import { logger } from "./logger.ts";
 
@@ -9,7 +9,7 @@ export interface ConnectionQuery {
   targetHandle?: string | null;
 }
 
-const areItemsCompatible = (connection: Readonly<ConnectionQuery>, graph: Readonly<Graph>, packIndex: Readonly<GamePackIndex>): boolean => {
+const areItemsCompatible = (connection: Readonly<ConnectionQuery>, graph: Readonly<Graph>, packIndex: Readonly<AtlasIndex>): boolean => {
   const sourceNode = graph.nodes[connection.source];
   const targetNode = graph.nodes[connection.target];
   if (!sourceNode.recipeId || !targetNode.recipeId) { logger.debug('[isConnectionValid] one or both nodes have no recipe — items compatible by default'); return true; }
@@ -27,7 +27,7 @@ const areItemsCompatible = (connection: Readonly<ConnectionQuery>, graph: Readon
   return !srcItem || !tgtItem || srcItem === tgtItem;
 };
 
-export const isConnectionValid = (connection: Readonly<ConnectionQuery>, graph: Readonly<Graph>, packIndex: Readonly<GamePackIndex>): boolean => {
+export const isConnectionValid = (connection: Readonly<ConnectionQuery>, graph: Readonly<Graph>, packIndex: Readonly<AtlasIndex>): boolean => {
   logger.debug(`[isConnectionValid] checking source=${connection.source}:${connection.sourceHandle ?? 'none'} → target=${connection.target}:${connection.targetHandle ?? 'none'}`);
   if (connection.source === connection.target) { logger.debug('[isConnectionValid] REJECT: self-loop'); return false; }
   if (Object.values(graph.edges).some(e =>

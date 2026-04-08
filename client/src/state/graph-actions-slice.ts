@@ -1,6 +1,6 @@
 import type {
   Edge, EdgeId,
-  Atlas, GamePackIndex, GraphActionSlice, GraphSlice,
+  Atlas, AtlasIndex, GraphActionSlice, GraphSlice,
   NodeTemplateId,
   PortId, Position, ProcessrNode, ProcessrNodeId,
   RecipeId,
@@ -9,7 +9,7 @@ import type {
 import { PortDirection } from "../models";
 import type { StateCreator } from "zustand";
 import { graphReducer } from "../utils/graph-reducer.ts";
-import { buildGamePackIndex } from "../utils/game-pack-index.ts";
+import { buildAtlasIndex } from "../utils/atlas-index.ts";
 import { isNodeLevelEdge } from "../utils/type-validators.ts";
 import { createGraph } from "../utils/graph-factory.ts";
 import { saveAtlas } from "../utils/persistence.ts";
@@ -21,8 +21,8 @@ import type { SetGraphData } from "../models/state/graph-state.ts";
  * Ports that have no counterpart in the new template are omitted (edge gets dropped).
  */
 const buildPortRemapping = (
-  oldIndex: GamePackIndex,
-  newIndex: GamePackIndex,
+  oldIndex: AtlasIndex,
+  newIndex: AtlasIndex,
 ): Map<NodeTemplateId, Map<PortId, PortId>> =>
   new Map(
     [...newIndex.nodeTemplatesById.entries()].flatMap(([templateId, newTemplate]) => {
@@ -48,7 +48,7 @@ const remapEdge = (
   edgeId: string,
   edge: Edge,
   nodes: NodeRecord,
-  packIndex: GamePackIndex,
+  packIndex: AtlasIndex,
   portRemapping: PortRemapping,
 ): [string, Edge] | null => {
   if (isNodeLevelEdge(edge)) return [edgeId, edge];
@@ -136,7 +136,7 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice, [], [], Gr
 
     loadGamePack: (pack: Atlas) =>
     {set((state) => {
-      const packIndex = buildGamePackIndex(pack);
+      const packIndex = buildAtlasIndex(pack);
       const portRemapping = buildPortRemapping(state.packIndex, packIndex);
 
       const remappedEdges = Object.fromEntries(

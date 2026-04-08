@@ -1,7 +1,7 @@
 import type { Atlas } from "../models";
 
-export const serializePackToText = async (pack: Atlas): Promise<string> => {
-    const res = await fetch('/api/pack/serialize', {
+export const serializeAtlasToText = async (pack: Atlas): Promise<string> => {
+    const res = await fetch('/api/atlas/serialize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(pack),
@@ -10,7 +10,7 @@ export const serializePackToText = async (pack: Atlas): Promise<string> => {
     return res.text();
 };
 
-export const downloadPackAs = (text: string, filename: string): void => {
+export const downloadAtlasAs = (text: string, filename: string): void => {
     const url = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
     const anchor = document.createElement('a');
     // eslint-disable-next-line functional/immutable-data
@@ -21,11 +21,11 @@ export const downloadPackAs = (text: string, filename: string): void => {
     URL.revokeObjectURL(url);
 };
 
-export interface PackParseSuccess { pack: Atlas; errors?: never }
-export interface PackParseError { errors: string[]; pack?: never }
-export type PackParseResult = PackParseSuccess | PackParseError;
+export interface AtlasParseSuccess { pack: Atlas; errors?: never }
+export interface AtlasParseError { errors: string[]; pack?: never }
+export type AtlasParseResult = AtlasParseSuccess | AtlasParseError;
 
-async function handleResponse(res: Response): Promise<PackParseResult> {
+async function handleResponse(res: Response): Promise<AtlasParseResult> {
     if (!res.ok) {
         return { errors: [`Server error: ${res.status.toString()} ${res.statusText}`] };
     }
@@ -36,8 +36,8 @@ async function handleResponse(res: Response): Promise<PackParseResult> {
     return { pack: body.result as Atlas };
 }
 
-export const parsePackText = async (text: string): Promise<PackParseResult> => {
-    const res = await fetch('/api/pack/parse', {
+export const parseAtlasText = async (text: string): Promise<AtlasParseResult> => {
+    const res = await fetch('/api/atlas/parse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text }),
@@ -45,9 +45,9 @@ export const parsePackText = async (text: string): Promise<PackParseResult> => {
     return handleResponse(res);
 };
 
-export const parsePackFile = async (file: File): Promise<PackParseResult> => {
+export const parseAtlasFile = async (file: File): Promise<AtlasParseResult> => {
     const form = new FormData();
     form.append('file', file);
-    const res = await fetch('/api/pack/parse-file', { method: 'POST', body: form });
+    const res = await fetch('/api/atlas/parse-file', { method: 'POST', body: form });
     return handleResponse(res);
 };

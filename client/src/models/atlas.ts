@@ -7,12 +7,10 @@ import type { NodeTemplate } from "./nodes.ts";
 export type SemVer = `${number}.${number}.${number}`;
 
 /**
- * A GamePack is the complete static data package for a specific game.
+ * An Atlas is the complete static data package for a specific game.
  * It contains all items, recipes, node templates, categories, and metadata
  * needed to plan production for that game.
  *
- * JSON-serializable by design — stored as .json files, loaded from URLs,
- * or bundled as static imports.
  */
 export interface Atlas {
   readonly id: GamePackId;
@@ -33,10 +31,10 @@ export interface Atlas {
 }
 
 /**
- * Indexed/normalized form of a GamePack for efficient lookups.
- * Created at load time from the raw GamePack arrays. Not serialized.
+ * Indexed/normalized form of a Atlas for efficient lookups.
+ * Created at load time from the raw Atlas arrays. Not serialized.
  */
-export interface GamePackIndex {
+export interface AtlasIndex {
   readonly pack: Atlas;
   readonly itemsById: ReadonlyMap<ItemId, Item>;
   readonly recipesById: ReadonlyMap<RecipeId, Recipe>;

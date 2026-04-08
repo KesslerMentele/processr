@@ -3,11 +3,11 @@ import type { EdgeId, NodeTemplateId, ProcessrNodeId, RecipeId } from "../ids.ts
 import type { Position } from "../common.ts";
 import type { Edge } from "../graph/edge.ts";
 import type { Graph, Viewport } from "../graph/graph.ts";
-import type { Atlas, GamePackIndex } from "../atlas.ts";
+import type { Atlas, AtlasIndex } from "../atlas.ts";
 
 export interface SetGraphData {
   readonly graph?: Graph;
-  readonly packIndex: GamePackIndex;
+  readonly packIndex: AtlasIndex;
 }
 
 export interface GraphActionSlice {
@@ -28,7 +28,7 @@ export interface GraphActionSlice {
 
 export interface GraphSlice {
   graph: Graph;
-  packIndex: GamePackIndex;
+  packIndex: AtlasIndex;
   selectedNodeId: ProcessrNodeId | null;
   draggedNodeTemplateId: NodeTemplateId | null;
 }
