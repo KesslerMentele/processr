@@ -161,7 +161,7 @@ html, body {
   height: 100%;
 }
 
-/* ── Sidebar ───────────────────────────────────────────── */
+/* ── sidebar ───────────────────────────────────────────── */
 .sidebar {
   min-width: 200px;
   min-height: 0;
@@ -222,7 +222,7 @@ html, body {
 }
 
 
-/* ── Sidebar recipe buttons ────────────────────────────── */
+/* ── sidebar recipe buttons ────────────────────────────── */
 .sidebar-recipe-btn {
   width: 100%;
   padding: 6px 10px;
@@ -247,7 +247,7 @@ html, body {
   background: var(--accent-dim);
 }
 
-/* ── Sidebar dev tools ─────────────────────────────────── */
+/* ── sidebar dev tools ─────────────────────────────────── */
 .sidebar-dev-tools {
   display: flex;
   flex-direction: column;
@@ -343,6 +343,22 @@ html, body {
     0 2px 6px rgb(0 0 0 / 50%),
     0 8px 28px rgb(0 0 0 / 35%),
     inset 0 1px 0 rgb(255 255 255 / 4%);
+}
+
+.processr-node-error {
+  --node-accent: #c0392b;
+  opacity: 0.85;
+}
+
+.processr-node-error-detail {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.processr-node-error-detail code {
+  font-family: monospace;
+  color: #e07070;
 }
 
 .processr-node.selected {
@@ -729,7 +745,7 @@ html, body {
 }
 
 @keyframes bi-slide {
-  0%   { background-position: 0% 50%; }
+  0%   { background-position: 0 50%; }
   100% { background-position: 100% 50%; }
 }
 
