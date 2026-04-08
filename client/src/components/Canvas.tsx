@@ -14,7 +14,7 @@ import ProcessrNodeComponent from "./ProcessrNodeComponent.tsx";
 import { useProcessrStore } from "../state/store.ts";
 import { useShortcut } from "react-keyhub";
 import CanvasToolbar from "./CanvasToolbar.tsx";
-import PackEditor from "./PackEditor.tsx";
+import AtlasEditor from "./editor/AtlasEditor.tsx";
 import { useCanvasHandlers } from "../hooks/useCanvasHandlers.ts";
 
 const nodeTypes = { processor: ProcessrNodeComponent };
@@ -76,7 +76,7 @@ const Canvas: FC = () => {
 
   return (
     <div className="canvas-container">
-      {packEditorOpen && <PackEditor />}
+      {packEditorOpen && <AtlasEditor />}
       <ReactFlow
         nodes={rfNodes}
         edges={rfEdges}

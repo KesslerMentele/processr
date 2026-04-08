@@ -3,11 +3,11 @@ import {
   saveProcessrGraph,
   loadProcessrGraph,
   clearProcessrGraph,
-  saveGamePack,
-  loadGamePack,
+  saveAtlas,
+  loadAtlas,
 } from './persistence.ts';
 import { createGraph } from './graph-factory.ts';
-import { gamePackId, type GamePack } from '../models';
+import { gamePackId, type Atlas } from '../models';
 import { DOCUMENT_FORMAT_VERSION } from '../models';
 
 const storageMap = new Map<string, string>();
@@ -21,7 +21,7 @@ vi.stubGlobal('localStorage', {
 
 const packId = gamePackId('pack-1');
 
-const minimalPack: GamePack = {
+const minimalPack: Atlas = {
   id: packId,
   name: 'Test Pack',
   gameName: 'Test Game',
@@ -70,11 +70,11 @@ describe('clearDocument', () => {
 
 describe('saveGamePack / loadGamePack', () => {
   it('round-trips a game pack through localStorage', () => {
-    saveGamePack(minimalPack);
-    expect(loadGamePack()).toEqual(minimalPack);
+    saveAtlas(minimalPack);
+    expect(loadAtlas()).toEqual(minimalPack);
   });
 
   it('returns null when nothing is saved', () => {
-    expect(loadGamePack()).toBeNull();
+    expect(loadAtlas()).toBeNull();
   });
 });

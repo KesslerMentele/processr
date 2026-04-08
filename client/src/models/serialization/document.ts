@@ -1,6 +1,6 @@
 import type { GraphId, GamePackId } from "../ids.ts";
 import type { Graph } from "../graph/graph.ts";
-import type { GamePack } from "../game-pack.ts";
+import type { Atlas } from "../atlas.ts";
 
 /** Increment when making breaking changes to the schema. */
 export const DOCUMENT_FORMAT_VERSION = 1;
@@ -16,7 +16,7 @@ export interface ProcessrGraph {
   readonly formatVersion: number;
   readonly graph: Graph;
   /** Embedded game pack data for export/sharing. Omitted in localStorage. */
-  readonly gamePack?: GamePack;
+  readonly gamePack?: Atlas;
 }
 
 /**

@@ -1,5 +1,6 @@
 import type { EdgeType, ToolMode } from "../../state/ui-slice.ts";
 
+// eslint-disable-next-line functional/no-mixed-types
 export interface UISettingsSlice {
   readonly snapToGrid: boolean;
   readonly detailedMode: boolean;
@@ -8,8 +9,6 @@ export interface UISettingsSlice {
   readonly lightTheme: boolean;
   readonly settingsPanelOpen: boolean;
   readonly packEditorOpen: boolean;
-}
-export interface UIActionsSlice {
   toggleSnap: () => void;
   toggleDetailed: () => void;
   setEdgeType: (t: EdgeType) => void;

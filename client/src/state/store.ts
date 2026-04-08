@@ -4,30 +4,26 @@ import { create } from "zustand/react";
 import type {
   GraphActionSlice,
   GraphSlice,
-  PackEditorSlice,
-  UIActionsSlice,
-  UISettingsSlice
+  UISettingsSlice,
+  AtlasEditorSlice,
 } from "../models";
 import createGraphSlice from "./graph-slice.ts";
 import createGraphActions from "./graph-actions-slice.ts";
-import { createUIActionsSlice, createUISlice } from "./ui-slice.ts";
-import createPackSlice from "./pack-editor-slice.ts";
+import { createUISlice } from "./ui-slice.ts";
+import { createAtlasSlice } from "./atlas-editor-slice.ts";
 
 
-const useBoundStore = create<
+export const useBoundStore = create<
   GraphSlice
   & GraphActionSlice
   & UISettingsSlice
-  & UIActionsSlice
-  & PackEditorSlice
+  & AtlasEditorSlice
 >()((setState, getState, store) => ({
   ...createGraphSlice(setState, getState, store),
   ...createGraphActions(setState, getState, store),
   ...createUISlice(setState, getState, store),
-  ...createUIActionsSlice(setState, getState, store),
-  ...createPackSlice(setState, getState, store),
+  ...createAtlasSlice(setState, getState, store),
 }));
-
 
 /**
  * Provides access to the zustand store.

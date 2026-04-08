@@ -1,6 +1,6 @@
-import type { GamePack } from "../models";
+import type { Atlas } from "../models";
 
-export const serializePackToText = async (pack: GamePack): Promise<string> => {
+export const serializePackToText = async (pack: Atlas): Promise<string> => {
     const res = await fetch('/api/pack/serialize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -21,7 +21,7 @@ export const downloadPackAs = (text: string, filename: string): void => {
     URL.revokeObjectURL(url);
 };
 
-export interface PackParseSuccess { pack: GamePack; errors?: never }
+export interface PackParseSuccess { pack: Atlas; errors?: never }
 export interface PackParseError { errors: string[]; pack?: never }
 export type PackParseResult = PackParseSuccess | PackParseError;
 
@@ -29,11 +29,11 @@ async function handleResponse(res: Response): Promise<PackParseResult> {
     if (!res.ok) {
         return { errors: [`Server error: ${res.status.toString()} ${res.statusText}`] };
     }
-    const body = await res.json() as { result?: GamePack; errors?: string[] };
+    const body = await res.json() as { result?: Atlas; errors?: string[] };
     if (body.errors) {
         return { errors: body.errors };
     }
-    return { pack: body.result as GamePack };
+    return { pack: body.result as Atlas };
 }
 
 export const parsePackText = async (text: string): Promise<PackParseResult> => {

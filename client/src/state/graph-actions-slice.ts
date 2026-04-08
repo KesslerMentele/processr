@@ -1,6 +1,6 @@
 import type {
   Edge, EdgeId,
-  GamePack, GamePackIndex, GraphActionSlice, GraphSlice,
+  Atlas, GamePackIndex, GraphActionSlice, GraphSlice,
   NodeTemplateId,
   PortId, Position, ProcessrNode, ProcessrNodeId,
   RecipeId,
@@ -12,7 +12,7 @@ import { graphReducer } from "../utils/graph-reducer.ts";
 import { buildGamePackIndex } from "../utils/game-pack-index.ts";
 import { isNodeLevelEdge } from "../utils/type-validators.ts";
 import { createGraph } from "../utils/graph-factory.ts";
-import { saveGamePack } from "../utils/persistence.ts";
+import { saveAtlas } from "../utils/persistence.ts";
 import type { SetGraphData } from "../models/state/graph-state.ts";
 
 /**
@@ -41,46 +41,73 @@ const buildPortRemapping = (
   );
 
 
+type NodeRecord = Readonly<Record<string, ProcessrNode>>;
+type PortRemapping = ReadonlyMap<NodeTemplateId, ReadonlyMap<PortId, PortId>>;
+
+const remapEdge = (
+  edgeId: string,
+  edge: Edge,
+  nodes: NodeRecord,
+  packIndex: GamePackIndex,
+  portRemapping: PortRemapping,
+): [string, Edge] | null => {
+  if (isNodeLevelEdge(edge)) return [edgeId, edge];
+
+  const sourceNode = nodes[edge.sourceNodeId] as ProcessrNode | undefined;
+  const targetNode = nodes[edge.targetNodeId] as ProcessrNode | undefined;
+  if (!sourceNode || !targetNode) return null;
+
+  const newSourcePortId = portRemapping.get(sourceNode.templateId)?.get(edge.sourcePortId) ?? edge.sourcePortId;
+  const newTargetPortId = portRemapping.get(targetNode.templateId)?.get(edge.targetPortId) ?? edge.targetPortId;
+
+  const sourceTemplate = packIndex.nodeTemplatesById.get(sourceNode.templateId);
+  const targetTemplate = packIndex.nodeTemplatesById.get(targetNode.templateId);
+  if (!sourceTemplate?.ports.some(p => p.id === newSourcePortId)) return null;
+  if (!targetTemplate?.ports.some(p => p.id === newTargetPortId)) return null;
+
+  return [edgeId, { ...edge, sourcePortId: newSourcePortId, targetPortId: newTargetPortId }];
+};
+
 const createGraphActions: StateCreator<GraphSlice & GraphActionSlice, [], [], GraphActionSlice> =
   (set) => ({
     addNode: (node: ProcessrNode) =>
     {set((state) =>
-      ({ ...state, graph: graphReducer(state.graph, { type: "ADD_NODE", node }) }));
+      ({ graph: graphReducer(state.graph, { type: "ADD_NODE", node }) }));
     },
 
     removeNode: (nodeId: ProcessrNodeId) =>
     {set((state) =>
-      ({ ...state, graph: graphReducer(state.graph, { type: "REMOVE_NODE", nodeId }) }));
+      ({ graph: graphReducer(state.graph, { type: "REMOVE_NODE", nodeId }) }));
     },
 
     updateNodePositions: (positions: Readonly<Record<string, Position>>) =>
     {set((state) =>
-      ({ ...state, graph: graphReducer(state.graph, { type: "SET_NODE_POSITIONS", positions }) }));
+      ({ graph: graphReducer(state.graph, { type: "SET_NODE_POSITIONS", positions }) }));
     },
 
     setNodeRecipe: (nodeId: ProcessrNodeId, recipeId: RecipeId | null) =>
     {set((state) =>
-      ({ ...state, graph: graphReducer(state.graph, { type: "SET_NODE_RECIPE", nodeId, recipeId }) }));
+      ({ graph: graphReducer(state.graph, { type: "SET_NODE_RECIPE", nodeId, recipeId }) }));
     },
 
     addEdge: (edge: Edge) =>
     {set((state) =>
-      ({ ...state, graph: graphReducer(state.graph, { type: "ADD_EDGE", edge }) }));
+      ({ graph: graphReducer(state.graph, { type: "ADD_EDGE", edge }) }));
     },
 
     removeEdge: (edgeId: EdgeId) =>
     {set((state) =>
-      ({ ...state, graph: graphReducer(state.graph, { type: "REMOVE_EDGE", edgeId }) }));
+      ({ graph: graphReducer(state.graph, { type: "REMOVE_EDGE", edgeId }) }));
     },
 
     setViewport: (viewport: Viewport) =>
     {set((state) =>
-      ({ ...state, graph: graphReducer(state.graph, { type: "SET_VIEWPORT", viewport }) }));
+      ({ graph: graphReducer(state.graph, { type: "SET_VIEWPORT", viewport }) }));
     },
 
     setSelectedNodeId: (id: ProcessrNodeId | null) =>
-    {set((state) =>
-      ({ ...state, selectedNodeId: id }));
+    {set(() =>
+      ({ selectedNodeId: id }));
     },
 
     loadGraph: (data:SetGraphData) =>
@@ -107,33 +134,18 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice, [], [], Gr
       ({ ...state, draggedTemplateId: id }));
     },
 
-    loadGamePack: (pack: GamePack) =>
+    loadGamePack: (pack: Atlas) =>
     {set((state) => {
       const packIndex = buildGamePackIndex(pack);
       const portRemapping = buildPortRemapping(state.packIndex, packIndex);
 
       const remappedEdges = Object.fromEntries(
-        Object.entries(state.graph.edges).flatMap(([edgeId, edge]): [string, Edge][] => {
-          if (isNodeLevelEdge(edge)) return [[edgeId, edge]];
-
-          const sourceNode = state.graph.nodes[edge.sourceNodeId] as ProcessrNode | undefined;
-          const targetNode = state.graph.nodes[edge.targetNodeId] as ProcessrNode | undefined;
-          if (!sourceNode || !targetNode) return [];
-
-          const newSourcePortId = portRemapping.get(sourceNode.templateId)?.get(edge.sourcePortId) ?? edge.sourcePortId;
-          const newTargetPortId = portRemapping.get(targetNode.templateId)?.get(edge.targetPortId) ?? edge.targetPortId;
-
-          const sourceTemplate = packIndex.nodeTemplatesById.get(sourceNode.templateId);
-          const targetTemplate = packIndex.nodeTemplatesById.get(targetNode.templateId);
-          if (!sourceTemplate?.ports.some(p => p.id === newSourcePortId)) return [];
-          if (!targetTemplate?.ports.some(p => p.id === newTargetPortId)) return [];
-
-          const remappedEdge: Edge = { ...edge, sourcePortId: newSourcePortId, targetPortId: newTargetPortId };
-          return [[edgeId, remappedEdge]];
-        })
+        Object.entries(state.graph.edges)
+          .map(([id, edge]) => remapEdge(id, edge, state.graph.nodes, packIndex, portRemapping))
+          .filter((entry): entry is [string, Edge] => entry !== null)
       );
 
-      saveGamePack(pack);
+      saveAtlas(pack);
       const graph = { ...state.graph, edges: remappedEdges };
       return { ...state, packIndex, graph };
     });

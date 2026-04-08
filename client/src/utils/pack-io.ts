@@ -1,6 +1,6 @@
-import type { GamePack } from "../models";
+import type { Atlas } from "../models";
 
-export function importPackFromFile(): Promise<GamePack> {
+export function importPackFromFile(): Promise<Atlas> {
   return new Promise((resolve, reject) => {
     const input = document.createElement("input");
     // eslint-disable-next-line functional/immutable-data
@@ -11,13 +11,13 @@ export function importPackFromFile(): Promise<GamePack> {
     input.onchange = () => {
       const file = input.files?.[0];
       if (file === undefined) { reject(new Error("No file selected")); return; }
-      void file.text().then(text => { resolve(JSON.parse(text) as GamePack); });
+      void file.text().then(text => { resolve(JSON.parse(text) as Atlas); });
     };
     input.click();
   });
 }
 
-export function exportPackToFile(pack: GamePack): void {
+export function exportPackToFile(pack: Atlas): void {
   const url = URL.createObjectURL(
     new Blob([JSON.stringify(pack, null, 2)], { type: "application/json" })
   );

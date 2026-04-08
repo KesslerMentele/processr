@@ -3,7 +3,7 @@ import type { EdgeId, NodeTemplateId, ProcessrNodeId, RecipeId } from "../ids.ts
 import type { Position } from "../common.ts";
 import type { Edge } from "../graph/edge.ts";
 import type { Graph, Viewport } from "../graph/graph.ts";
-import type { GamePack, GamePackIndex } from "../game-pack.ts";
+import type { Atlas, GamePackIndex } from "../atlas.ts";
 
 export interface SetGraphData {
   readonly graph?: Graph;
@@ -19,7 +19,7 @@ export interface GraphActionSlice {
   removeEdge: (edgeId: EdgeId) => void;
   setViewport: (viewport: Viewport) => void;
   loadGraph: (options:SetGraphData) => void;
-  loadGamePack: (pack: GamePack) => void;
+  loadGamePack: (pack: Atlas) => void;
   setSelectedNodeId: (id: ProcessrNodeId | null) => void;
   setDraggedTemplateId: (id: NodeTemplateId | null) => void;
   undo: () => void

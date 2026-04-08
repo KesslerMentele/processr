@@ -1,5 +1,5 @@
 import type {
-  GamePack,
+  Atlas,
   GamePackIndex,
   NodeTemplateId,
   Recipe,
@@ -15,7 +15,7 @@ function groupBy<K, V>(items: readonly V[], key: (v: V) => K | undefined): Map<K
   }, new Map<K, readonly V[]>());
 }
 
-export function buildGamePackIndex(pack: GamePack): GamePackIndex {
+export function buildGamePackIndex(pack: Atlas): GamePackIndex {
 
   const nodeIdsByTag: Map<string, readonly NodeTemplateId[]> = pack.nodeTemplates
     .flatMap((node) => node.tags.map((tag) => [tag, node.id] as const))

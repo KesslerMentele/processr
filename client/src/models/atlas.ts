@@ -14,7 +14,7 @@ export type SemVer = `${number}.${number}.${number}`;
  * JSON-serializable by design — stored as .json files, loaded from URLs,
  * or bundled as static imports.
  */
-export interface GamePack {
+export interface Atlas {
   readonly id: GamePackId;
   readonly name: string;
   readonly gameName: string;
@@ -37,7 +37,7 @@ export interface GamePack {
  * Created at load time from the raw GamePack arrays. Not serialized.
  */
 export interface GamePackIndex {
-  readonly pack: GamePack;
+  readonly pack: Atlas;
   readonly itemsById: ReadonlyMap<ItemId, Item>;
   readonly recipesById: ReadonlyMap<RecipeId, Recipe>;
   readonly nodeTemplatesById: ReadonlyMap<NodeTemplateId, NodeTemplate>;

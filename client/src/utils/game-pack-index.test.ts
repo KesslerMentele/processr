@@ -6,7 +6,7 @@ import {
   itemId,
   nodeTemplateId,
   recipeId,
-  type GamePack,
+  type Atlas,
   type Item,
   type NodeTemplate,
   type Recipe,
@@ -14,7 +14,7 @@ import {
 
 // --- Fixtures ---
 
-const emptyPack: GamePack = {
+const emptyPack: Atlas = {
   id: gamePackId('pack-1'),
   name: 'Test Pack',
   gameName: 'Test Game',
