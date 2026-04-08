@@ -1,4 +1,4 @@
-import type { GamePack } from "../models";
+import type { Atlas } from "../models";
 import {
   categoryId,
   gamePackId,
@@ -10,7 +10,7 @@ import {
   recipeId,
 } from "../models";
 
-export const factorioPack: GamePack = {
+export const factorioPack: Atlas = {
   id: gamePackId('faketorio'),
   name: "faketorio",
   gameName: "factorio",

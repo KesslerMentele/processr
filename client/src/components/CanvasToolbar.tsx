@@ -1,8 +1,8 @@
 import type { FC } from 'react';
 import { Panel } from '@xyflow/react';
 import { type EdgeType } from '../state/ui-slice.ts';
-import { useProcessrStore } from "../state/store.ts";
-import { LuMove, LuLassoSelect, LuSettings2, LuPackage } from 'react-icons/lu';
+import { LuMove, LuLassoSelect, LuSettings2, LuPackage, LuSun, LuMoon } from 'react-icons/lu';
+import { useToolbarState } from '../hooks/useToolbarState.ts';
 
 interface EdgeOption  { readonly value: EdgeType; readonly label: string }
 
@@ -14,24 +14,13 @@ const EDGE_OPTIONS: readonly EdgeOption[] = [
 ];
 
 const CanvasToolbar: FC = () => {
-  const toolMode = useProcessrStore.use.toolMode();
-  const snapToGrid = useProcessrStore.use.snapToGrid();
-  const detailedMode = useProcessrStore.use.detailedMode();
-  const edgeType = useProcessrStore.use.edgeType();
-  const settingsPanelOpen = useProcessrStore.use.settingsPanelOpen();
-  const packEditorOpen = useProcessrStore.use.packEditorOpen();
-  const setToolMode = useProcessrStore.use.setToolMode();
-  const toggleSnap = useProcessrStore.use.toggleSnap();
-  const toggleDetailed = useProcessrStore.use.toggleDetailed();
-  const setEdgeType = useProcessrStore.use.setEdgeType();
-  const toggleSettingsPanel = useProcessrStore.use.toggleSettingsPanel();
-  const togglePackEditor = useProcessrStore.use.togglePackEditor();
+  const { toolMode, snapToGrid, detailedMode, edgeType, lightTheme, settingsPanelOpen, packEditorOpen, setToolMode, toggleSnap, toggleDetailed, setEdgeType, toggleLightTheme, toggleSettingsPanel, togglePackEditor } = useToolbarState();
 
   return (
     <Panel position="top-right" className="canvas-toolbar">
-      <div className="canvas-toolbar__strip">
+      <div className="canvas-toolbar-strip">
         <button
-          className={`canvas-toolbar__btn${toolMode === 'pan' ? ' active' : ''}`}
+          className={`canvas-toolbar-btn${toolMode === 'pan' ? ' active' : ''}`}
           title="Pan tool"
           onClick={() => {
             setToolMode('pan');
@@ -40,7 +29,7 @@ const CanvasToolbar: FC = () => {
           <LuMove />
         </button>
         <button
-          className={`canvas-toolbar__btn${toolMode === 'select' ? ' active' : ''}`}
+          className={`canvas-toolbar-btn${toolMode === 'select' ? ' active' : ''}`}
           title="Select tool — drag to box-select, Shift+click to multi-select"
           onClick={() => {
             setToolMode('select');
@@ -48,16 +37,16 @@ const CanvasToolbar: FC = () => {
         >
           <LuLassoSelect />
         </button>
-        <div className="canvas-toolbar__sep" />
+        <div className="canvas-toolbar-sep" />
         <button
-          className={`canvas-toolbar__btn${packEditorOpen ? ' active' : ''}`}
+          className={`canvas-toolbar-btn${packEditorOpen ? ' active' : ''}`}
           title="Pack editor"
           onClick={togglePackEditor}
         >
           <LuPackage />
         </button>
         <button
-          className={`canvas-toolbar__btn${settingsPanelOpen ? ' active' : ''}`}
+          className={`canvas-toolbar-btn${settingsPanelOpen ? ' active' : ''}`}
           title="Display & grid settings"
           onClick={toggleSettingsPanel}
         >
@@ -67,20 +56,25 @@ const CanvasToolbar: FC = () => {
 
       {settingsPanelOpen && (
         <div className="canvas-settings-panel">
-          <label className="canvas-settings-panel__toggle">
+          <label className="canvas-settings-panel-toggle">
             <input type="checkbox" checked={snapToGrid} onChange={toggleSnap} />
             Snap to grid
           </label>
-          <label className="canvas-settings-panel__toggle">
+          <label className="canvas-settings-panel-toggle">
             <input type="checkbox" checked={detailedMode} onChange={toggleDetailed} />
             Detailed mode
           </label>
-          <div className="canvas-settings-panel__section-label">Edge style</div>
-          <div className="canvas-settings-panel__edge-btns">
+          <label className="canvas-settings-panel-toggle">
+            <input type="checkbox" checked={lightTheme} onChange={toggleLightTheme} />
+            {lightTheme ? <LuSun size={13} /> : <LuMoon size={13} />}
+            Light theme
+          </label>
+          <div className="canvas-settings-panel-section-label">Edge style</div>
+          <div className="canvas-settings-panel-edge-btns">
             {EDGE_OPTIONS.map(({ value, label }) => (
               <button
                 key={value}
-                className={`canvas-settings-panel__edge-btn${edgeType === value ? ' active' : ''}`}
+                className={`canvas-settings-panel-edge-btn${edgeType === value ? ' active' : ''}`}
                 onClick={() => {
                   setEdgeType(value);
                 }}

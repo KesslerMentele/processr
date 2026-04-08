@@ -17,6 +17,18 @@ export default defineConfig([
     },
   },
   {
+    files: ['src/components/**/*.tsx'],
+      rules: {
+      'functional/no-mixed-types': 'off',
+      },
+  },
+  {
+    files: ['src/state/**/*.tsx'],
+    rules: {
+      'functional/no-mixed-types': 'off',
+    },
+  },
+  {
     files: ['**/*.{ts,tsx}'],
     extends: [
       js.configs.recommended,
@@ -26,7 +38,6 @@ export default defineConfig([
       tseslint.configs.stylistic,
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
-      // Functional lite: no-let, no-loop-statements, immutable-data
       functional.configs['lite'],
     ],
     languageOptions: {

@@ -1,4 +1,4 @@
-import type { GamePack, Graph, ProcessrGraph } from "../models";
+import type { Atlas, Graph, ProcessrGraph } from "../models";
 import { DOCUMENT_FORMAT_VERSION } from "../models";
 
 const GRAPH_KEY = "processr:graph";
@@ -30,6 +30,7 @@ export interface PersistedUISettings {
   readonly detailedMode: boolean;
   readonly edgeType: string;
   readonly toolMode: string;
+  readonly lightTheme: boolean;
 }
 
 export const saveUISettings = (settings: PersistedUISettings): void => {
@@ -43,21 +44,26 @@ export const loadUISettings = (): PersistedUISettings | null => {
 
 const PACK_EDITOR_TEXT_KEY = "processr:pack-editor-text";
 
-export const savePackEditorText = (text: string): void => {
+export const saveAtlasEditorText = (text: string): void => {
   localStorage.setItem(PACK_EDITOR_TEXT_KEY, text);
 };
 
-export const loadPackEditorText = (): string | null => {
+export const loadAtlasEditorText = (): string | null => {
   return localStorage.getItem(PACK_EDITOR_TEXT_KEY);
 };
 
 const PACK_KEY = "processr:game-pack";
 
-export const saveGamePack = (pack: GamePack): void => {
+export const saveAtlas = (pack: Atlas): void => {
   localStorage.setItem(PACK_KEY, JSON.stringify(pack));
 };
 
-export const loadGamePack = (): GamePack | null => {
+export const loadAtlas = (): Atlas | null => {
   const raw = localStorage.getItem(PACK_KEY);
-  return raw === null ? null : JSON.parse(raw) as GamePack;
+  return raw === null ? null : JSON.parse(raw) as Atlas;
+};
+
+
+export const clearAtlas = (): void => {
+  localStorage.removeItem(PACK_KEY);
 };

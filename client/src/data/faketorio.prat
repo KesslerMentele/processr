@@ -1,0 +1,190 @@
+gamepack faketorio {
+    name "faketorio"
+    game "factorio"
+    version "0.0.2"
+}
+
+category raw {
+    name "Raw Resources"
+    color "#e11717"
+    sortOrder 0
+}
+
+category intermediates {
+    name "Intermediate Products"
+    color "#d6a21f"
+    sortOrder 1
+}
+
+category machines {
+    color "#740ed3"
+}
+
+item iron-ore {
+    color "#0d78e6"
+    form solid
+}
+
+item iron-plate {
+    color "#408fdd"
+    category intermediates
+    form solid
+}
+
+item copper-ore {
+    color "#B06040"
+    category raw
+    form solid
+}
+
+item copper-plate {
+    color "#DA8A67"
+    category intermediates
+    form solid
+}
+
+item copper-cable {
+    color "#7e3718"
+    category intermediates
+    form solid
+}
+
+item water {
+    color "#4488FF"
+    form fluid
+}
+
+item steam {
+    color "#AAAAAA"
+    form fluid
+}
+
+item coal {
+    color "#190d06"
+    form solid
+}
+
+node stone-furnace {
+    icon "/icons/stone-furnace.png"
+    color "#888888"
+    category machines
+    speed 1
+    power 90
+    port input Input
+    port output Output
+}
+
+node water-pump {
+    icon "/icons/water-pump.png"
+    color "#8ca2ae"
+    category machines
+    speed 1
+    port output Output
+}
+
+node burner-mining-drill {
+    icon "/icons/burner-mining-drill.png"
+    color "#63564d"
+    category machines
+    speed 1
+    power 90
+    port input Input
+    port output Output
+}
+
+node assembling-machine-1 {
+    icon "/icons/assembler-1.png"
+    color "#4A6080"
+    category machines
+    speed 0.5
+    power 75
+    moduleSlots 0
+    port input Input-1
+    port input Input-2
+    port output Output
+}
+
+node boiler {
+    icon "/icons/boiler.png"
+    color "#805030"
+    category machines
+    speed 1
+    power 0
+    port input Water-In
+    port input Coal-In
+    port output Steam-Out
+}
+
+recipe smelt-iron-plate {
+    name "Iron Plate"
+    icon "/icons/iron-plate.png"
+    category intermediates
+    duration 3.2 sec
+    in 1 iron-ore
+    out 1 iron-plate
+    nodes [stone-furnace]
+}
+
+recipe smelt-copper-plate {
+    name "Copper Plate"
+    icon "/icons/copper-plate.png"
+    category intermediates
+    duration 3.2 sec
+    in 1 copper-ore
+    out 1 copper-plate
+    nodes [stone-furnace]
+}
+
+recipe copper-cable {
+    icon "/icons/copper-cable.png"
+    category intermediates
+    duration 0.5 sec
+    in 1 copper-plate
+    out 2 copper-cable
+    nodes [assembling-machine-1]
+}
+
+recipe boil-water {
+    name "Steam"
+    icon "/icons/steam.png"
+    duration 1 sec
+    in 60 water
+    in 1 coal
+    out 60 steam
+    nodes [boiler]
+}
+
+recipe pump-water {
+    icon "/icons/water.png"
+    category intermediates
+    duration 1 sec
+    out 100 water
+    nodes [water-pump]
+}
+
+recipe mine-copper {
+    icon "/icons/copper-ore.png"
+    category intermediates
+    duration 1 sec
+    in 1 coal
+    out 1 copper-ore
+    nodes [burner-mining-drill]
+}
+
+recipe mine-iron {
+    icon "/icons/iron-ore.png"
+    category intermediates
+    duration 1 sec
+    in 1 coal
+    out 1 iron-ore
+    nodes [burner-mining-drill]
+}
+
+recipe mine-coal {
+    icon "/icons/coal.png"
+    category intermediates
+    duration 1 sec
+    in 1 coal
+    out 1 coal
+    nodes [burner-mining-drill]
+}

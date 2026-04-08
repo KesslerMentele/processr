@@ -1,31 +1,26 @@
 import type {
-  GamePack,
+  Atlas,
   GamePackIndex,
   NodeTemplateId,
   Recipe,
 } from "../models";
 
-// Helper: group an array into a Map, skipping items with no key
-function groupBy<K, V>(items: readonly V[], key: (v: V) => K | undefined): Map<K, readonly V[]> {
-  return items.reduce((acc, item) => {
-    const k = key(item);
-    if (k === undefined) return acc;
+// Helper: group pre-formed [key, value] pairs into a Map
+function groupPairs<K, V>(pairs: readonly (readonly [K, V])[]): Map<K, readonly V[]> {
+  return pairs.reduce((acc, [k, v]) => {
     const existing = acc.get(k) ?? [];
-    return new Map([...acc, [k, [...existing, item]]]);
+    return new Map([...acc, [k, [...existing, v]]]);
   }, new Map<K, readonly V[]>());
 }
 
-export function buildGamePackIndex(pack: GamePack): GamePackIndex {
+export function buildGamePackIndex(pack: Atlas): GamePackIndex {
 
-  const nodeIdsByTag: Map<string, readonly NodeTemplateId[]> = pack.nodeTemplates
-    .flatMap((node) => node.tags.map((tag) => [tag, node.id] as const))
-    .reduce((acc, [tag, nodeId]) => {
-      const existing = acc.get(tag) ?? [];
-      return new Map([...acc, [tag, [...existing, nodeId]]]);
-    }, new Map<string, readonly NodeTemplateId[]>());
+  const nodeIdsByTag = groupPairs(
+    pack.nodeTemplates.flatMap((node) => node.tags.map((tag) => [tag, node.id] as const))
+  );
 
-  const recipesByNodeType: Map<NodeTemplateId, readonly Recipe[]> = pack.recipes
-    .flatMap((recipe) => {
+  const recipesByNodeType: Map<NodeTemplateId, readonly Recipe[]> = groupPairs(
+    pack.recipes.flatMap((recipe) => {
       const exactIds = recipe.compatibleNodeTypes;
       const tagIds = (recipe.compatibleNodeTags ?? [])
         .flatMap((tag) => nodeIdsByTag.get(tag) ?? []);
@@ -35,10 +30,7 @@ export function buildGamePackIndex(pack: GamePack): GamePackIndex {
         nodeIds.length > 0 ? nodeIds : pack.nodeTemplates.map((n) => n.id);
       return targets.map((id) => [id, recipe] as const);
     })
-    .reduce((acc, [nodeId, recipe]) => {
-      const existing = acc.get(nodeId) ?? [];
-      return new Map([...acc, [nodeId, [...existing, recipe]]]);
-    }, new Map<NodeTemplateId, readonly Recipe[]>());
+  );
 
   return {
     pack,
@@ -47,6 +39,8 @@ export function buildGamePackIndex(pack: GamePack): GamePackIndex {
     nodeTemplatesById: new Map(pack.nodeTemplates.map((n) => [n.id, n])),
     categoriesById: new Map(pack.categories.map((c) => [c.id, c])),
     recipesByNodeType,
-    itemsByCategory: groupBy(pack.items, (item) => item.categoryId),
+    itemsByCategory: groupPairs(
+      pack.items.flatMap((i) => i.categoryId ? [[i.categoryId, i] as const] : [])
+    ),
   };
 }
