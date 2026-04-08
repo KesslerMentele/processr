@@ -5,6 +5,9 @@ import type {
   PortId,
 } from "../ids.ts";
 import type { Position, Metadata } from "../common.ts";
+import type { Item } from "../items.ts";
+import type { RecipeItemStack } from "../recipes.ts";
+import type { PortDefinition } from "../nodes.ts";
 
 /**
  * A port instance on a placed processor node.
@@ -46,4 +49,10 @@ export interface ProcessrNode {
   /** How many of this machine run in parallel. Defaults to 1. */
   readonly count: number;
   readonly metadata: Metadata;
+}
+
+export interface PortEntry {
+  readonly port: PortDefinition;
+  readonly item: Item | undefined;
+  readonly stack: RecipeItemStack | undefined;
 }

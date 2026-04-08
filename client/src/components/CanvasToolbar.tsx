@@ -1,8 +1,8 @@
 import type { FC } from 'react';
 import { Panel } from '@xyflow/react';
 import { type EdgeType } from '../state/ui-slice.ts';
-import { useProcessrStore } from "../state/store.ts";
 import { LuMove, LuLassoSelect, LuSettings2, LuPackage, LuSun, LuMoon } from 'react-icons/lu';
+import { useToolbarState } from '../hooks/useToolbarState.ts';
 
 interface EdgeOption  { readonly value: EdgeType; readonly label: string }
 
@@ -14,20 +14,7 @@ const EDGE_OPTIONS: readonly EdgeOption[] = [
 ];
 
 const CanvasToolbar: FC = () => {
-  const toolMode = useProcessrStore.use.toolMode();
-  const snapToGrid = useProcessrStore.use.snapToGrid();
-  const detailedMode = useProcessrStore.use.detailedMode();
-  const edgeType = useProcessrStore.use.edgeType();
-  const lightTheme = useProcessrStore.use.lightTheme();
-  const settingsPanelOpen = useProcessrStore.use.settingsPanelOpen();
-  const packEditorOpen = useProcessrStore.use.packEditorOpen();
-  const setToolMode = useProcessrStore.use.setToolMode();
-  const toggleSnap = useProcessrStore.use.toggleSnap();
-  const toggleDetailed = useProcessrStore.use.toggleDetailed();
-  const setEdgeType = useProcessrStore.use.setEdgeType();
-  const toggleLightTheme = useProcessrStore.use.toggleLightTheme();
-  const toggleSettingsPanel = useProcessrStore.use.toggleSettingsPanel();
-  const togglePackEditor = useProcessrStore.use.togglePackEditor();
+  const { toolMode, snapToGrid, detailedMode, edgeType, lightTheme, settingsPanelOpen, packEditorOpen, setToolMode, toggleSnap, toggleDetailed, setEdgeType, toggleLightTheme, toggleSettingsPanel, togglePackEditor } = useToolbarState();
 
   return (
     <Panel position="top-right" className="canvas-toolbar">

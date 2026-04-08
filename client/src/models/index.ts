@@ -40,6 +40,7 @@ export type {
   ProcessrNode,
   PortInstance,
   NodeStatsOverride,
+  PortEntry
 } from "./graph/processr-node.ts";
 export type { Edge, EdgeNodeLevel, EdgePortLevel } from "./graph/edge.ts";
 export type { Graph, Viewport, GraphAction, ActionType, GraphHistory, GraphChange, ReversibleAction } from "./graph/graph.ts";

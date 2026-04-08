@@ -10,12 +10,12 @@ import {
 import { useEdgesState, useNodesState } from "@xyflow/react";
 import { toRFEdge, toRFNode } from "../utils/reactflow-bridge.ts";
 import { type ProcessrNodeData, processrNodeId } from "../models";
-import ProcessrNodeComponent from "./ProcessrNodeComponent.tsx";
-import { useProcessrStore } from "../state/store.ts";
+import ProcessrNodeComponent from "./node/ProcessrNodeComponent.tsx";
 import { useShortcut } from "react-keyhub";
 import CanvasToolbar from "./CanvasToolbar.tsx";
 import AtlasEditor from "./editor/AtlasEditor.tsx";
 import { useCanvasHandlers } from "../hooks/useCanvasHandlers.ts";
+import { useCanvasState } from "../hooks/useCanvasState.ts";
 
 const nodeTypes = { processor: ProcessrNodeComponent };
 const initialNodes: RFNode<ProcessrNodeData>[] = [];
@@ -23,13 +23,7 @@ const initialEdges: RFEdge[] = [];
 
 const Canvas: FC = () => {
 
-  const graph = useProcessrStore.use.graph();
-  const selectedNodeId = useProcessrStore.use.selectedNodeId();
-  const toolMode = useProcessrStore.use.toolMode();
-  const snapToGrid = useProcessrStore.use.snapToGrid();
-  const edgeType = useProcessrStore.use.edgeType();
-  const packEditorOpen = useProcessrStore.use.packEditorOpen();
-  const updateNodePositions = useProcessrStore.use.updateNodePositions();
+  const { graph, selectedNodeId, toolMode, snapToGrid, edgeType, packEditorOpen, updateNodePositions, undo, redo } = useCanvasState();
 
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState(initialNodes);
   const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -40,6 +34,8 @@ const Canvas: FC = () => {
     onNodeDragStart,
     onNodeDragStop,
     isValidConnection,
+    onConnectStart,
+    onConnectEnd,
     onConnect,
     onMoveEnd,
     onNodesDelete,
@@ -48,9 +44,9 @@ const Canvas: FC = () => {
 
   const handleNodesChange = useCallback((changes: NodeChange<RFNode<ProcessrNodeData>>[]) => {
     onNodesChange(changes);
-    const settled = changes.filter((c): c is NodePositionChange => c.type === 'position' && c.dragging === false && c.position !== undefined);
+    const settled = changes.filter((c): c is NodePositionChange & { readonly position: NonNullable<NodePositionChange['position']> } => c.type === 'position' && c.dragging === false && c.position !== undefined);
     if (settled.length > 0) {
-      updateNodePositions(Object.fromEntries(settled.map(c => [processrNodeId(c.id), c.position!])));
+      updateNodePositions(Object.fromEntries(settled.map(c => [processrNodeId(c.id), c.position])));
     }
   }, [onNodesChange, updateNodePositions]);
 
@@ -71,8 +67,8 @@ const Canvas: FC = () => {
     });
   }, [selectedNodeId, setRfNodes]);
 
-  useShortcut('undo', useProcessrStore.use.undo());
-  useShortcut('redo', useProcessrStore.use.redo());
+  useShortcut('undo', undo);
+  useShortcut('redo', redo);
 
   return (
     <div className="canvas-container">
@@ -90,6 +86,8 @@ const Canvas: FC = () => {
         onNodeDragStop={onNodeDragStop}
         onNodesDelete={onNodesDelete}
         onEdgesDelete={onEdgesDelete}
+        onConnectStart={onConnectStart}
+        onConnectEnd={onConnectEnd}
         onConnect={onConnect}
         isValidConnection={isValidConnection}
         onMoveEnd={onMoveEnd}

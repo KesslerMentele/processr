@@ -16,7 +16,7 @@ export const DraggableNodeTemplate: FC<{template:NodeTemplate}> = ({ template })
 
   const startRectRef = useRef<DOMRect | null>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [ghostPos, setGhostPos] = useState<{ x: number; y: number } | null>(null);
+  const [ghostPos, setGhostPos] = useState<{ x: number; y: number; width: number } | null>(null);
 
   const handleNodeDrop = useCallback(
     (screenPosition: XYPosition) => {
@@ -45,12 +45,12 @@ export const DraggableNodeTemplate: FC<{template:NodeTemplate}> = ({ template })
     onDragStart: ({ rootNode }) => {
       // eslint-disable-next-line functional/immutable-data
       startRectRef.current = rootNode.getBoundingClientRect();
-      setGhostPos({ x: startRectRef.current.left, y: startRectRef.current.top });
+      setGhostPos({ x: startRectRef.current.left, y: startRectRef.current.top, width: startRectRef.current.width });
     },
     onDrag: ({ offsetX, offsetY }) => {
       setPosition({ x: offsetX, y: offsetY });
       if (startRectRef.current) {
-        setGhostPos({ x: startRectRef.current.left + offsetX, y: startRectRef.current.top + offsetY });
+        setGhostPos({ x: startRectRef.current.left + offsetX, y: startRectRef.current.top + offsetY, width: startRectRef.current.width });
       }
     },
     onDragEnd: ({ event }) => {
@@ -70,14 +70,14 @@ export const DraggableNodeTemplate: FC<{template:NodeTemplate}> = ({ template })
       <div ref={draggableRef} className="node-template" style={{ opacity: ghostPos ? 0 : 1 }}>
         {template.name}
       </div>
-      {ghostPos && startRectRef.current && createPortal(
+      {ghostPos && createPortal(
         <div
           className="node-template node-template--drag-ghost"
           style={{
             position: 'fixed',
             left: ghostPos.x,
             top: ghostPos.y,
-            width: startRectRef.current.width,
+            width: ghostPos.width,
             pointerEvents: 'none',
             zIndex: 9999,
             opacity: 0.9,

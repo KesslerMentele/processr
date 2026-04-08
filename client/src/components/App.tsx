@@ -1,7 +1,7 @@
 import { type FC, useEffect } from 'react';
 import { ReactFlowProvider } from "@xyflow/react";
 import Canvas from "./Canvas.tsx";
-import Sidebar from "./Sidebar.tsx";
+import Sidebar from "./sidebar/Sidebar.tsx";
 import { saveProcessrGraph } from "../utils/persistence.ts";
 import { useProcessrStore } from "../state/store.ts";
 import { defaultShortcuts, KeyHubProvider } from "react-keyhub";
