@@ -35,7 +35,7 @@ interface GraphActionPayloadMap {
   [ReversibleAction.AddNode]: { readonly node: ProcessrNode };
   [ReversibleAction.RemoveNode]: { readonly nodeId: ProcessrNodeId };
   [ReversibleAction.SetNodePositions]: { readonly positions: Readonly<Record<string, Position>> };
-  [ReversibleAction.SetNodeRecipe]: { readonly nodeId: ProcessrNodeId; readonly recipeId: RecipeId | null };
+  [ReversibleAction.SetNodeRecipe]: { readonly nodeId: ProcessrNodeId; readonly recipeId: RecipeId | null; readonly invalidEdges: Readonly<Record<string, Edge>>; readonly behavior: 'delete' | 'highlight' };
   [ReversibleAction.AddEdge]: { readonly edge: Edge };
   [ReversibleAction.RemoveEdge]: { readonly edgeId: EdgeId };
   [TransientAction.SetViewport]: { readonly viewport: Viewport };
@@ -51,7 +51,7 @@ interface GraphChangePayloadMap {
   [ReversibleAction.AddNode]: { readonly removedNode: ProcessrNode };
   [ReversibleAction.RemoveNode]: { readonly removedNode: ProcessrNode; readonly removedEdges: Readonly<Record<string, Edge>> };
   [ReversibleAction.SetNodePositions]: { readonly previousPositions: Readonly<Record<string, Position>> };
-  [ReversibleAction.SetNodeRecipe]: { readonly previousRecipeId: RecipeId | null };
+  [ReversibleAction.SetNodeRecipe]: { readonly previousRecipeId: RecipeId | null; readonly deletedEdges?: Readonly<Record<string, Edge>> };
   [ReversibleAction.AddEdge]: object;
   [ReversibleAction.RemoveEdge]: { readonly removedEdge: Edge };
 }

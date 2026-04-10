@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { toRFNode, toRFEdge, fromRFConnection } from './reactflow-bridge.ts';
-import { createEdge, createProcessrNode } from './graph-factory.ts';
+import { toRFNode, toRFEdge, fromRFConnection } from '../utils/reactflow-bridge.ts';
+import { createEdge, createProcessrNode } from '../utils/graph-factory.ts';
 import { nodeTemplateId, portId, processrNodeId, PortDirection, type NodeTemplate } from '../models';
 import type { Edge as RFEdge } from '@xyflow/react';
 

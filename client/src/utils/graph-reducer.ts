@@ -2,7 +2,6 @@ import type {
   Graph, GraphAction, GraphChange, ReversibleAction, ProcessrNode, Edge,
 } from "../models";
 
-
 const now = () => new Date().toISOString();
 
 const omitKey = <T>(obj: Readonly<Record<string, T>>, key: string): Record<string, T> =>
@@ -19,13 +18,13 @@ const pickNodeEdges = (edges: Readonly<Record<string, Edge>>, nodeId: string): R
 const omitNodeEdges = (edges: Readonly<Record<string, Edge>>, nodeId: string): Record<string, Edge> =>
   Object.fromEntries(Object.entries(edges).filter(([, e]) => e.sourceNodeId !== nodeId && e.targetNodeId !== nodeId));
 
-const withHistory = (graph: Graph, nextGraph: Graph, change: GraphChange): Graph => ({
+const addChangeToHistory = (graph: Graph, nextGraph: Graph, change: GraphChange): Graph => ({
   ...nextGraph,
   history: { past: [...graph.history.past, change], future: [] },
   updatedAt: now(),
 });
 
-const applyForward = (graph: Graph, action: GraphAction<ReversibleAction>): Graph => {
+const doAction = (graph: Graph, action: GraphAction<ReversibleAction>): Graph => {
   switch (action.type) {
     case "ADD_NODE":
       return { ...graph, nodes: { ...graph.nodes, [action.node.id]: action.node } };
@@ -46,9 +45,18 @@ const applyForward = (graph: Graph, action: GraphAction<ReversibleAction>): Grap
       return { ...graph, nodes: { ...graph.nodes, ...updates } };
     }
 
-    case "SET_NODE_RECIPE":
+    case "SET_NODE_RECIPE": {
       if (!Object.hasOwn(graph.nodes, action.nodeId)) return graph;
-      return withNodeUpdate(graph, action.nodeId, { recipeId: action.recipeId });
+      const withRecipe = withNodeUpdate(graph, action.nodeId, { recipeId: action.recipeId });
+      if (action.behavior === 'delete') {
+        return { ...withRecipe, edges: Object.fromEntries(Object.entries(withRecipe.edges).filter(([id]) => !Object.hasOwn(action.invalidEdges, id))) };
+      }
+      // highlight: mark connected edges as invalid/valid based on recipe compatibility
+      return { ...withRecipe, edges: Object.fromEntries(Object.entries(withRecipe.edges).map(([id, edge]) => {
+        if (edge.sourceNodeId !== action.nodeId && edge.targetNodeId !== action.nodeId) return [id, edge];
+        return [id, Object.hasOwn(action.invalidEdges, id) ? { ...edge, invalid: true } : { ...edge, invalid: undefined }];
+      })) };
+    }
 
     case "ADD_EDGE":
       return { ...graph, edges: { ...graph.edges, [action.edge.id]: action.edge } };
@@ -58,7 +66,7 @@ const applyForward = (graph: Graph, action: GraphAction<ReversibleAction>): Grap
   }
 };
 
-const applyReverse = (graph: Graph, change: GraphChange): Graph => {
+const undoAction = (graph: Graph, change: GraphChange): Graph => {
   switch (change.type) {
     case "ADD_NODE":
       return { ...graph, nodes: omitKey(graph.nodes, change.action.node.id) };
@@ -79,9 +87,12 @@ const applyReverse = (graph: Graph, change: GraphChange): Graph => {
       return { ...graph, nodes: { ...graph.nodes, ...restores } };
     }
 
-    case "SET_NODE_RECIPE":
+    case "SET_NODE_RECIPE": {
       if (!Object.hasOwn(graph.nodes, change.action.nodeId)) return graph;
-      return withNodeUpdate(graph, change.action.nodeId, { recipeId: change.previousRecipeId });
+      const restored = withNodeUpdate(graph, change.action.nodeId, { recipeId: change.previousRecipeId });
+      if (!change.deletedEdges) return restored;
+      return { ...restored, edges: { ...restored.edges, ...change.deletedEdges } };
+    }
 
     case "ADD_EDGE":
       return { ...graph, edges: omitKey(graph.edges, change.action.edge.id) };
@@ -94,13 +105,13 @@ const applyReverse = (graph: Graph, change: GraphChange): Graph => {
 export const graphReducer = (graph: Graph, action: GraphAction): Graph => {
   switch (action.type) {
     case "ADD_NODE":
-      return withHistory(graph, applyForward(graph, action), { type: action.type, action, removedNode: action.node });
+      return addChangeToHistory(graph, doAction(graph, action), { type: action.type, action, removedNode: action.node });
 
     case "REMOVE_NODE": {
       if (!Object.hasOwn(graph.nodes, action.nodeId)) return graph;
       const removedNode = graph.nodes[action.nodeId];
       const removedEdges = pickNodeEdges(graph.edges, action.nodeId);
-      return withHistory(graph, applyForward(graph, action), { type: action.type, action, removedNode, removedEdges });
+      return addChangeToHistory(graph, doAction(graph, action), { type: action.type, action, removedNode, removedEdges });
     }
 
     case "SET_NODE_POSITIONS": {
@@ -109,22 +120,23 @@ export const graphReducer = (graph: Graph, action: GraphAction): Graph => {
           .filter(([id]) => Object.hasOwn(graph.nodes, id))
           .map(([id]) => [id, graph.nodes[id].position])
       );
-      return withHistory(graph, applyForward(graph, action), { type: action.type, action, previousPositions });
+      return addChangeToHistory(graph, doAction(graph, action), { type: action.type, action, previousPositions });
     }
 
     case "SET_NODE_RECIPE": {
       if (!Object.hasOwn(graph.nodes, action.nodeId)) return graph;
       const previousRecipeId = graph.nodes[action.nodeId].recipeId ?? null;
-      return withHistory(graph, applyForward(graph, action), { type: action.type, action, previousRecipeId });
+      const deletedEdges = action.behavior === 'delete' ? action.invalidEdges : undefined;
+      return addChangeToHistory(graph, doAction(graph, action), { type: action.type, action, previousRecipeId, deletedEdges });
     }
 
     case "ADD_EDGE":
-      return withHistory(graph, applyForward(graph, action), { type: action.type, action });
+      return addChangeToHistory(graph, doAction(graph, action), { type: action.type, action });
 
     case "REMOVE_EDGE": {
       if (!Object.hasOwn(graph.edges, action.edgeId)) return graph;
       const removedEdge = graph.edges[action.edgeId];
-      return withHistory(graph, applyForward(graph, action), { type: action.type, action, removedEdge });
+      return addChangeToHistory(graph, doAction(graph, action), { type: action.type, action, removedEdge });
     }
 
     case "SET_VIEWPORT":
@@ -134,7 +146,7 @@ export const graphReducer = (graph: Graph, action: GraphAction): Graph => {
       const lastChange = graph.history.past.at(-1);
       if (lastChange === undefined) return graph;
       return {
-        ...applyReverse(graph, lastChange),
+        ...undoAction(graph, lastChange),
         history: { past: graph.history.past.slice(0, -1), future: [...graph.history.future, lastChange] },
         updatedAt: now(),
       };
@@ -144,7 +156,7 @@ export const graphReducer = (graph: Graph, action: GraphAction): Graph => {
       const lastChange = graph.history.future.at(-1);
       if (lastChange === undefined) return graph;
       return {
-        ...applyForward(graph, lastChange.action),
+        ...doAction(graph, lastChange.action),
         history: { past: [...graph.history.past, lastChange], future: graph.history.future.slice(0, -1) },
         updatedAt: now(),
       };

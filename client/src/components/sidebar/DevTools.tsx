@@ -9,7 +9,7 @@ const DevTools = () => {
 
   const handleClearGraph = () => {
     clearProcessrGraph();
-    loadGraph({ packIndex });
+    loadGraph({ atlasIndex: packIndex });
   };
   const handleClearGamepack = () => {
     clearAtlas();

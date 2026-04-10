@@ -5,7 +5,7 @@ export const useSidebarState = () =>
   useBoundStore(useShallow((state) => ({
     selectedNodeId: state.selectedNodeId,
     graph: state.graph,
-    packIndex: state.packIndex,
+    packIndex: state.atlasIndex,
     setNodeRecipe: state.setNodeRecipe,
     loadGraph: state.loadGraph,
 })));

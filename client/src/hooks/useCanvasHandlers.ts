@@ -22,7 +22,7 @@ import { logger } from "../utils/logger.ts";
 
 export const useCanvasHandlers = () => {
   const graph = useProcessrStore.use.graph();
-  const packIndex = useProcessrStore.use.packIndex();
+  const atlasIndex = useProcessrStore.use.atlasIndex();
   const setSelectedNodeId = useProcessrStore.use.setSelectedNodeId();
   const updateNodePositions = useProcessrStore.use.updateNodePositions();
   const removeNode = useProcessrStore.use.removeNode();
@@ -82,10 +82,10 @@ export const useCanvasHandlers = () => {
   }, []);
 
   const isValidConnection = useCallback<IsValidConnection>((connection) => {
-    const result = isConnectionValid(connection, graph, packIndex);
+    const result = isConnectionValid(connection, graph, atlasIndex);
     logger.debug(`[Connect] isValidConnection source=${connection.source}:${connection.sourceHandle ?? 'none'} → target=${connection.target}:${connection.targetHandle ?? 'none'} → ${result ? 'VALID' : 'INVALID'}`);
     return result;
-  }, [graph, packIndex]);
+  }, [graph, atlasIndex]);
 
   const onConnect = useCallback<OnConnect>((connection) => {
     logger.debug(`[Connect] onConnect source=${connection.source}:${connection.sourceHandle ?? 'none'} → target=${connection.target}:${connection.targetHandle ?? 'none'}`);

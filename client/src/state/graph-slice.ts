@@ -11,7 +11,7 @@ const createGraphSlice: StateCreator<GraphSlice> = (): GraphSlice => {
   const graph = loadProcessrGraph() ?? createGraph(pack.id, "My Factory");
   return {
     graph,
-    packIndex: buildAtlasIndex(pack),
+    atlasIndex: buildAtlasIndex(pack),
     selectedNodeId: null,
     draggedNodeTemplateId: null,
   };

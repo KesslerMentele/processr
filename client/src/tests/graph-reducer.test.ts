@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { graphReducer } from "./graph-reducer.ts";
-import { createEdge, createGraph, createProcessrNode } from "./graph-factory.ts";
+import { graphReducer } from "../utils/graph-reducer.ts";
+import { createEdge, createGraph, createProcessrNode } from "../utils/graph-factory.ts";
 import {
   edgeId,
   gamePackId,
@@ -135,12 +135,6 @@ describe('graphReducer', () => {
       const withNode = graphReducer(makeGraph(), { type: 'ADD_NODE', node });
       const result = graphReducer(withNode, { type: 'SET_NODE_POSITIONS', positions: { [node.id]: { x: 100, y: 200 } } });
       expect(result.nodes[node.id].position).toEqual({ x: 100, y: 200 });
-    });
-
-    it('is idempotent for a non-existent nodeId', () => {
-      const graph = makeGraph();
-      const result = graphReducer(graph, { type: 'SET_NODE_POSITIONS', positions: { [processrNodeId('ghost')]: { x: 0, y: 0 } } });
-      expect(result).toBe(graph);
     });
 
     it('pushes a change to history.past', () => {

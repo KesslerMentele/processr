@@ -7,6 +7,7 @@ import type {
   Viewport
 } from "../models";
 import { PortDirection } from "../models";
+import type { UISettingsSlice } from "../models/state/ui-state.ts";
 import type { StateCreator } from "zustand";
 import { graphReducer } from "../utils/graph-reducer.ts";
 import { buildAtlasIndex } from "../utils/atlas-index.ts";
@@ -14,6 +15,7 @@ import { isNodeLevelEdge } from "../utils/type-validators.ts";
 import { createGraph } from "../utils/graph-factory.ts";
 import { saveAtlas } from "../utils/persistence.ts";
 import type { SetGraphData } from "../models/state/graph-state.ts";
+import { findInvalidEdges } from "../utils/graph-utils.ts";
 
 /**
  * For each template present in both indices, builds a map from old port ID
@@ -68,7 +70,7 @@ const remapEdge = (
   return [edgeId, { ...edge, sourcePortId: newSourcePortId, targetPortId: newTargetPortId }];
 };
 
-const createGraphActions: StateCreator<GraphSlice & GraphActionSlice, [], [], GraphActionSlice> =
+const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISettingsSlice, [], [], GraphActionSlice> =
   (set) => ({
     addNode: (node: ProcessrNode) =>
     {set((state) =>
@@ -86,8 +88,14 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice, [], [], Gr
     },
 
     setNodeRecipe: (nodeId: ProcessrNodeId, recipeId: RecipeId | null) =>
-    {set((state) =>
-      ({ graph: graphReducer(state.graph, { type: "SET_NODE_RECIPE", nodeId, recipeId }) }));
+    {set((state) => {
+      // Compute invalid edges against the graph with the new recipe already applied,
+      // so we detect incompatibilities introduced by the change (not the old state).
+      const tempGraph = { ...state.graph, nodes: { ...state.graph.nodes, [nodeId]: { ...state.graph.nodes[nodeId], recipeId } } };
+      const invalidEdges = findInvalidEdges(nodeId, tempGraph, state.atlasIndex);
+
+      return ({ graph: graphReducer(state.graph, { type: "SET_NODE_RECIPE", nodeId, recipeId, invalidEdges, behavior: state.invalidEdgeBehavior }) });
+    });
     },
 
     addEdge: (edge: Edge) =>
@@ -112,10 +120,10 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice, [], [], Gr
 
     loadGraph: (data:SetGraphData) =>
     {set((state) => {
-      const { graph, packIndex } = data;
+      const { graph, atlasIndex } = data;
       return { ...state,
-        graph: graph ? graph : createGraph(packIndex.pack.id, "My Factory"),
-        packIndex: packIndex };
+        graph: graph ? graph : createGraph(atlasIndex.pack.id, "My Factory"),
+        atlasIndex: atlasIndex };
     });
     },
 
@@ -134,10 +142,10 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice, [], [], Gr
       ({ ...state, draggedTemplateId: id }));
     },
 
-    loadGamePack: (pack: Atlas) =>
+    loadAtlas: (pack: Atlas) =>
     {set((state) => {
       const packIndex = buildAtlasIndex(pack);
-      const portRemapping = buildPortRemapping(state.packIndex, packIndex);
+      const portRemapping = buildPortRemapping(state.atlasIndex, packIndex);
 
       const remappedEdges = Object.fromEntries(
         Object.entries(state.graph.edges)
@@ -147,7 +155,7 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice, [], [], Gr
 
       saveAtlas(pack);
       const graph = { ...state.graph, edges: remappedEdges };
-      return { ...state, packIndex, graph };
+      return { ...state, atlasIndex: packIndex, graph };
     });
     },
 

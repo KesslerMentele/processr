@@ -8,7 +8,7 @@ import {
   portId, type Position,
   processrNodeId
 } from "../models";
-import { createEdge, createGraph, createProcessrNode } from "./graph-factory.ts";
+import { createEdge, createGraph, createProcessrNode } from "../utils/graph-factory.ts";
 
 
 

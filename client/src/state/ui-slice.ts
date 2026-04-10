@@ -4,6 +4,7 @@ import { loadUISettings, saveUISettings } from "../utils/persistence.ts";
 
 export type EdgeType = 'default' | 'straight' | 'step' | 'smoothstep';
 export type ToolMode = 'pan' | 'select';
+export type InvalidEdgeBehavior = 'delete' | 'highlight';
 
 const saved = loadUISettings();
 
@@ -13,6 +14,7 @@ export const createUISlice: StateCreator<UISettingsSlice> = (set) => ({
   edgeType: (saved?.edgeType as EdgeType | undefined) ?? 'default',
   toolMode: (saved?.toolMode as ToolMode | undefined) ?? 'pan',
   lightTheme: saved?.lightTheme ?? false,
+  invalidEdgeBehavior: (saved?.invalidEdgeBehavior as InvalidEdgeBehavior | undefined) ?? 'delete',
   settingsPanelOpen: false,
   packEditorOpen: false,
   toggleSnap: () => {
@@ -48,6 +50,12 @@ export const createUISlice: StateCreator<UISettingsSlice> = (set) => ({
       return next;
     });
   },
+  setInvalidEdgeBehavior: (invalidEdgeBehavior) => {
+    set((state) => {
+      persist({ ...state, invalidEdgeBehavior });
+      return { invalidEdgeBehavior };
+    });
+  },
   toggleSettingsPanel: () => {
     set((state) => ({ settingsPanelOpen: !state.settingsPanelOpen }));
   },
@@ -63,5 +71,6 @@ const persist = (state: UISettingsSlice): void => {
     edgeType: state.edgeType,
     toolMode: state.toolMode,
     lightTheme: state.lightTheme,
+    invalidEdgeBehavior: state.invalidEdgeBehavior,
   });
 };

@@ -9,6 +9,8 @@ interface EdgeBase {
   readonly itemId?: ItemId;
   readonly label?: string;
   readonly metadata: Metadata;
+  /** Set to true when the edge is incompatible with the connected nodes' recipes (highlight mode). */
+  readonly invalid?: boolean;
 }
 
 /**

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildAtlasIndex } from './atlas-index.ts';
+import { buildAtlasIndex } from '../utils/atlas-index.ts';
 import {
   categoryId,
   gamePackId,

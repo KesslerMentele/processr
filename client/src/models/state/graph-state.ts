@@ -7,7 +7,7 @@ import type { Atlas, AtlasIndex } from "../atlas.ts";
 
 export interface SetGraphData {
   readonly graph?: Graph;
-  readonly packIndex: AtlasIndex;
+  readonly atlasIndex: AtlasIndex;
 }
 
 export interface GraphActionSlice {
@@ -19,7 +19,7 @@ export interface GraphActionSlice {
   removeEdge: (edgeId: EdgeId) => void;
   setViewport: (viewport: Viewport) => void;
   loadGraph: (options:SetGraphData) => void;
-  loadGamePack: (pack: Atlas) => void;
+  loadAtlas: (pack: Atlas) => void;
   setSelectedNodeId: (id: ProcessrNodeId | null) => void;
   setDraggedTemplateId: (id: NodeTemplateId | null) => void;
   undo: () => void
@@ -28,7 +28,7 @@ export interface GraphActionSlice {
 
 export interface GraphSlice {
   graph: Graph;
-  packIndex: AtlasIndex;
+  atlasIndex: AtlasIndex;
   selectedNodeId: ProcessrNodeId | null;
   draggedNodeTemplateId: NodeTemplateId | null;
 }

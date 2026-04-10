@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { isNodeLevelEdge } from './type-validators.ts';
-import { createEdge } from './graph-factory.ts';
+import { isNodeLevelEdge } from '../utils/type-validators.ts';
+import { createEdge } from '../utils/graph-factory.ts';
 import { portId, processrNodeId } from '../models';
 
 const nodeA = processrNodeId('node-a');

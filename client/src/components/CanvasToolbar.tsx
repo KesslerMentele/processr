@@ -14,7 +14,7 @@ const EDGE_OPTIONS: readonly EdgeOption[] = [
 ];
 
 const CanvasToolbar: FC = () => {
-  const { toolMode, snapToGrid, detailedMode, edgeType, lightTheme, settingsPanelOpen, packEditorOpen, setToolMode, toggleSnap, toggleDetailed, setEdgeType, toggleLightTheme, toggleSettingsPanel, togglePackEditor } = useToolbarState();
+  const { toolMode, snapToGrid, detailedMode, edgeType, lightTheme, invalidEdgeBehavior, settingsPanelOpen, packEditorOpen, setToolMode, toggleSnap, toggleDetailed, setEdgeType, toggleLightTheme, setInvalidEdgeBehavior, toggleSettingsPanel, togglePackEditor } = useToolbarState();
 
   return (
     <Panel position="top-right" className="canvas-toolbar">
@@ -69,6 +69,21 @@ const CanvasToolbar: FC = () => {
             {lightTheme ? <LuSun size={13} /> : <LuMoon size={13} />}
             Light theme
           </label>
+          <div className="canvas-settings-panel-section-label">Invalid edges</div>
+          <div className="canvas-settings-panel-edge-btns">
+            <button
+              className={`canvas-settings-panel-edge-btn${invalidEdgeBehavior === 'delete' ? ' active' : ''}`}
+              onClick={() => { setInvalidEdgeBehavior('delete'); }}
+            >
+              Delete
+            </button>
+            <button
+              className={`canvas-settings-panel-edge-btn${invalidEdgeBehavior === 'highlight' ? ' active' : ''}`}
+              onClick={() => { setInvalidEdgeBehavior('highlight'); }}
+            >
+              Highlight
+            </button>
+          </div>
           <div className="canvas-settings-panel-section-label">Edge style</div>
           <div className="canvas-settings-panel-edge-btns">
             {EDGE_OPTIONS.map(({ value, label }) => (
