@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { graphReducer } from "../utils/graph-reducer.ts";
-import { createEdge, createGraph, createProcessrNode } from "../utils/graph-factory.ts";
+import { graphReducer } from "../reducers/graph-reducer.ts";
+import { createGraph, createProcessrNode } from "../utils/graph-factory.ts";
+import { createEdge } from "../utils/edge-factory.ts";
 import {
   edgeId,
   gamePackId,
@@ -33,6 +34,8 @@ const template: NodeTemplate = {
 
 const makeGraph = () => createGraph(packId, 'Test Graph');
 const makeNode = (pos = { x: 0, y: 0 }) => createProcessrNode(template, pos);
+const makeEdge = (sourceNodeId: ReturnType<typeof makeNode>['id'], targetNodeId: ReturnType<typeof makeNode>['id']) =>
+  createEdge(sourceNodeId, targetNodeId, { sourcePortId: portId('p-out'), targetPortId: portId('p-in') });
 
 /** Applies a sequence of typed actions to a graph, starting from makeGraph() by default. */
 const applyActions = (actions: GraphAction[], graph: Graph = makeGraph()): Graph =>
@@ -45,21 +48,21 @@ describe('graphReducer', () => {
   describe('ADD_NODE', () => {
     it('adds the node to graph.nodes', () => {
       const node = makeNode();
-      const result = graphReducer(makeGraph(), { type: 'ADD_NODE', node });
+      const result = graphReducer(makeGraph(), { type: 'ADD_NODE', payload: { node } });
       expect(result.nodes[node.id]).toEqual(node);
     });
 
     it('pushes a change to history.past', () => {
       const node = makeNode();
-      const result = graphReducer(makeGraph(), { type: 'ADD_NODE', node });
+      const result = graphReducer(makeGraph(), { type: 'ADD_NODE', payload: { node } });
       expect(result.history.past).toHaveLength(1);
     });
 
     it('clears history.future', () => {
       const node = makeNode();
-      const withNode = graphReducer(makeGraph(), { type: 'ADD_NODE', node });
+      const withNode = graphReducer(makeGraph(), { type: 'ADD_NODE', payload: { node } });
       const undone = graphReducer(withNode, { type: 'UNDO' });
-      const result = graphReducer(undone, { type: 'ADD_NODE', node: makeNode() });
+      const result = graphReducer(undone, { type: 'ADD_NODE', payload: { node: makeNode() } });
       expect(result.history.future).toHaveLength(0);
     });
   });
@@ -67,34 +70,34 @@ describe('graphReducer', () => {
   describe('REMOVE_NODE', () => {
     it('removes the node from graph.nodes', () => {
       const node = makeNode();
-      const withNode = graphReducer(makeGraph(), { type: 'ADD_NODE', node });
-      const result = graphReducer(withNode, { type: 'REMOVE_NODE', nodeId: node.id });
+      const withNode = graphReducer(makeGraph(), { type: 'ADD_NODE', payload: { node } });
+      const result = graphReducer(withNode, { type: 'REMOVE_NODE', payload: { nodeId: node.id } });
       expect(result.nodes).not.toHaveProperty(node.id);
     });
 
     it('removes edges where the node is the source', () => {
       const nodeA = makeNode();
       const nodeB = makeNode();
-      const edge = createEdge(nodeA.id, nodeB.id);
+      const edge = makeEdge(nodeA.id, nodeB.id);
       const graph = applyActions([
-        { type: 'ADD_NODE', node: nodeA },
-        { type: 'ADD_NODE', node: nodeB },
-        { type: 'ADD_EDGE', edge },
+        { type: 'ADD_NODE', payload: { node: nodeA } },
+        { type: 'ADD_NODE', payload: { node: nodeB } },
+        { type: 'ADD_EDGE', payload: { edge } },
       ]);
-      const result = graphReducer(graph, { type: 'REMOVE_NODE', nodeId: nodeA.id });
+      const result = graphReducer(graph, { type: 'REMOVE_NODE', payload: { nodeId: nodeA.id } });
       expect(result.edges).not.toHaveProperty(edge.id);
     });
 
     it('removes edges where the node is the target', () => {
       const nodeA = makeNode();
       const nodeB = makeNode();
-      const edge = createEdge(nodeA.id, nodeB.id);
+      const edge = makeEdge(nodeA.id, nodeB.id);
       const graph = applyActions([
-        { type: 'ADD_NODE', node: nodeA },
-        { type: 'ADD_NODE', node: nodeB },
-        { type: 'ADD_EDGE', edge },
+        { type: 'ADD_NODE', payload: { node: nodeA } },
+        { type: 'ADD_NODE', payload: { node: nodeB } },
+        { type: 'ADD_EDGE', payload: { edge } },
       ]);
-      const result = graphReducer(graph, { type: 'REMOVE_NODE', nodeId: nodeB.id });
+      const result = graphReducer(graph, { type: 'REMOVE_NODE', payload: { nodeId: nodeB.id } });
       expect(result.edges).not.toHaveProperty(edge.id);
     });
 
@@ -102,29 +105,29 @@ describe('graphReducer', () => {
       const nodeA = makeNode();
       const nodeB = makeNode();
       const nodeC = makeNode();
-      const edgeAB = createEdge(nodeA.id, nodeB.id);
-      const edgeBC = createEdge(nodeB.id, nodeC.id);
+      const edgeAB = makeEdge(nodeA.id, nodeB.id);
+      const edgeBC = makeEdge(nodeB.id, nodeC.id);
       const graph = applyActions([
-        { type: 'ADD_NODE', node: nodeA },
-        { type: 'ADD_NODE', node: nodeB },
-        { type: 'ADD_NODE', node: nodeC },
-        { type: 'ADD_EDGE', edge: edgeAB },
-        { type: 'ADD_EDGE', edge: edgeBC },
+        { type: 'ADD_NODE', payload: { node: nodeA } },
+        { type: 'ADD_NODE', payload: { node: nodeB } },
+        { type: 'ADD_NODE', payload: { node: nodeC } },
+        { type: 'ADD_EDGE', payload: { edge: edgeAB } },
+        { type: 'ADD_EDGE', payload: { edge: edgeBC } },
       ]);
-      const result = graphReducer(graph, { type: 'REMOVE_NODE', nodeId: nodeA.id });
+      const result = graphReducer(graph, { type: 'REMOVE_NODE', payload: { nodeId: nodeA.id } });
       expect(result.edges).toHaveProperty(edgeBC.id);
     });
 
-    it('is idempotent for a non-existent nodeId', () => {
+    it('leaves nodes unchanged for a non-existent nodeId', () => {
       const graph = makeGraph();
-      const result = graphReducer(graph, { type: 'REMOVE_NODE', nodeId: processrNodeId('ghost') });
-      expect(result).toBe(graph);
+      const result = graphReducer(graph, { type: 'REMOVE_NODE', payload: { nodeId: processrNodeId('ghost') } });
+      expect(result.nodes).toEqual(graph.nodes);
     });
 
     it('pushes a change to history.past', () => {
       const node = makeNode();
-      const withNode = graphReducer(makeGraph(), { type: 'ADD_NODE', node });
-      const result = graphReducer(withNode, { type: 'REMOVE_NODE', nodeId: node.id });
+      const withNode = graphReducer(makeGraph(), { type: 'ADD_NODE', payload: { node } });
+      const result = graphReducer(withNode, { type: 'REMOVE_NODE', payload: { nodeId: node.id } });
       expect(result.history.past).toHaveLength(2);
     });
   });
@@ -132,15 +135,15 @@ describe('graphReducer', () => {
   describe('SET_NODE_POSITION', () => {
     it('updates the node position', () => {
       const node = makeNode({ x: 0, y: 0 });
-      const withNode = graphReducer(makeGraph(), { type: 'ADD_NODE', node });
-      const result = graphReducer(withNode, { type: 'SET_NODE_POSITIONS', positions: { [node.id]: { x: 100, y: 200 } } });
+      const withNode = graphReducer(makeGraph(), { type: 'ADD_NODE', payload: { node } });
+      const result = graphReducer(withNode, { type: 'SET_NODE_POSITIONS', payload: { positions: { [node.id]: { x: 100, y: 200 } } } });
       expect(result.nodes[node.id].position).toEqual({ x: 100, y: 200 });
     });
 
     it('pushes a change to history.past', () => {
       const node = makeNode();
-      const withNode = graphReducer(makeGraph(), { type: 'ADD_NODE', node });
-      const result = graphReducer(withNode, { type: 'SET_NODE_POSITIONS', positions: { [node.id]: { x: 10, y: 10 } } });
+      const withNode = graphReducer(makeGraph(), { type: 'ADD_NODE', payload: { node } });
+      const result = graphReducer(withNode, { type: 'SET_NODE_POSITIONS', payload: { positions: { [node.id]: { x: 10, y: 10 } } } });
       expect(result.history.past).toHaveLength(2);
     });
   });
@@ -149,8 +152,8 @@ describe('graphReducer', () => {
     it('sets the recipe on the node', () => {
       const node = makeNode();
       const rid = recipeId('recipe-1');
-      const withNode = graphReducer(makeGraph(), { type: 'ADD_NODE', node });
-      const result = graphReducer(withNode, { type: 'SET_NODE_RECIPE', nodeId: node.id, recipeId: rid });
+      const withNode = graphReducer(makeGraph(), { type: 'ADD_NODE', payload: { node } });
+      const result = graphReducer(withNode, { type: 'SET_NODE_RECIPE', payload: { nodeId: node.id, recipeId: rid, invalidEdges: {}, behavior: 'highlight' } });
       expect(result.nodes[node.id].recipeId).toBe(rid);
     });
 
@@ -158,24 +161,50 @@ describe('graphReducer', () => {
       const node = makeNode();
       const rid = recipeId('recipe-1');
       const graph = applyActions([
-        { type: 'ADD_NODE', node },
-        { type: 'SET_NODE_RECIPE', nodeId: node.id, recipeId: rid },
+        { type: 'ADD_NODE', payload: { node } },
+        { type: 'SET_NODE_RECIPE', payload: { nodeId: node.id, recipeId: rid, invalidEdges: {}, behavior: 'highlight' } },
       ]);
-      const result = graphReducer(graph, { type: 'SET_NODE_RECIPE', nodeId: node.id, recipeId: null });
+      const result = graphReducer(graph, { type: 'SET_NODE_RECIPE', payload: { nodeId: node.id, recipeId: null, invalidEdges: {}, behavior: 'highlight' } });
       expect(result.nodes[node.id].recipeId).toBeNull();
-    });
-
-    it('is idempotent for a non-existent nodeId', () => {
-      const graph = makeGraph();
-      const result = graphReducer(graph, { type: 'SET_NODE_RECIPE', nodeId: processrNodeId('ghost'), recipeId: null });
-      expect(result).toBe(graph);
     });
 
     it('pushes a change to history.past', () => {
       const node = makeNode();
-      const withNode = graphReducer(makeGraph(), { type: 'ADD_NODE', node });
-      const result = graphReducer(withNode, { type: 'SET_NODE_RECIPE', nodeId: node.id, recipeId: recipeId('r-1') });
+      const withNode = graphReducer(makeGraph(), { type: 'ADD_NODE', payload: { node } });
+      const result = graphReducer(withNode, { type: 'SET_NODE_RECIPE', payload: { nodeId: node.id, recipeId: recipeId('r-1'), invalidEdges: {}, behavior: 'highlight' } });
       expect(result.history.past).toHaveLength(2);
+    });
+
+    it('marks connected edges as invalid when behavior is highlight', () => {
+      const nodeA = makeNode();
+      const nodeB = makeNode();
+      const edge = makeEdge(nodeA.id, nodeB.id);
+      const graph = applyActions([
+        { type: 'ADD_NODE', payload: { node: nodeA } },
+        { type: 'ADD_NODE', payload: { node: nodeB } },
+        { type: 'ADD_EDGE', payload: { edge } },
+      ]);
+      const result = graphReducer(graph, {
+        type: 'SET_NODE_RECIPE',
+        payload: { nodeId: nodeA.id, recipeId: recipeId('r-1'), invalidEdges: { [edge.id]: edge }, behavior: 'highlight' },
+      });
+      expect(result.edges[edge.id].invalid).toBe(true);
+    });
+
+    it('removes invalid edges when behavior is delete', () => {
+      const nodeA = makeNode();
+      const nodeB = makeNode();
+      const edge = makeEdge(nodeA.id, nodeB.id);
+      const graph = applyActions([
+        { type: 'ADD_NODE', payload: { node: nodeA } },
+        { type: 'ADD_NODE', payload: { node: nodeB } },
+        { type: 'ADD_EDGE', payload: { edge } },
+      ]);
+      const result = graphReducer(graph, {
+        type: 'SET_NODE_RECIPE',
+        payload: { nodeId: nodeA.id, recipeId: recipeId('r-1'), invalidEdges: { [edge.id]: edge }, behavior: 'delete' },
+      });
+      expect(result.edges).not.toHaveProperty(edge.id);
     });
   });
 
@@ -183,24 +212,24 @@ describe('graphReducer', () => {
     it('adds the edge to graph.edges', () => {
       const nodeA = makeNode();
       const nodeB = makeNode();
-      const edge = createEdge(nodeA.id, nodeB.id);
+      const edge = makeEdge(nodeA.id, nodeB.id);
       const withNodes = applyActions([
-        { type: 'ADD_NODE', node: nodeA },
-        { type: 'ADD_NODE', node: nodeB },
+        { type: 'ADD_NODE', payload: { node: nodeA } },
+        { type: 'ADD_NODE', payload: { node: nodeB } },
       ]);
-      const result = graphReducer(withNodes, { type: 'ADD_EDGE', edge });
+      const result = graphReducer(withNodes, { type: 'ADD_EDGE', payload: { edge } });
       expect(result.edges[edge.id]).toEqual(edge);
     });
 
     it('pushes a change to history.past', () => {
       const nodeA = makeNode();
       const nodeB = makeNode();
-      const edge = createEdge(nodeA.id, nodeB.id);
+      const edge = makeEdge(nodeA.id, nodeB.id);
       const withNodes = applyActions([
-        { type: 'ADD_NODE', node: nodeA },
-        { type: 'ADD_NODE', node: nodeB },
+        { type: 'ADD_NODE', payload: { node: nodeA } },
+        { type: 'ADD_NODE', payload: { node: nodeB } },
       ]);
-      const result = graphReducer(withNodes, { type: 'ADD_EDGE', edge });
+      const result = graphReducer(withNodes, { type: 'ADD_EDGE', payload: { edge } });
       expect(result.history.past).toHaveLength(3);
     });
   });
@@ -209,32 +238,32 @@ describe('graphReducer', () => {
     it('removes the edge from graph.edges', () => {
       const nodeA = makeNode();
       const nodeB = makeNode();
-      const edge = createEdge(nodeA.id, nodeB.id);
+      const edge = makeEdge(nodeA.id, nodeB.id);
       const graph = applyActions([
-        { type: 'ADD_NODE', node: nodeA },
-        { type: 'ADD_NODE', node: nodeB },
-        { type: 'ADD_EDGE', edge },
+        { type: 'ADD_NODE', payload: { node: nodeA } },
+        { type: 'ADD_NODE', payload: { node: nodeB } },
+        { type: 'ADD_EDGE', payload: { edge } },
       ]);
-      const result = graphReducer(graph, { type: 'REMOVE_EDGE', edgeId: edge.id });
+      const result = graphReducer(graph, { type: 'REMOVE_EDGE', payload: { edgeId: edge.id } });
       expect(result.edges).not.toHaveProperty(edge.id);
     });
 
-    it('is idempotent for a non-existent edgeId', () => {
+    it('leaves edges unchanged for a non-existent edgeId', () => {
       const graph = makeGraph();
-      const result = graphReducer(graph, { type: 'REMOVE_EDGE', edgeId: edgeId('ghost') });
-      expect(result).toBe(graph);
+      const result = graphReducer(graph, { type: 'REMOVE_EDGE', payload: { edgeId: edgeId('ghost') } });
+      expect(result.edges).toEqual(graph.edges);
     });
 
     it('pushes a change to history.past', () => {
       const nodeA = makeNode();
       const nodeB = makeNode();
-      const edge = createEdge(nodeA.id, nodeB.id);
+      const edge = makeEdge(nodeA.id, nodeB.id);
       const graph = applyActions([
-        { type: 'ADD_NODE', node: nodeA },
-        { type: 'ADD_NODE', node: nodeB },
-        { type: 'ADD_EDGE', edge },
+        { type: 'ADD_NODE', payload: { node: nodeA } },
+        { type: 'ADD_NODE', payload: { node: nodeB } },
+        { type: 'ADD_EDGE', payload: { edge } },
       ]);
-      const result = graphReducer(graph, { type: 'REMOVE_EDGE', edgeId: edge.id });
+      const result = graphReducer(graph, { type: 'REMOVE_EDGE', payload: { edgeId: edge.id } });
       expect(result.history.past).toHaveLength(4);
     });
   });
@@ -242,12 +271,12 @@ describe('graphReducer', () => {
   describe('SET_VIEWPORT', () => {
     it('updates the viewport', () => {
       const viewport = { x: 100, y: 200, zoom: 1.5 };
-      const result = graphReducer(makeGraph(), { type: 'SET_VIEWPORT', viewport });
+      const result = graphReducer(makeGraph(), { type: 'SET_VIEWPORT', payload: { viewport } });
       expect(result.viewport).toEqual(viewport);
     });
 
     it('does not push to history', () => {
-      const result = graphReducer(makeGraph(), { type: 'SET_VIEWPORT', viewport: { x: 0, y: 0, zoom: 2 } });
+      const result = graphReducer(makeGraph(), { type: 'SET_VIEWPORT', payload: { viewport: { x: 0, y: 0, zoom: 2 } } });
       expect(result.history.past).toHaveLength(0);
     });
   });
@@ -261,7 +290,7 @@ describe('graphReducer', () => {
 
     it('reverses ADD_NODE', () => {
       const node = makeNode();
-      const withNode = graphReducer(makeGraph(), { type: 'ADD_NODE', node });
+      const withNode = graphReducer(makeGraph(), { type: 'ADD_NODE', payload: { node } });
       const result = graphReducer(withNode, { type: 'UNDO' });
       expect(result.nodes).not.toHaveProperty(node.id);
     });
@@ -269,12 +298,12 @@ describe('graphReducer', () => {
     it('reverses REMOVE_NODE and restores its edges', () => {
       const nodeA = makeNode();
       const nodeB = makeNode();
-      const edge = createEdge(nodeA.id, nodeB.id);
+      const edge = makeEdge(nodeA.id, nodeB.id);
       const graph = applyActions([
-        { type: 'ADD_NODE', node: nodeA },
-        { type: 'ADD_NODE', node: nodeB },
-        { type: 'ADD_EDGE', edge },
-        { type: 'REMOVE_NODE', nodeId: nodeA.id },
+        { type: 'ADD_NODE', payload: { node: nodeA } },
+        { type: 'ADD_NODE', payload: { node: nodeB } },
+        { type: 'ADD_EDGE', payload: { edge } },
+        { type: 'REMOVE_NODE', payload: { nodeId: nodeA.id } },
       ]);
       const result = graphReducer(graph, { type: 'UNDO' });
       expect(result.nodes).toHaveProperty(nodeA.id);
@@ -284,8 +313,8 @@ describe('graphReducer', () => {
     it('reverses SET_NODE_POSITION', () => {
       const node = makeNode({ x: 0, y: 0 });
       const graph = applyActions([
-        { type: 'ADD_NODE', node },
-        { type: 'SET_NODE_POSITIONS', positions: { [node.id]: { x: 100, y: 100 } } },
+        { type: 'ADD_NODE', payload: { node } },
+        { type: 'SET_NODE_POSITIONS', payload: { positions: { [node.id]: { x: 100, y: 100 } } } },
       ]);
       const result = graphReducer(graph, { type: 'UNDO' });
       expect(result.nodes[node.id].position).toEqual({ x: 0, y: 0 });
@@ -295,8 +324,8 @@ describe('graphReducer', () => {
       const node = makeNode();
       const rid = recipeId('recipe-1');
       const graph = applyActions([
-        { type: 'ADD_NODE', node },
-        { type: 'SET_NODE_RECIPE', nodeId: node.id, recipeId: rid },
+        { type: 'ADD_NODE', payload: { node } },
+        { type: 'SET_NODE_RECIPE', payload: { nodeId: node.id, recipeId: rid, invalidEdges: {}, behavior: 'highlight' } },
       ]);
       const result = graphReducer(graph, { type: 'UNDO' });
       expect(result.nodes[node.id].recipeId).toBeNull();
@@ -305,11 +334,11 @@ describe('graphReducer', () => {
     it('reverses ADD_EDGE', () => {
       const nodeA = makeNode();
       const nodeB = makeNode();
-      const edge = createEdge(nodeA.id, nodeB.id);
+      const edge = makeEdge(nodeA.id, nodeB.id);
       const graph = applyActions([
-        { type: 'ADD_NODE', node: nodeA },
-        { type: 'ADD_NODE', node: nodeB },
-        { type: 'ADD_EDGE', edge },
+        { type: 'ADD_NODE', payload: { node: nodeA } },
+        { type: 'ADD_NODE', payload: { node: nodeB } },
+        { type: 'ADD_EDGE', payload: { edge } },
       ]);
       const result = graphReducer(graph, { type: 'UNDO' });
       expect(result.edges).not.toHaveProperty(edge.id);
@@ -318,12 +347,12 @@ describe('graphReducer', () => {
     it('reverses REMOVE_EDGE', () => {
       const nodeA = makeNode();
       const nodeB = makeNode();
-      const edge = createEdge(nodeA.id, nodeB.id);
+      const edge = makeEdge(nodeA.id, nodeB.id);
       const graph = applyActions([
-        { type: 'ADD_NODE', node: nodeA },
-        { type: 'ADD_NODE', node: nodeB },
-        { type: 'ADD_EDGE', edge },
-        { type: 'REMOVE_EDGE', edgeId: edge.id },
+        { type: 'ADD_NODE', payload: { node: nodeA } },
+        { type: 'ADD_NODE', payload: { node: nodeB } },
+        { type: 'ADD_EDGE', payload: { edge } },
+        { type: 'REMOVE_EDGE', payload: { edgeId: edge.id } },
       ]);
       const result = graphReducer(graph, { type: 'UNDO' });
       expect(result.edges).toHaveProperty(edge.id);
@@ -331,7 +360,7 @@ describe('graphReducer', () => {
 
     it('moves the change from past to future', () => {
       const node = makeNode();
-      const withNode = graphReducer(makeGraph(), { type: 'ADD_NODE', node });
+      const withNode = graphReducer(makeGraph(), { type: 'ADD_NODE', payload: { node } });
       const result = graphReducer(withNode, { type: 'UNDO' });
       expect(result.history.past).toHaveLength(0);
       expect(result.history.future).toHaveLength(1);
@@ -348,7 +377,7 @@ describe('graphReducer', () => {
     it('replays the last undone action', () => {
       const node = makeNode();
       const graph = applyActions([
-        { type: 'ADD_NODE', node },
+        { type: 'ADD_NODE', payload: { node } },
         { type: 'UNDO' },
       ]);
       const result = graphReducer(graph, { type: 'REDO' });
@@ -358,7 +387,7 @@ describe('graphReducer', () => {
     it('moves the change from future to past', () => {
       const node = makeNode();
       const graph = applyActions([
-        { type: 'ADD_NODE', node },
+        { type: 'ADD_NODE', payload: { node } },
         { type: 'UNDO' },
       ]);
       const result = graphReducer(graph, { type: 'REDO' });
@@ -371,9 +400,9 @@ describe('graphReducer', () => {
     it('clears future when a new action is dispatched after an undo', () => {
       const node = makeNode();
       const graph = applyActions([
-        { type: 'ADD_NODE', node },
+        { type: 'ADD_NODE', payload: { node } },
         { type: 'UNDO' },
-        { type: 'ADD_NODE', node: makeNode() },
+        { type: 'ADD_NODE', payload: { node: makeNode() } },
       ]);
       expect(graph.history.future).toHaveLength(0);
     });
