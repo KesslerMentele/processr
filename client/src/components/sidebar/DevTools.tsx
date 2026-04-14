@@ -5,13 +5,13 @@ import { useProcessrStore } from "../../state/store.ts";
 
 const DevTools = () => {
   const loadGraph = useProcessrStore.use.loadGraph();
-  const packIndex = useProcessrStore.use.packIndex();
+  const atlasIndex = useProcessrStore.use.atlasIndex();
 
   const handleClearGraph = () => {
     clearProcessrGraph();
-    loadGraph({ atlasIndex: packIndex });
+    loadGraph({ atlasIndex: atlasIndex });
   };
-  const handleClearGamepack = () => {
+  const handleClearAtlas = () => {
     clearAtlas();
     handleClearGraph();
   };
@@ -19,7 +19,7 @@ const DevTools = () => {
   return (
     <div className="sidebar-dev-tools">
       <button className="sidebar-dev-btn" onClick={handleClearGraph}>Clear Graph</button>
-      <button className="sidebar-dev-btn sidebar-dev-btn-danger" onClick={handleClearGamepack}>Clear Saved Atlas</button>
+      <button className="sidebar-dev-btn sidebar-dev-btn-danger" onClick={handleClearAtlas}>Clear Saved Atlas</button>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import { type Edge, portId, type ProcessrNode, type ProcessrNodeData, processrNodeId } from "../models";
 import type { Node as RFNode, Edge as RFEdge } from "@xyflow/react";
-import { createEdge } from "./graph-factory.ts";
+import { createEdge } from "./edge-factory.ts";
 
 export const toRFNode = (node:ProcessrNode): RFNode<ProcessrNodeData> => {
   return {
@@ -23,12 +23,12 @@ export const toRFEdge = (edge:Edge): RFEdge => {
 };
 
 export const fromRFConnection = (rfEge:RFEdge): Edge => {
+  if (!rfEge.sourceHandle || !rfEge.targetHandle) {
+    throw new Error("Invalid RF connection");
+  }
   return createEdge(
     processrNodeId(rfEge.source),
     processrNodeId(rfEge.target),
-    {
-      sourcePortId: rfEge.sourceHandle ? portId(rfEge.sourceHandle) : undefined,
-      targetPortId: rfEge.targetHandle ? portId(rfEge.targetHandle) : undefined
-    }
+    { sourcePortId: portId(rfEge.sourceHandle), targetPortId: portId(rfEge.targetHandle) }
   );
 };

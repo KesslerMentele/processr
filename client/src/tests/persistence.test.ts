@@ -5,8 +5,8 @@ import {
   clearProcessrGraph,
   saveAtlas,
   loadAtlas,
-} from './persistence.ts';
-import { createGraph } from './graph-factory.ts';
+} from '../utils/persistence.ts';
+import { createGraph } from '../utils/graph-factory.ts';
 import { gamePackId, type Atlas } from '../models';
 import { DOCUMENT_FORMAT_VERSION } from '../models';
 

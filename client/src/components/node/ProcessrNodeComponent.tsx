@@ -70,7 +70,7 @@ const ProcessrNodeComponent: FC<ProcessrNodeComponentProps> = ({ data, selected 
         </div>
       }
 
-      {outputs.map(p => (<Port {...p} />))}
+      {outputs.map((p, i) => (<Port key={i} {...p} />))}
     </div>
   );
 };

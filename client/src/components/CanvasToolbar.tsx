@@ -14,7 +14,24 @@ const EDGE_OPTIONS: readonly EdgeOption[] = [
 ];
 
 const CanvasToolbar: FC = () => {
-  const { toolMode, snapToGrid, detailedMode, edgeType, lightTheme, invalidEdgeBehavior, settingsPanelOpen, packEditorOpen, setToolMode, toggleSnap, toggleDetailed, setEdgeType, toggleLightTheme, setInvalidEdgeBehavior, toggleSettingsPanel, togglePackEditor } = useToolbarState();
+  const {
+    toolMode,
+    snapToGrid,
+    detailedMode,
+    edgeType,
+    lightTheme,
+    invalidEdgeBehavior,
+    settingsPanelOpen,
+    packEditorOpen,
+    setToolMode,
+    toggleSnap,
+    toggleDetailed,
+    setEdgeType,
+    toggleLightTheme,
+    setInvalidEdgeBehavior,
+    toggleSettingsPanel,
+    togglePackEditor
+  } = useToolbarState();
 
   return (
     <Panel position="top-right" className="canvas-toolbar">

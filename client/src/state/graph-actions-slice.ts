@@ -7,11 +7,10 @@ import type {
   Viewport
 } from "../models";
 import { PortDirection } from "../models";
-import type { UISettingsSlice } from "../models/state/ui-state.ts";
+import type { UISettingsSlice } from "../models";
 import type { StateCreator } from "zustand";
-import { graphReducer } from "../utils/graph-reducer.ts";
+import { graphReducer } from "../reducers/graph-reducer.ts";
 import { buildAtlasIndex } from "../utils/atlas-index.ts";
-import { isNodeLevelEdge } from "../utils/type-validators.ts";
 import { createGraph } from "../utils/graph-factory.ts";
 import { saveAtlas } from "../utils/persistence.ts";
 import type { SetGraphData } from "../models/state/graph-state.ts";
@@ -53,7 +52,6 @@ const remapEdge = (
   packIndex: AtlasIndex,
   portRemapping: PortRemapping,
 ): [string, Edge] | null => {
-  if (isNodeLevelEdge(edge)) return [edgeId, edge];
 
   const sourceNode = nodes[edge.sourceNodeId] as ProcessrNode | undefined;
   const targetNode = nodes[edge.targetNodeId] as ProcessrNode | undefined;
@@ -74,17 +72,17 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISetting
   (set) => ({
     addNode: (node: ProcessrNode) =>
     {set((state) =>
-      ({ graph: graphReducer(state.graph, { type: "ADD_NODE", node }) }));
+      ({ graph: graphReducer(state.graph, { type: "ADD_NODE", payload: { node } }) }));
     },
 
     removeNode: (nodeId: ProcessrNodeId) =>
     {set((state) =>
-      ({ graph: graphReducer(state.graph, { type: "REMOVE_NODE", nodeId }) }));
+      ({ graph: graphReducer(state.graph, { type: "REMOVE_NODE",  payload: { nodeId } }) }));
     },
 
     updateNodePositions: (positions: Readonly<Record<string, Position>>) =>
     {set((state) =>
-      ({ graph: graphReducer(state.graph, { type: "SET_NODE_POSITIONS", positions }) }));
+      ({ graph: graphReducer(state.graph, { type: "SET_NODE_POSITIONS",  payload: { positions } }) }));
     },
 
     setNodeRecipe: (nodeId: ProcessrNodeId, recipeId: RecipeId | null) =>
@@ -94,23 +92,23 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISetting
       const tempGraph = { ...state.graph, nodes: { ...state.graph.nodes, [nodeId]: { ...state.graph.nodes[nodeId], recipeId } } };
       const invalidEdges = findInvalidEdges(nodeId, tempGraph, state.atlasIndex);
 
-      return ({ graph: graphReducer(state.graph, { type: "SET_NODE_RECIPE", nodeId, recipeId, invalidEdges, behavior: state.invalidEdgeBehavior }) });
+      return ({ graph: graphReducer(state.graph, { type: "SET_NODE_RECIPE", payload: { nodeId, recipeId, invalidEdges, behavior: state.invalidEdgeBehavior } }) });
     });
     },
 
     addEdge: (edge: Edge) =>
     {set((state) =>
-      ({ graph: graphReducer(state.graph, { type: "ADD_EDGE", edge }) }));
+      ({ graph: graphReducer(state.graph, { type: "ADD_EDGE",  payload: { edge } }) }));
     },
 
     removeEdge: (edgeId: EdgeId) =>
     {set((state) =>
-      ({ graph: graphReducer(state.graph, { type: "REMOVE_EDGE", edgeId }) }));
+      ({ graph: graphReducer(state.graph, { type: "REMOVE_EDGE",  payload: { edgeId } }) }));
     },
 
     setViewport: (viewport: Viewport) =>
     {set((state) =>
-      ({ graph: graphReducer(state.graph, { type: "SET_VIEWPORT", viewport }) }));
+      ({ graph: graphReducer(state.graph, { type: "SET_VIEWPORT",  payload: { viewport } }) }));
     },
 
     setSelectedNodeId: (id: ProcessrNodeId | null) =>
