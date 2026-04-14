@@ -39,25 +39,29 @@ interface GraphActionPayloadMap {
   [ReversibleAction.AddEdge]: { readonly edge: Edge };
   [ReversibleAction.RemoveEdge]: { readonly edgeId: EdgeId };
   [TransientAction.SetViewport]: { readonly viewport: Viewport };
-  [TransientAction.Undo]: object;
-  [TransientAction.Redo]: object;
+  [TransientAction.Undo]: undefined;
+  [TransientAction.Redo]: undefined;
 }
 
-  export type GraphAction<T extends ActionType = ActionType> = {
-    [K in T]: { readonly type: K } & GraphActionPayloadMap[K]
-  }[T];
+export type GraphAction<T extends ActionType = ActionType> = {
+  [K in T]: GraphActionPayloadMap[K] extends undefined
+    ? { readonly type: K; }
+    : { readonly type: K; payload: GraphActionPayloadMap[K] }
+}[T];
 
 interface GraphChangePayloadMap {
-  [ReversibleAction.AddNode]: { readonly removedNode: ProcessrNode };
+  [ReversibleAction.AddNode]: undefined;
   [ReversibleAction.RemoveNode]: { readonly removedNode: ProcessrNode; readonly removedEdges: Readonly<Record<string, Edge>> };
   [ReversibleAction.SetNodePositions]: { readonly previousPositions: Readonly<Record<string, Position>> };
-  [ReversibleAction.SetNodeRecipe]: { readonly previousRecipeId: RecipeId | null; readonly deletedEdges?: Readonly<Record<string, Edge>> };
-  [ReversibleAction.AddEdge]: object;
+  [ReversibleAction.SetNodeRecipe]: { readonly previousRecipeId: RecipeId | null; readonly changedEdges: Readonly<Record<string, Edge>>;};
+  [ReversibleAction.AddEdge]: undefined;
   [ReversibleAction.RemoveEdge]: { readonly removedEdge: Edge };
 }
 
 export type GraphChange<T extends ReversibleAction = ReversibleAction> = {
-  [K in T]: { readonly type: K; readonly action: GraphAction<K> } & GraphChangePayloadMap[K]
+  [K in T]: GraphChangePayloadMap[K] extends undefined
+    ? { readonly type: K; readonly action: GraphAction<K>; }
+    : { readonly type: K; readonly action: GraphAction<K>; payload: GraphChangePayloadMap[K] }
 }[T];
 
 export interface GraphHistory {
