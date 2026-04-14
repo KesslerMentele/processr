@@ -3,6 +3,8 @@ import { EditorView } from '@codemirror/view';
 import { EditorState as CodeMirrorEditorState } from '@codemirror/state';
 import { basicSetup } from 'codemirror';
 import { oneDark } from '@codemirror/theme-one-dark';
+import { atlasLanguage } from '../utils/atlas-language.ts';
+import { atlasColorPicker } from '../utils/atlas-color-picker.ts';
 import { parseAtlasText, serializeAtlasToText } from '../utils/pack-api.ts';
 import { loadAtlasEditorText } from '../utils/persistence.ts';
 import { generatePackText } from '../utils/ai-api.ts';
@@ -86,6 +88,8 @@ export const usePackEditorView = ({
         extensions: [
           basicSetup,
           oneDark,
+          atlasLanguage,
+          atlasColorPicker,
           EditorView.updateListener.of((update) => {
             if (!update.docChanged) return;
             if (isGeneratingRef.current) return;
