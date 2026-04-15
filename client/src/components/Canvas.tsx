@@ -24,7 +24,7 @@ const initialEdges: RFEdge[] = [];
 const Canvas: FC = () => {
 
   const {
-    graph, selectedNodeId, toolMode,
+    graph, selectedNodeIds, toolMode,
     snapToGrid, edgeType, packEditorOpen,
     updateNodePositions, undo, redo
   } = useCanvasState();
@@ -68,34 +68,23 @@ const Canvas: FC = () => {
   }, [onNodesChange, updateNodePositions]);
 
 
-  // Effect to reset ReactFlow Nodes array when graph.nodes changes.
+  // Effect to reset ReactFlow Nodes array when graph.nodes or selection changes.
   useEffect(() => {
-
+    const idSet = new Set(selectedNodeIds);
     setRfNodes(Object.values(graph.nodes).map(n => (
-      { ...toRFNode(n), selected: n.id === selectedNodeId })
+      { ...toRFNode(n), selected: idSet.has(n.id) })
     ));
-  }, [setRfNodes, graph.nodes, selectedNodeId]);
+  }, [setRfNodes, graph.nodes, selectedNodeIds]);
 
 
   // Effect to reset ReactFlow Edges array when graph.edges changes.
   useEffect(() => {
-
     setRfEdges(Object.values(graph.edges).map(e => {
 
       return { ...toRFEdge(e), type: edgeType, animated: e.invalid, style: { stroke: e.invalid ? 'red' : "gray" } };
     }));
 
   }, [setRfEdges, graph.edges, edgeType]);
-
-  // Effect to find and apply selection to ReactFlow Node array based on selectedNodeId
-  useEffect(() => {
-    if (selectedNodeId === null) return;
-    setRfNodes(prev => {
-      const target = prev.find(n => n.id === selectedNodeId);
-      if (target?.selected) return prev;
-      return prev.map(n => n.id === selectedNodeId ? { ...n, selected: true } : n);
-    });
-  }, [selectedNodeId, setRfNodes]);
 
   useShortcut('undo', undo);
   useShortcut('redo', redo);

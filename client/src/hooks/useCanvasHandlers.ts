@@ -23,7 +23,7 @@ import { areItemsCompatible } from "../utils/graph-utils.ts";
 export const useCanvasHandlers = () => {
   const graph = useProcessrStore.use.graph();
   const atlasIndex = useProcessrStore.use.atlasIndex();
-  const setSelectedNodeId = useProcessrStore.use.setSelectedNodeId();
+  const setSelectedNodeIds = useProcessrStore.use.setSelectedNodeIds();
   const updateNodePositions = useProcessrStore.use.updateNodePositions();
   const removeNode = useProcessrStore.use.removeNode();
   const addEdge = useProcessrStore.use.addEdge();
@@ -41,10 +41,10 @@ export const useCanvasHandlers = () => {
         pendingSelectionRef.current = nodes;
         return;
       }
-      if (!isDragging.current && nodes.length <= 1) {
-        setSelectedNodeId(nodes[0] ? processrNodeId(nodes[0].id) : null);
+      if (!isDragging.current) {
+        setSelectedNodeIds(nodes.map(n => processrNodeId(n.id)));
       }
-    }, [setSelectedNodeId])
+    }, [setSelectedNodeIds])
   });
 
   const onSelectionStart = useCallback(() => {
@@ -56,10 +56,8 @@ export const useCanvasHandlers = () => {
     // eslint-disable-next-line functional/immutable-data
     isSelectionDragging.current = false;
     const nodes = pendingSelectionRef.current;
-    if (nodes.length === 1) {
-      setSelectedNodeId(processrNodeId(nodes[0].id));
-    }
-  }, [setSelectedNodeId]);
+    setSelectedNodeIds(nodes.map(n => processrNodeId(n.id)));
+  }, [setSelectedNodeIds]);
 
   const onNodeDragStart = useCallback<OnNodeDrag<RFNode<ProcessrNodeData>>>(() => {
     // eslint-disable-next-line functional/immutable-data

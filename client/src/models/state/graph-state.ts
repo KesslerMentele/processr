@@ -15,13 +15,16 @@ export interface GraphActionSlice {
   removeNode: (node: ProcessrNodeId) => void;
   updateNodePositions: (positions: Readonly<Record<string, Position>>) => void;
   setNodeRecipe: (nodeId: ProcessrNodeId, recipeId: RecipeId | null) => void;
+  setNodeRecipes: (updates: { nodeId: ProcessrNodeId; recipeId: RecipeId | null }[]) => void;
   addEdge: (edge: Edge) => void;
   removeEdge: (edgeId: EdgeId) => void;
   setViewport: (viewport: Viewport) => void;
   loadGraph: (options:SetGraphData) => void;
   loadAtlas: (pack: Atlas) => void;
-  setSelectedNodeId: (id: ProcessrNodeId | null) => void;
+  setSelectedNodeIds: (ids: readonly ProcessrNodeId[]) => void;
   setDraggedTemplateId: (id: NodeTemplateId | null) => void;
+  stackNodes: (selectedNodeIds: readonly ProcessrNodeId[]) => void;
+  unstackNode: (nodeId: ProcessrNodeId) => void;
   undo: () => void
   redo: () => void
 }
@@ -29,6 +32,6 @@ export interface GraphActionSlice {
 export interface GraphSlice {
   graph: Graph;
   atlasIndex: AtlasIndex;
-  selectedNodeId: ProcessrNodeId | null;
+  selectedNodeIds: readonly ProcessrNodeId[];
   draggedNodeTemplateId: NodeTemplateId | null;
 }

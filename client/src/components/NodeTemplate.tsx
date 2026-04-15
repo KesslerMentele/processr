@@ -10,7 +10,7 @@ import { useReactFlow, type XYPosition } from "@xyflow/react";
 export const DraggableNodeTemplate: FC<{template:NodeTemplate}> = ({ template }) => {
   const draggableRef = useRef<HTMLDivElement>(null);
   const addNode = useProcessrStore.use.addNode();
-  const setSelectedNodeId = useProcessrStore.use.setSelectedNodeId();
+  const setSelectedNodeId = useProcessrStore.use.setSelectedNodeIds();
   const atlasIndex = useProcessrStore.use.atlasIndex();
   const { screenToFlowPosition } = useReactFlow();
 
@@ -35,7 +35,7 @@ export const DraggableNodeTemplate: FC<{template:NodeTemplate}> = ({ template })
         const autoRecipeId = compatibleRecipes.length === 1 ? compatibleRecipes[0].id : null;
         const node = createProcessrNode(template, position, autoRecipeId ? { recipeId: autoRecipeId } : undefined);
         addNode(node);
-        setSelectedNodeId(node.id);
+        setSelectedNodeId([node.id]);
       }
     }, [addNode, atlasIndex.recipesByNodeType, screenToFlowPosition, setSelectedNodeId, template],
   );

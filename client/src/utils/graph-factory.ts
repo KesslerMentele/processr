@@ -8,7 +8,6 @@ import type {
 } from "../models";
 import { newGraphId, newProcessrNodeId } from "./id.ts";
 
-
 const newViewport = () => ({ x: 0, y: 0, zoom: 1 });
 
 
@@ -30,6 +29,17 @@ export const createProcessrNode = (
     metadata: template.metadata
   };
 };
+
+export const cloneNode = (
+  source: ProcessrNode,
+  template: NodeTemplate,
+  position: Position,
+): ProcessrNode => createProcessrNode(template, position, {
+  recipeId: source.recipeId,
+  statsOverride: source.statsOverride,
+  label: source.label,
+  count: 1,
+});
 
 export const createGraph = (
   gamePackId: GamePackId,

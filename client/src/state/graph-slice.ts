@@ -12,7 +12,7 @@ const createGraphSlice: StateCreator<GraphSlice> = (): GraphSlice => {
   return {
     graph,
     atlasIndex: buildAtlasIndex(pack),
-    selectedNodeId: null,
+    selectedNodeIds: [],
     draggedNodeTemplateId: null,
   };
 };

@@ -10,6 +10,8 @@ export const useToolbarState = () => useBoundStore(useShallow(state => ({
   invalidEdgeBehavior: state.invalidEdgeBehavior,
   settingsPanelOpen: state.settingsPanelOpen,
   packEditorOpen: state.packEditorOpen,
+  selectedNodeIds: state.selectedNodeIds,
+  graph: state.graph,
   setToolMode: state.setToolMode,
   toggleSnap: state.toggleSnap,
   toggleDetailed: state.toggleDetailed,
@@ -18,4 +20,6 @@ export const useToolbarState = () => useBoundStore(useShallow(state => ({
   setInvalidEdgeBehavior: state.setInvalidEdgeBehavior,
   toggleSettingsPanel: state.toggleSettingsPanel,
   togglePackEditor: state.togglePackEditor,
+  stackNodes: state.stackNodes,
+  unstackNode: state.unstackNode,
 })));

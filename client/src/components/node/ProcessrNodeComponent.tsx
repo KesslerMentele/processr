@@ -43,7 +43,10 @@ const ProcessrNodeComponent: FC<ProcessrNodeComponentProps> = ({ data, selected 
       style={{ '--node-accent': template.display.color ?? '#3b6ea5' } as CSSProperties}
     >
       {inputs.map((p, i) => (<Port key={i} {...p} />))}
-      <div className="processr-node-label">{data.label ?? template.name}</div>
+      <div className="processr-node-label">
+        {data.label ?? template.name}
+        {data.count > 1 && <span className="processr-node-count-badge">×{data.count}</span>}
+      </div>
       {recipe && (
         <div className="processr-node-recipe">{recipe.name}</div>
       )}
@@ -55,7 +58,7 @@ const ProcessrNodeComponent: FC<ProcessrNodeComponentProps> = ({ data, selected 
             <div key={port.id} className="processr-node-detail-row">
               <PortIcon {...item}/>
               <span className="processr-node-detail-name">{item.name}</span>
-              <span className="processr-node-detail-amount">×{stack.amount}</span>
+              <span className="processr-node-detail-amount">×{stack.amount * data.count}</span>
             </div>
           ))}
           {inputs.length > 0 ? <div className="processr-node-detail-sep"/> : null}
@@ -63,7 +66,7 @@ const ProcessrNodeComponent: FC<ProcessrNodeComponentProps> = ({ data, selected 
             <div key={port.id} className="processr-node-detail-row processr-node-detail-row-out">
               <PortIcon {...item}/>
               <span className="processr-node-detail-name">{item.name}</span>
-              <span className="processr-node-detail-amount">×{stack.amount}</span>
+              <span className="processr-node-detail-amount">×{stack.amount * data.count}</span>
             </div>
           ))}
           <div className="processr-node-detail-duration">{recipe.duration}s cycle</div>

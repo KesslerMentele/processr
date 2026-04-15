@@ -11,10 +11,11 @@ import type { UISettingsSlice } from "../models";
 import type { StateCreator } from "zustand";
 import { graphReducer } from "../reducers/graph-reducer.ts";
 import { buildAtlasIndex } from "../features/atlas/atlas-index.ts";
-import { createGraph } from "../utils/graph-factory.ts";
+import { cloneNode, createGraph } from "../utils/graph-factory.ts";
 import { saveAtlas } from "../utils/persistence.ts";
 import type { SetGraphData } from "../models/state/graph-state.ts";
-import { findInvalidEdges } from "../utils/graph-utils.ts";
+import { findInvalidEdges, pickNodeEdges } from "../utils/graph-utils.ts";
+import { newEdgeId } from "../utils/id.ts";
 
 /**
  * For each template present in both indices, builds a map from old port ID
@@ -96,6 +97,21 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISetting
     });
     },
 
+    setNodeRecipes: (updates: { nodeId: ProcessrNodeId; recipeId: RecipeId | null }[]) =>
+    {set((state) => {
+      const behavior = state.invalidEdgeBehavior;
+      const fullUpdates = updates.reduce<{ tempGraph: typeof state.graph; acc: { nodeId: ProcessrNodeId; recipeId: RecipeId | null; invalidEdges: Readonly<Record<string, Edge>> }[] }>(
+        ({ tempGraph, acc }, { nodeId, recipeId }) => {
+          const updatedGraph = { ...tempGraph, nodes: { ...tempGraph.nodes, [nodeId]: { ...tempGraph.nodes[nodeId], recipeId } } };
+          const invalidEdges = findInvalidEdges(nodeId, updatedGraph, state.atlasIndex);
+          return { tempGraph: updatedGraph, acc: [...acc, { nodeId, recipeId, invalidEdges }] };
+        },
+        { tempGraph: state.graph, acc: [] }
+      ).acc;
+      return { graph: graphReducer(state.graph, { type: "SET_MULTI_NODE_RECIPES", payload: { updates: fullUpdates, behavior } }) };
+    });
+    },
+
     addEdge: (edge: Edge) =>
     {set((state) =>
       ({ graph: graphReducer(state.graph, { type: "ADD_EDGE",  payload: { edge } }) }));
@@ -111,9 +127,63 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISetting
       ({ graph: graphReducer(state.graph, { type: "SET_VIEWPORT",  payload: { viewport } }) }));
     },
 
-    setSelectedNodeId: (id: ProcessrNodeId | null) =>
-    {set(() =>
-      ({ selectedNodeId: id }));
+    setSelectedNodeIds: (ids: readonly ProcessrNodeId[]) =>
+    {set((state) => {
+      if (ids.length === state.selectedNodeIds.length && ids.every((id, i) => id === state.selectedNodeIds[i])) return {};
+      return { selectedNodeIds: ids };
+    });
+    },
+
+    stackNodes: (selectedNodeIds: readonly ProcessrNodeId[]) =>
+    {set((state) => {
+      const nodes = selectedNodeIds.map(id => state.graph.nodes[id]).filter(Boolean);
+      if (nodes.length < 2) return state;
+      const survivor = nodes.reduce((min, n) => n.position.y < min.position.y ? n : min);
+      const removedIds = selectedNodeIds.filter(id => id !== survivor.id);
+      return {
+        selectedNodeIds: [survivor.id],
+        graph: graphReducer(state.graph, {
+          type: "STACK_NODES",
+          payload: { survivorId: survivor.id, removedIds, newCount: nodes.length },
+        }),
+      };
+    });
+    },
+
+    unstackNode: (nodeId: ProcessrNodeId) =>
+    {set((state) => {
+      const source = state.graph.nodes[nodeId];
+      if (source.count <= 1) return state;
+      const template = state.atlasIndex.nodeTemplatesById.get(source.templateId);
+      if (!template) return state;
+
+      const count = source.count;
+      const newNodes = Array.from({ length: count - 1 }, (_, i) =>
+        cloneNode(source, template, { x: source.position.x, y: source.position.y + (i + 1) * 160 })
+      );
+
+      const sourceEdges = Object.values(pickNodeEdges(state.graph.edges, nodeId));
+      const newEdges = Object.fromEntries(
+        newNodes.flatMap(newNode =>
+          sourceEdges.map(edge => {
+            const newEdge: Edge = {
+              ...edge,
+              id: newEdgeId(),
+              sourceNodeId: edge.sourceNodeId === nodeId ? newNode.id : edge.sourceNodeId,
+              targetNodeId: edge.targetNodeId === nodeId ? newNode.id : edge.targetNodeId,
+            };
+            return [newEdge.id, newEdge] as const;
+          })
+        )
+      );
+
+      return {
+        graph: graphReducer(state.graph, {
+          type: "UNSTACK_NODE",
+          payload: { nodeId, newNodes, newEdges },
+        }),
+      };
+    });
     },
 
     loadGraph: (data:SetGraphData) =>

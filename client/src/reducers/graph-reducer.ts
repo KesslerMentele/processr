@@ -1,5 +1,5 @@
 import type {
-  Graph, GraphAction, GraphChange, ReversibleAction
+  Edge, Graph, GraphAction, GraphChange, ReversibleAction
 } from "../models";
 import {
   addChangeToHistory,
@@ -66,6 +66,63 @@ const applyActionToGraph = (graph: Graph, action: GraphAction<ReversibleAction>)
       const { edgeId } = payload;
       return { ...graph, edges: omitKey(graph.edges, edgeId) };
     }
+
+    case "SET_MULTI_NODE_RECIPES": {
+      const { updates, behavior } = payload;
+      return updates.reduce((g, { nodeId, recipeId, invalidEdges }) => {
+        if (!Object.hasOwn(g.nodes, nodeId)) return g;
+        const withRecipe = applySingleNodeUpdate(g, nodeId, { recipeId });
+        if (behavior === 'delete') {
+          return { ...withRecipe, edges: Object.fromEntries(Object.entries(withRecipe.edges).filter(([id]) => !Object.hasOwn(invalidEdges, id))) };
+        }
+        return { ...withRecipe, edges: Object.fromEntries(Object.entries(withRecipe.edges).map(([id, edge]) => {
+          if (edge.sourceNodeId !== nodeId && edge.targetNodeId !== nodeId) return [id, edge];
+          return [id, Object.hasOwn(invalidEdges, id) ? { ...edge, invalid: true } : { ...edge, invalid: undefined }];
+        })) };
+      }, graph);
+    }
+
+    case "STACK_NODES": {
+      const { survivorId, removedIds, newCount } = payload;
+      const removedSet = new Set<string>(removedIds);
+
+      const filteredNodes = Object.fromEntries(Object.entries(graph.nodes).filter(([id]) => !removedSet.has(id)));
+      const nodes = { ...filteredNodes, [survivorId]: { ...filteredNodes[survivorId], count: newCount } };
+
+      const edges = Object.entries(graph.edges).reduce<Record<string, typeof graph.edges[string]>>((acc, [id, edge]) => {
+        const srcRemoved = removedSet.has(edge.sourceNodeId);
+        const tgtRemoved = removedSet.has(edge.targetNodeId);
+        if (!srcRemoved && !tgtRemoved) { return { ...acc, [id]: edge }; }
+        const rerouted = {
+          ...edge,
+          sourceNodeId: srcRemoved ? survivorId : edge.sourceNodeId,
+          targetNodeId: tgtRemoved ? survivorId : edge.targetNodeId,
+        };
+        // Drop self-loops
+        if (rerouted.sourceNodeId === rerouted.targetNodeId) return acc;
+        // Deduplicate
+        const isDup = Object.values(acc).some(e =>
+          e.sourceNodeId === rerouted.sourceNodeId &&
+          e.targetNodeId === rerouted.targetNodeId &&
+          e.sourcePortId === rerouted.sourcePortId &&
+          e.targetPortId === rerouted.targetPortId
+        );
+        if (isDup) return acc;
+        return { ...acc, [id]: rerouted };
+      }, {});
+
+      return { ...graph, nodes, edges };
+    }
+
+    case "UNSTACK_NODE": {
+      const { nodeId, newNodes, newEdges } = payload;
+      const nodes = {
+        ...graph.nodes,
+        [nodeId]: { ...graph.nodes[nodeId], count: 1 },
+        ...Object.fromEntries(newNodes.map(n => [n.id, n])),
+      };
+      return { ...graph, nodes, edges: { ...graph.edges, ...newEdges } };
+    }
   }
 };
 
@@ -118,6 +175,37 @@ const undoAction = (graph: Graph, change: GraphChange): Graph => {
 
       return { ...graph, edges: { ...graph.edges, [removedEdge.id]: removedEdge } };
     }
+    case "SET_MULTI_NODE_RECIPES": {
+      const { previousRecipes, changedEdges } = change.payload;
+      const restoredNodes = Object.entries(previousRecipes).reduce((g, [nodeId, recipeId]) => {
+        if (!Object.hasOwn(g.nodes, nodeId)) return g;
+        return applySingleNodeUpdate(g, nodeId, { recipeId });
+      }, graph);
+      return { ...restoredNodes, edges: { ...restoredNodes.edges, ...changedEdges } };
+    }
+    case "STACK_NODES": {
+      const { originalSurvivorCount, removedNodes, edgeSnapshot } = change.payload;
+      const { survivorId } = action.payload;
+      const nodes = {
+        ...graph.nodes,
+        [survivorId]: { ...graph.nodes[survivorId], count: originalSurvivorCount },
+        ...Object.fromEntries(removedNodes.map(n => [n.id, n])),
+      };
+      return { ...graph, nodes, edges: edgeSnapshot };
+    }
+    case "UNSTACK_NODE": {
+      const { newNodeIds, newEdgeIds, originalCount } = change.payload;
+      const { nodeId } = action.payload;
+      const excludeSet = new Set<string>(newNodeIds);
+      const filteredNodes = Object.fromEntries(
+        Object.entries(graph.nodes).filter(([id]) => !excludeSet.has(id))
+      );
+      const nodes = { ...filteredNodes, [nodeId]: { ...filteredNodes[nodeId], count: originalCount } };
+      const edges = Object.fromEntries(
+        Object.entries(graph.edges).filter(([id]) => !newEdgeIds.includes(id))
+      );
+      return { ...graph, nodes, edges };
+    }
   }
 };
 
@@ -156,6 +244,29 @@ const createGraphChangeForHistory = (graph: Graph, action:GraphAction<Reversible
     case "REMOVE_EDGE": return {
       type, action, payload: { removedEdge: graph.edges[action.payload.edgeId] }
     };
+    case "SET_MULTI_NODE_RECIPES": {
+      const previousRecipes = Object.fromEntries(
+        action.payload.updates.map(({ nodeId }) => [nodeId, graph.nodes[nodeId].recipeId])
+      );
+      const changedEdges = action.payload.updates.reduce<Record<string, Edge>>((acc, u) => ({ ...acc, ...u.invalidEdges }), {});
+      return { type, action, payload: { previousRecipes, changedEdges } };
+    }
+    case "STACK_NODES": {
+      const { survivorId, removedIds } = action.payload;
+      return { type, action, payload: {
+        originalSurvivorCount: graph.nodes[survivorId].count,
+        removedNodes: removedIds.map(id => graph.nodes[id]).filter(Boolean),
+        edgeSnapshot: { ...graph.edges },
+      } };
+    }
+    case "UNSTACK_NODE": {
+      const { newNodes, newEdges } = action.payload;
+      return { type, action, payload: {
+        newNodeIds: newNodes.map(n => n.id),
+        newEdgeIds: Object.keys(newEdges),
+        originalCount: graph.nodes[action.payload.nodeId].count,
+      } };
+    }
   }
 };
 
@@ -167,8 +278,11 @@ export const graphReducer = (graph: Graph, action: GraphAction): Graph => {
     case "REMOVE_NODE":
     case "SET_NODE_POSITIONS":
     case "SET_NODE_RECIPE":
+    case "SET_MULTI_NODE_RECIPES":
     case "ADD_EDGE":
     case "REMOVE_EDGE":
+    case "STACK_NODES":
+    case "UNSTACK_NODE":
       return addChangeToHistory(graph, applyActionToGraph(graph, action), createGraphChangeForHistory(graph, action));
 
 
