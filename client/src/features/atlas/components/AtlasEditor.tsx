@@ -1,13 +1,13 @@
 import type { FC } from 'react';
 import { useState } from 'react';
 import { LuX, LuSendHorizontal } from 'react-icons/lu';
-import { useAtlasEditorState } from '../../hooks/useAtlasEditorState.ts';
-import { usePackEditorView } from '../../hooks/usePackEditorView.ts';
+import { useAtlasEditorState } from '../hooks/useAtlasEditorState.ts';
+import { usePackEditorView } from '../hooks/usePackEditorView.ts';
 import { useShortcutPause } from 'react-keyhub';
 import HelpPanel from "./HelpPanel.tsx";
 import AtlasEditorHeader from "./AtlasEditorHeader.tsx";
-import type { Atlas } from "../../models";
-import { ATLAS_TABS, ATLAS_TAB_LABELS } from '../../utils/atlas-text-tabs.ts';
+import type { Atlas } from "../../../models";
+import { ATLAS_TABS, ATLAS_TAB_LABELS } from '../atlas-text-tabs.ts';
 
 const AtlasEditor: FC = () => {
   const { packIndex, editorPosition, editorCollapsed, aiMode, promptText, helpOpen, errors, status, setEditorErrors, setEditorStatus, setAIMode, setPromptText } = useAtlasEditorState();

@@ -86,7 +86,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['src/utils/atlas-color-picker.ts'],
+    files: ['src/features/atlas/atlas-color-picker.ts'],
     rules: {
       'functional/no-classes': 'off',
       'functional/no-class-inheritance': 'off',

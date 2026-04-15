@@ -1,7 +1,7 @@
 import { type RefObject, useRef } from 'react';
 
-import { generatePackText } from '../utils/ai-api.ts';
-import type { EditorStatus } from '../models';
+import { generatePackText } from '../ai-api.ts';
+import type { EditorStatus } from '../../../models';
 
 // eslint-disable-next-line functional/no-mixed-types
 interface UseEditorGenerateOptions {

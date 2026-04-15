@@ -13,7 +13,7 @@ import { type ProcessrNodeData, processrNodeId } from "../models";
 import ProcessrNodeComponent from "./node/ProcessrNodeComponent.tsx";
 import { useShortcut } from "react-keyhub";
 import CanvasToolbar from "./CanvasToolbar.tsx";
-import AtlasEditor from "./editor/AtlasEditor.tsx";
+import AtlasEditor from "../features/atlas/components/AtlasEditor.tsx";
 import { useCanvasHandlers } from "../hooks/useCanvasHandlers.ts";
 import { useCanvasState } from "../hooks/useCanvasState.ts";
 

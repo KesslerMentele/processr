@@ -10,7 +10,7 @@ import { PortDirection } from "../models";
 import type { UISettingsSlice } from "../models";
 import type { StateCreator } from "zustand";
 import { graphReducer } from "../reducers/graph-reducer.ts";
-import { buildAtlasIndex } from "../utils/atlas-index.ts";
+import { buildAtlasIndex } from "../features/atlas/atlas-index.ts";
 import { createGraph } from "../utils/graph-factory.ts";
 import { saveAtlas } from "../utils/persistence.ts";
 import type { SetGraphData } from "../models/state/graph-state.ts";

@@ -3,7 +3,7 @@ import type { GraphSlice } from "../models";
 import { loadProcessrGraph, loadAtlas } from "../utils/persistence.ts";
 import { factorioPack } from "../data/example-factorio-pack.ts";
 import { createGraph } from "../utils/graph-factory.ts";
-import { buildAtlasIndex } from "../utils/atlas-index.ts";
+import { buildAtlasIndex } from "../features/atlas/atlas-index.ts";
 
 
 const createGraphSlice: StateCreator<GraphSlice> = (): GraphSlice => {

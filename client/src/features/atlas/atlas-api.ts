@@ -1,4 +1,4 @@
-import type { Atlas } from "../models";
+import type { Atlas } from "../../models";
 
 export const serializeAtlasToText = async (pack: Atlas): Promise<string> => {
     const res = await fetch('/api/atlas/serialize', {

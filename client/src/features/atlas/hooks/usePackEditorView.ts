@@ -3,17 +3,17 @@ import { EditorView } from '@codemirror/view';
 import { EditorState as CodeMirrorEditorState } from '@codemirror/state';
 import { basicSetup } from 'codemirror';
 import { oneDark } from '@codemirror/theme-one-dark';
-import { atlasLanguage } from '../utils/atlas-language.ts';
-import { atlasColorPicker } from '../utils/atlas-color-picker.ts';
-import { parseAtlasText, serializeAtlasToText } from '../utils/pack-api.ts';
-import { loadAtlasEditorText } from '../utils/persistence.ts';
-import { generatePackText } from '../utils/ai-api.ts';
-import { logger } from '../utils/logger.ts';
-import { splitAtlasText, joinAtlasText, ATLAS_TABS } from '../utils/atlas-text-tabs.ts';
-import type { AtlasTab } from '../utils/atlas-text-tabs.ts';
-import type { Atlas, AtlasIndex } from '../models';
-import { EditorState } from '../models';
-import type { EditorStatus } from '../models';
+import { atlasLanguage } from '../atlas-language.ts';
+import { atlasColorPicker } from '../atlas-color-picker.ts';
+import { parseAtlasText, serializeAtlasToText } from '../atlas-api.ts';
+import { loadAtlasEditorText } from '../../../utils/persistence.ts';
+import { generatePackText } from '../ai-api.ts';
+import { logger } from '../../../utils/logger.ts';
+import { splitAtlasText, joinAtlasText, ATLAS_TABS } from '../atlas-text-tabs.ts';
+import type { AtlasTab } from '../atlas-text-tabs.ts';
+import type { Atlas, AtlasIndex } from '../../../models';
+import { EditorState } from '../../../models';
+import type { EditorStatus } from '../../../models';
 
 import type React from 'react';
 

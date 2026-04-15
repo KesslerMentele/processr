@@ -1,4 +1,4 @@
-import type { Atlas } from "../models";
+import type { Atlas } from "../../models";
 
 export function importAtlasFromFile(): Promise<Atlas> {
   return new Promise((resolve, reject) => {

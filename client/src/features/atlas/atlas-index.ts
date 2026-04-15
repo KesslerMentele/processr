@@ -3,7 +3,7 @@ import type {
   AtlasIndex,
   NodeTemplateId,
   Recipe,
-} from "../models";
+} from "../../models";
 
 // Helper: group pre-formed [key, value] pairs into a Map
 function groupPairs<K, V>(pairs: readonly (readonly [K, V])[]): Map<K, readonly V[]> {

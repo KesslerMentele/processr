@@ -11,10 +11,10 @@ import {
 } from "react-icons/lu";
 import { type ChangeEvent, useRef } from "react";
 import type { MouseEvent as ReactMouseEvent } from 'react';
-import { downloadAtlasAs, parseAtlasFile } from "../../utils/pack-api.ts";
-import type { Atlas } from "../../models";
-import { useAtlasEditorHeaderState } from "../../hooks/useAtlasEditorHeaderState.ts";
-import { saveAtlasEditorText } from "../../utils/persistence.ts";
+import { downloadAtlasAs, parseAtlasFile } from "../atlas-api.ts";
+import type { Atlas } from "../../../models";
+import { useAtlasEditorHeaderState } from "../hooks/useAtlasEditorHeaderState.ts";
+import { saveAtlasEditorText } from "../../../utils/persistence.ts";
 
 // eslint-disable-next-line functional/no-mixed-types
 interface AtlasEditorHeaderProps {
