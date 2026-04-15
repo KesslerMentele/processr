@@ -85,4 +85,13 @@ export default defineConfig([
       'space-in-parens': ['error', 'never'],
     },
   },
+  {
+    files: ['src/features/atlas/atlas-color-picker.ts'],
+    rules: {
+      'functional/no-classes': 'off',
+      'functional/no-class-inheritance': 'off',
+      'functional/prefer-immutable-types': 'off',
+      'functional/immutable-data': 'off',
+    },
+  },
 ])

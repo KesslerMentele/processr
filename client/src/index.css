@@ -775,6 +775,36 @@ html, body {
   border-color: var(--border-strong);
 }
 
+.pack-editor-tabs {
+  display: flex;
+  gap: 0;
+  background: var(--surface-overlay);
+  border-bottom: 1px solid var(--border-default);
+  flex-shrink: 0;
+}
+
+.pack-editor-tab {
+  padding: 5px 14px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-faint);
+  font-size: 12px;
+  cursor: pointer;
+  margin-bottom: -1px;
+}
+
+.pack-editor-tab:hover {
+  color: var(--text-secondary);
+  background: var(--surface-hover);
+}
+
+.pack-editor-tab-active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  background: var(--surface-card);
+}
+
 .pack-editor-body {
   flex: 1;
   display: flex;
@@ -792,6 +822,22 @@ html, body {
 .pack-editor-cm .cm-editor {
   height: 100%;
   font-size: 12px;
+}
+
+.cm-atlas-color-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  vertical-align: middle;
+  margin: 0 4px 1px;
+  flex-shrink: 0;
+}
+
+.cm-atlas-color-swatch:hover {
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
 .pack-editor-prompt {

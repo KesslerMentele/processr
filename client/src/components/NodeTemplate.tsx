@@ -10,8 +10,8 @@ import { useReactFlow, type XYPosition } from "@xyflow/react";
 export const DraggableNodeTemplate: FC<{template:NodeTemplate}> = ({ template }) => {
   const draggableRef = useRef<HTMLDivElement>(null);
   const addNode = useProcessrStore.use.addNode();
-  const setSelectedNodeId = useProcessrStore.use.setSelectedNodeId();
-  const packIndex = useProcessrStore.use.packIndex();
+  const setSelectedNodeId = useProcessrStore.use.setSelectedNodeIds();
+  const atlasIndex = useProcessrStore.use.atlasIndex();
   const { screenToFlowPosition } = useReactFlow();
 
   const startRectRef = useRef<DOMRect | null>(null);
@@ -31,13 +31,13 @@ export const DraggableNodeTemplate: FC<{template:NodeTemplate}> = ({ template })
 
       if (isInFlow) {
         const position = screenToFlowPosition(screenPosition);
-        const compatibleRecipes = packIndex.recipesByNodeType.get(template.id) ?? [];
+        const compatibleRecipes = atlasIndex.recipesByNodeType.get(template.id) ?? [];
         const autoRecipeId = compatibleRecipes.length === 1 ? compatibleRecipes[0].id : null;
         const node = createProcessrNode(template, position, autoRecipeId ? { recipeId: autoRecipeId } : undefined);
         addNode(node);
-        setSelectedNodeId(node.id);
+        setSelectedNodeId([node.id]);
       }
-    }, [addNode, packIndex.recipesByNodeType, screenToFlowPosition, setSelectedNodeId, template],
+    }, [addNode, atlasIndex.recipesByNodeType, screenToFlowPosition, setSelectedNodeId, template],
   );
 
   useDraggable(draggableRef as RefObject<HTMLElement>, {

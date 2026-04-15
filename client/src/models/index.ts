@@ -33,7 +33,7 @@ export { ItemForm } from "./items.ts";
 export type { Recipe, RecipeItemStack } from "./recipes.ts";
 export type { NodeTemplate, PortDefinition, NodeStats } from "./nodes.ts";
 export { PortDirection } from "./nodes.ts";
-export type { Atlas, GamePackIndex, SemVer } from "./atlas.ts";
+export type { Atlas, AtlasIndex, SemVer } from "./atlas.ts";
 
 // ---- Graph layer (user-mutable instances) ----
 export type {
@@ -42,7 +42,7 @@ export type {
   NodeStatsOverride,
   PortEntry
 } from "./graph/processr-node.ts";
-export type { Edge, EdgeNodeLevel, EdgePortLevel } from "./graph/edge.ts";
+export type { Edge } from "./graph/edge.ts";
 export type { Graph, Viewport, GraphAction, ActionType, GraphHistory, GraphChange, ReversibleAction } from "./graph/graph.ts";
 export type { ProcessrNodeData } from "./graph/graph-react-connector.ts";
 

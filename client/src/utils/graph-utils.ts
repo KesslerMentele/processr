@@ -1,4 +1,11 @@
-import type { GamePackIndex, Graph } from "../models";
+import type {
+  AtlasIndex,
+  Edge,
+  Graph,
+  GraphChange,
+  ProcessrNode,
+  ProcessrNodeId,
+} from "../models";
 import { getInputPorts, getOutputPorts } from "./node-utils.ts";
 import { logger } from "./logger.ts";
 
@@ -9,32 +16,81 @@ export interface ConnectionQuery {
   targetHandle?: string | null;
 }
 
-const areItemsCompatible = (connection: Readonly<ConnectionQuery>, graph: Readonly<Graph>, packIndex: Readonly<GamePackIndex>): boolean => {
+export const areItemsCompatible = (connection: Readonly<ConnectionQuery>, graph: Graph, atlasIndex: AtlasIndex): boolean => {
   const sourceNode = graph.nodes[connection.source];
   const targetNode = graph.nodes[connection.target];
-  if (!sourceNode.recipeId || !targetNode.recipeId) { logger.debug('[isConnectionValid] one or both nodes have no recipe — items compatible by default'); return true; }
+  if (!sourceNode.recipeId || !targetNode.recipeId) { logger.debug('[areItemsCompatible] one or both nodes have no recipe — items compatible by default'); return true; }
 
-  const sourceRecipe = packIndex.recipesById.get(sourceNode.recipeId);
-  const targetRecipe = packIndex.recipesById.get(targetNode.recipeId);
-  if (!sourceRecipe || !targetRecipe) { logger.debug('[isConnectionValid] recipe lookup failed'); return true; }
+  const sourceRecipe = atlasIndex.recipesById.get(sourceNode.recipeId);
+  const targetRecipe = atlasIndex.recipesById.get(targetNode.recipeId);
+  if (!sourceRecipe || !targetRecipe) { logger.debug('[areItemsCompatible] recipe lookup failed'); return true; }
 
-  const srcIdx = getOutputPorts(packIndex.nodeTemplatesById.get(sourceNode.templateId)).findIndex(p => p.id === connection.sourceHandle);
-  const tgtIdx = getInputPorts(packIndex.nodeTemplatesById.get(targetNode.templateId)).findIndex(p => p.id === connection.targetHandle);
+  const srcIdx = getOutputPorts(atlasIndex.nodeTemplatesById.get(sourceNode.templateId)).findIndex(p => p.id === connection.sourceHandle);
+  const tgtIdx = getInputPorts(atlasIndex.nodeTemplatesById.get(targetNode.templateId)).findIndex(p => p.id === connection.targetHandle);
   const srcItem = srcIdx >= 0 ? sourceRecipe.outputs[srcIdx]?.itemId : undefined;
   const tgtItem = tgtIdx >= 0 ? targetRecipe.inputs[tgtIdx]?.itemId : undefined;
-  logger.debug(`[isConnectionValid] item check srcIdx=${String(srcIdx)} srcItem=${srcItem ?? 'none'} tgtIdx=${String(tgtIdx)} tgtItem=${tgtItem ?? 'none'}`);
+  logger.debug(`[areItemsCompatible] item check srcIdx=${String(srcIdx)} srcItem=${srcItem ?? 'none'} tgtIdx=${String(tgtIdx)} tgtItem=${tgtItem ?? 'none'}`);
 
   return !srcItem || !tgtItem || srcItem === tgtItem;
 };
 
-export const isConnectionValid = (connection: Readonly<ConnectionQuery>, graph: Readonly<Graph>, packIndex: Readonly<GamePackIndex>): boolean => {
-  logger.debug(`[isConnectionValid] checking source=${connection.source}:${connection.sourceHandle ?? 'none'} → target=${connection.target}:${connection.targetHandle ?? 'none'}`);
-  if (connection.source === connection.target) { logger.debug('[isConnectionValid] REJECT: self-loop'); return false; }
-  if (Object.values(graph.edges).some(e =>
-    e.sourceNodeId === connection.source &&
-    e.targetNodeId === connection.target &&
-    (e.sourcePortId ?? null) === (connection.sourceHandle ?? null) &&
-    (e.targetPortId ?? null) === (connection.targetHandle ?? null)
-  )) { logger.debug('[isConnectionValid] REJECT: duplicate edge'); return false; }
-  return areItemsCompatible(connection, graph, packIndex);
-};
+
+export const findInvalidEdges = (nodeId: ProcessrNodeId, graph: Graph, atlasIndex: AtlasIndex,): Record<string, Edge> => Object.fromEntries(
+  Object.values(graph.edges)
+    .filter(e => e.sourceNodeId === nodeId || e.targetNodeId === nodeId)
+    .filter(e => !areItemsCompatible(
+      { source: e.sourceNodeId, target: e.targetNodeId, sourceHandle: e.sourcePortId, targetHandle: e.targetPortId },
+      graph, atlasIndex
+    ))
+    .map(e => [e.id, e])
+);
+
+export const now = () => new Date().toISOString();
+
+/**
+ * Filters a record by removing a given key.
+ * @param obj
+ * @param key
+ */
+export const omitKey = <T>(obj: Readonly<Record<string, T>>, key: string): Record<string, T> =>
+  Object.fromEntries(Object.entries(obj).filter(([id]) => id !== key));
+
+
+/**
+ * Applies an update to a single node and returns the new state of the graph.
+ * @param graph - The state of the graph prior to the change
+ * @param nodeId - The node to be targeted
+ * @param update - The updates to the node state.
+ */
+export const applySingleNodeUpdate = (graph: Graph, nodeId: string, update: Partial<ProcessrNode>): Graph => ({
+  ...graph,
+  nodes: { ...graph.nodes, [nodeId]: { ...graph.nodes[nodeId], ...update } },
+});
+
+/**
+ * Returns a Record of edges that are related to a given nodeId.
+ * @param edges
+ * @param nodeId
+ */
+export const pickNodeEdges = (edges: Readonly<Record<string, Edge>>, nodeId: string): Record<string, Edge> =>
+  Object.fromEntries(Object.entries(edges).filter(([, e]) => e.sourceNodeId === nodeId || e.targetNodeId === nodeId));
+
+/**
+ * Returns all edges that are not related to a given nodeId.
+ * @param edges
+ * @param nodeId
+ */
+export const omitNodeEdges = (edges: Readonly<Record<string, Edge>>, nodeId: string): Record<string, Edge> =>
+  Object.fromEntries(Object.entries(edges).filter(([, e]) => e.sourceNodeId !== nodeId && e.targetNodeId !== nodeId));
+
+/**
+ * Adds a given GraphChange to the history of the graph.
+ * @param graph
+ * @param nextGraph
+ * @param change
+ */
+export const addChangeToHistory = (graph: Graph, nextGraph: Graph, change: GraphChange): Graph => ({
+  ...nextGraph,
+  history: { past: [...graph.history.past, change], future: [] },
+  updatedAt: now(),
+});

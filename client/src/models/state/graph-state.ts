@@ -3,11 +3,11 @@ import type { EdgeId, NodeTemplateId, ProcessrNodeId, RecipeId } from "../ids.ts
 import type { Position } from "../common.ts";
 import type { Edge } from "../graph/edge.ts";
 import type { Graph, Viewport } from "../graph/graph.ts";
-import type { Atlas, GamePackIndex } from "../atlas.ts";
+import type { Atlas, AtlasIndex } from "../atlas.ts";
 
 export interface SetGraphData {
   readonly graph?: Graph;
-  readonly packIndex: GamePackIndex;
+  readonly atlasIndex: AtlasIndex;
 }
 
 export interface GraphActionSlice {
@@ -15,20 +15,23 @@ export interface GraphActionSlice {
   removeNode: (node: ProcessrNodeId) => void;
   updateNodePositions: (positions: Readonly<Record<string, Position>>) => void;
   setNodeRecipe: (nodeId: ProcessrNodeId, recipeId: RecipeId | null) => void;
+  setNodeRecipes: (updates: { nodeId: ProcessrNodeId; recipeId: RecipeId | null }[]) => void;
   addEdge: (edge: Edge) => void;
   removeEdge: (edgeId: EdgeId) => void;
   setViewport: (viewport: Viewport) => void;
   loadGraph: (options:SetGraphData) => void;
-  loadGamePack: (pack: Atlas) => void;
-  setSelectedNodeId: (id: ProcessrNodeId | null) => void;
+  loadAtlas: (pack: Atlas) => void;
+  setSelectedNodeIds: (ids: readonly ProcessrNodeId[]) => void;
   setDraggedTemplateId: (id: NodeTemplateId | null) => void;
+  stackNodes: (selectedNodeIds: readonly ProcessrNodeId[]) => void;
+  unstackNode: (nodeId: ProcessrNodeId) => void;
   undo: () => void
   redo: () => void
 }
 
 export interface GraphSlice {
   graph: Graph;
-  packIndex: GamePackIndex;
-  selectedNodeId: ProcessrNodeId | null;
+  atlasIndex: AtlasIndex;
+  selectedNodeIds: readonly ProcessrNodeId[];
   draggedNodeTemplateId: NodeTemplateId | null;
 }

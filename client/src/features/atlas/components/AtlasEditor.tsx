@@ -1,19 +1,20 @@
 import type { FC } from 'react';
 import { useState } from 'react';
 import { LuX, LuSendHorizontal } from 'react-icons/lu';
-import { useAtlasEditorState } from '../../hooks/useAtlasEditorState.ts';
-import { usePackEditorView } from '../../hooks/usePackEditorView.ts';
+import { useAtlasEditorState } from '../hooks/useAtlasEditorState.ts';
+import { usePackEditorView } from '../hooks/usePackEditorView.ts';
 import { useShortcutPause } from 'react-keyhub';
 import HelpPanel from "./HelpPanel.tsx";
 import AtlasEditorHeader from "./AtlasEditorHeader.tsx";
-import type { Atlas } from "../../models";
+import type { Atlas } from "../../../models";
+import { ATLAS_TABS, ATLAS_TAB_LABELS } from '../atlas-text-tabs.ts';
 
 const AtlasEditor: FC = () => {
   const { packIndex, editorPosition, editorCollapsed, aiMode, promptText, helpOpen, errors, status, setEditorErrors, setEditorStatus, setAIMode, setPromptText } = useAtlasEditorState();
 
   const [pack, setPack] = useState<Atlas | null>(null);
 
-  const { containerRef, focused, getCurrentText, replaceAll, handleGenerate, abortGenerate } = usePackEditorView({
+  const { containerRefs, activeTab, setActiveTab, focused, getCurrentText, replaceAll, handleGenerate, abortGenerate } = usePackEditorView({
     packIndex,
     setPack,
     setEditorErrors,
@@ -40,8 +41,27 @@ const AtlasEditor: FC = () => {
         }}
       />
 
+      <div className="pack-editor-tabs">
+        {ATLAS_TABS.map(tab => (
+          <button
+            key={tab}
+            className={`pack-editor-tab${activeTab === tab ? ' pack-editor-tab-active' : ''}`}
+            onClick={() => { setActiveTab(tab); }}
+          >
+            {ATLAS_TAB_LABELS[tab]}
+          </button>
+        ))}
+      </div>
+
       <div className="pack-editor-body">
-        <div ref={containerRef} className="pack-editor-cm" style={helpOpen ? { display: 'none' } : undefined} />
+        {ATLAS_TABS.map(tab => (
+          <div
+            key={tab}
+            ref={containerRefs[tab]}
+            className="pack-editor-cm"
+            style={helpOpen || activeTab !== tab ? { display: 'none' } : undefined}
+          />
+        ))}
         {helpOpen && <HelpPanel/>}
         {aiMode && status !== 'thinking' && (
           <div className="pack-editor-prompt">

@@ -17,13 +17,13 @@ import { edgeId, type ProcessrNodeData, processrNodeId } from "../models";
 import { useProcessrStore } from "../state/store.ts";
 import { fromRFConnection } from "../utils/reactflow-bridge.ts";
 import { newEdgeId } from "../utils/id.ts";
-import { isConnectionValid } from "../utils/graph-utils.ts";
 import { logger } from "../utils/logger.ts";
+import { areItemsCompatible } from "../utils/graph-utils.ts";
 
 export const useCanvasHandlers = () => {
   const graph = useProcessrStore.use.graph();
-  const packIndex = useProcessrStore.use.packIndex();
-  const setSelectedNodeId = useProcessrStore.use.setSelectedNodeId();
+  const atlasIndex = useProcessrStore.use.atlasIndex();
+  const setSelectedNodeIds = useProcessrStore.use.setSelectedNodeIds();
   const updateNodePositions = useProcessrStore.use.updateNodePositions();
   const removeNode = useProcessrStore.use.removeNode();
   const addEdge = useProcessrStore.use.addEdge();
@@ -41,10 +41,10 @@ export const useCanvasHandlers = () => {
         pendingSelectionRef.current = nodes;
         return;
       }
-      if (!isDragging.current && nodes.length <= 1) {
-        setSelectedNodeId(nodes[0] ? processrNodeId(nodes[0].id) : null);
+      if (!isDragging.current) {
+        setSelectedNodeIds(nodes.map(n => processrNodeId(n.id)));
       }
-    }, [setSelectedNodeId])
+    }, [setSelectedNodeIds])
   });
 
   const onSelectionStart = useCallback(() => {
@@ -56,10 +56,8 @@ export const useCanvasHandlers = () => {
     // eslint-disable-next-line functional/immutable-data
     isSelectionDragging.current = false;
     const nodes = pendingSelectionRef.current;
-    if (nodes.length === 1) {
-      setSelectedNodeId(processrNodeId(nodes[0].id));
-    }
-  }, [setSelectedNodeId]);
+    setSelectedNodeIds(nodes.map(n => processrNodeId(n.id)));
+  }, [setSelectedNodeIds]);
 
   const onNodeDragStart = useCallback<OnNodeDrag<RFNode<ProcessrNodeData>>>(() => {
     // eslint-disable-next-line functional/immutable-data
@@ -82,10 +80,22 @@ export const useCanvasHandlers = () => {
   }, []);
 
   const isValidConnection = useCallback<IsValidConnection>((connection) => {
-    const result = isConnectionValid(connection, graph, packIndex);
-    logger.debug(`[Connect] isValidConnection source=${connection.source}:${connection.sourceHandle ?? 'none'} → target=${connection.target}:${connection.targetHandle ?? 'none'} → ${result ? 'VALID' : 'INVALID'}`);
+    logger.debug(`[isValidConnection] checking source=${connection.source}:${connection.sourceHandle ?? 'none'} → target=${connection.target}:${connection.targetHandle ?? 'none'}`);
+
+    if (connection.source === connection.target) { logger.debug('[isValidConnection] REJECT: self-loop'); return false; }
+
+    if (Object.values(graph.edges).some(e =>
+      e.sourceNodeId === connection.source &&
+      e.targetNodeId === connection.target &&
+      e.sourcePortId === (connection.sourceHandle ?? null) &&
+      e.targetPortId === (connection.targetHandle ?? null)
+    )) { logger.debug('[isValidConnection] REJECT: duplicate edge'); return false; }
+
+    const result = areItemsCompatible(connection, graph, atlasIndex);
+
+    logger.debug(`[isValidConnection] isValidConnection source=${connection.source}:${connection.sourceHandle ?? 'none'} → target=${connection.target}:${connection.targetHandle ?? 'none'} → ${result ? 'VALID' : 'INVALID'}`);
     return result;
-  }, [graph, packIndex]);
+  }, [graph, atlasIndex]);
 
   const onConnect = useCallback<OnConnect>((connection) => {
     logger.debug(`[Connect] onConnect source=${connection.source}:${connection.sourceHandle ?? 'none'} → target=${connection.target}:${connection.targetHandle ?? 'none'}`);

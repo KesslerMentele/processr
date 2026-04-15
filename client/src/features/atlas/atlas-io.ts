@@ -1,6 +1,6 @@
-import type { Atlas } from "../models";
+import type { Atlas } from "../../models";
 
-export function importPackFromFile(): Promise<Atlas> {
+export function importAtlasFromFile(): Promise<Atlas> {
   return new Promise((resolve, reject) => {
     const input = document.createElement("input");
     // eslint-disable-next-line functional/immutable-data
@@ -17,15 +17,15 @@ export function importPackFromFile(): Promise<Atlas> {
   });
 }
 
-export function exportPackToFile(pack: Atlas): void {
+export function exportAtlasToFile(atlas: Atlas): void {
   const url = URL.createObjectURL(
-    new Blob([JSON.stringify(pack, null, 2)], { type: "application/json" })
+    new Blob([JSON.stringify(atlas, null, 2)], { type: "application/json" })
   );
   const a = document.createElement("a");
   // eslint-disable-next-line functional/immutable-data
   a.href = url;
   // eslint-disable-next-line functional/immutable-data
-  a.download = `${pack.name}-${pack.version}.json`;
+  a.download = `${atlas.name}-${atlas.version}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }

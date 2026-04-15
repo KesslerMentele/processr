@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { toRFNode, toRFEdge, fromRFConnection } from './reactflow-bridge.ts';
-import { createEdge, createProcessrNode } from './graph-factory.ts';
+import { toRFNode, toRFEdge, fromRFConnection } from '../utils/reactflow-bridge.ts';
+import { createProcessrNode } from '../utils/graph-factory.ts';
+import { createEdge } from '../utils/edge-factory.ts';
 import { nodeTemplateId, portId, processrNodeId, PortDirection, type NodeTemplate } from '../models';
 import type { Edge as RFEdge } from '@xyflow/react';
 
@@ -19,6 +20,9 @@ const template: NodeTemplate = {
 
 const nodeA = processrNodeId('node-a');
 const nodeB = processrNodeId('node-b');
+const portA = portId('port-a');
+const portB = portId('port-b');
+const ports = { sourcePortId: portA, targetPortId: portB };
 
 describe('toRFNode', () => {
   it('sets type to "processor"', () => {
@@ -44,43 +48,33 @@ describe('toRFNode', () => {
 
 describe('toRFEdge', () => {
   it('maps source and target node ids', () => {
-    const edge = createEdge(nodeA, nodeB);
+    const edge = createEdge(nodeA, nodeB, ports);
     const rfEdge = toRFEdge(edge);
     expect(rfEdge.source).toBe(nodeA);
     expect(rfEdge.target).toBe(nodeB);
   });
 
   it('uses the edge id', () => {
-    const edge = createEdge(nodeA, nodeB);
+    const edge = createEdge(nodeA, nodeB, ports);
     expect(toRFEdge(edge).id).toBe(edge.id);
   });
 
   it('maps port ids to source and target handles', () => {
-    const edge = createEdge(nodeA, nodeB, {
-      sourcePortId: portId('p-out'),
-      targetPortId: portId('p-in'),
-    });
+    const edge = createEdge(nodeA, nodeB, { sourcePortId: portId('p-out'), targetPortId: portId('p-in') });
     const rfEdge = toRFEdge(edge);
     expect(rfEdge.sourceHandle).toBe('p-out');
     expect(rfEdge.targetHandle).toBe('p-in');
   });
 
   it('maps the label', () => {
-    const edge = createEdge(nodeA, nodeB, { label: 'iron plates' });
+    const edge = createEdge(nodeA, nodeB, ports, { label: 'iron plates' });
     expect(toRFEdge(edge).label).toBe('iron plates');
-  });
-
-  it('leaves handles undefined for a node-level edge', () => {
-    const edge = createEdge(nodeA, nodeB);
-    const rfEdge = toRFEdge(edge);
-    expect(rfEdge.sourceHandle).toBeUndefined();
-    expect(rfEdge.targetHandle).toBeUndefined();
   });
 });
 
 describe('fromRFConnection', () => {
   it('maps source and target to ProcessrNodeIds', () => {
-    const rfEdge: RFEdge = { id: 'e-1', source: 'node-a', target: 'node-b', sourceHandle: null, targetHandle: null };
+    const rfEdge: RFEdge = { id: 'e-1', source: 'node-a', target: 'node-b', sourceHandle: 'port-a', targetHandle: 'port-b' };
     const edge = fromRFConnection(rfEdge);
     expect(edge.sourceNodeId).toBe('node-a');
     expect(edge.targetNodeId).toBe('node-b');
@@ -93,10 +87,8 @@ describe('fromRFConnection', () => {
     expect(edge).toHaveProperty('targetPortId', 'p-in');
   });
 
-  it('creates a node-level edge when handles are null', () => {
+  it('throws when handles are missing', () => {
     const rfEdge: RFEdge = { id: 'e-1', source: 'node-a', target: 'node-b', sourceHandle: null, targetHandle: null };
-    const edge = fromRFConnection(rfEdge);
-    expect(edge).not.toHaveProperty('sourcePortId');
-    expect(edge).not.toHaveProperty('targetPortId');
+    expect(() => fromRFConnection(rfEdge)).toThrow('Invalid RF connection');
   });
 });

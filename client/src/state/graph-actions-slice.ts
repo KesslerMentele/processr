@@ -1,19 +1,21 @@
 import type {
   Edge, EdgeId,
-  Atlas, GamePackIndex, GraphActionSlice, GraphSlice,
+  Atlas, AtlasIndex, GraphActionSlice, GraphSlice,
   NodeTemplateId,
   PortId, Position, ProcessrNode, ProcessrNodeId,
   RecipeId,
   Viewport
 } from "../models";
 import { PortDirection } from "../models";
+import type { UISettingsSlice } from "../models";
 import type { StateCreator } from "zustand";
-import { graphReducer } from "../utils/graph-reducer.ts";
-import { buildGamePackIndex } from "../utils/game-pack-index.ts";
-import { isNodeLevelEdge } from "../utils/type-validators.ts";
-import { createGraph } from "../utils/graph-factory.ts";
+import { graphReducer } from "../reducers/graph-reducer.ts";
+import { buildAtlasIndex } from "../features/atlas/atlas-index.ts";
+import { cloneNode, createGraph } from "../utils/graph-factory.ts";
 import { saveAtlas } from "../utils/persistence.ts";
 import type { SetGraphData } from "../models/state/graph-state.ts";
+import { findInvalidEdges, pickNodeEdges } from "../utils/graph-utils.ts";
+import { newEdgeId } from "../utils/id.ts";
 
 /**
  * For each template present in both indices, builds a map from old port ID
@@ -21,8 +23,8 @@ import type { SetGraphData } from "../models/state/graph-state.ts";
  * Ports that have no counterpart in the new template are omitted (edge gets dropped).
  */
 const buildPortRemapping = (
-  oldIndex: GamePackIndex,
-  newIndex: GamePackIndex,
+  oldIndex: AtlasIndex,
+  newIndex: AtlasIndex,
 ): Map<NodeTemplateId, Map<PortId, PortId>> =>
   new Map(
     [...newIndex.nodeTemplatesById.entries()].flatMap(([templateId, newTemplate]) => {
@@ -48,10 +50,9 @@ const remapEdge = (
   edgeId: string,
   edge: Edge,
   nodes: NodeRecord,
-  packIndex: GamePackIndex,
+  packIndex: AtlasIndex,
   portRemapping: PortRemapping,
 ): [string, Edge] | null => {
-  if (isNodeLevelEdge(edge)) return [edgeId, edge];
 
   const sourceNode = nodes[edge.sourceNodeId] as ProcessrNode | undefined;
   const targetNode = nodes[edge.targetNodeId] as ProcessrNode | undefined;
@@ -68,54 +69,129 @@ const remapEdge = (
   return [edgeId, { ...edge, sourcePortId: newSourcePortId, targetPortId: newTargetPortId }];
 };
 
-const createGraphActions: StateCreator<GraphSlice & GraphActionSlice, [], [], GraphActionSlice> =
+const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISettingsSlice, [], [], GraphActionSlice> =
   (set) => ({
     addNode: (node: ProcessrNode) =>
     {set((state) =>
-      ({ graph: graphReducer(state.graph, { type: "ADD_NODE", node }) }));
+      ({ graph: graphReducer(state.graph, { type: "ADD_NODE", payload: { node } }) }));
     },
 
     removeNode: (nodeId: ProcessrNodeId) =>
     {set((state) =>
-      ({ graph: graphReducer(state.graph, { type: "REMOVE_NODE", nodeId }) }));
+      ({ graph: graphReducer(state.graph, { type: "REMOVE_NODE",  payload: { nodeId } }) }));
     },
 
     updateNodePositions: (positions: Readonly<Record<string, Position>>) =>
     {set((state) =>
-      ({ graph: graphReducer(state.graph, { type: "SET_NODE_POSITIONS", positions }) }));
+      ({ graph: graphReducer(state.graph, { type: "SET_NODE_POSITIONS",  payload: { positions } }) }));
     },
 
     setNodeRecipe: (nodeId: ProcessrNodeId, recipeId: RecipeId | null) =>
-    {set((state) =>
-      ({ graph: graphReducer(state.graph, { type: "SET_NODE_RECIPE", nodeId, recipeId }) }));
+    {set((state) => {
+      // Compute invalid edges against the graph with the new recipe already applied,
+      // so we detect incompatibilities introduced by the change (not the old state).
+      const tempGraph = { ...state.graph, nodes: { ...state.graph.nodes, [nodeId]: { ...state.graph.nodes[nodeId], recipeId } } };
+      const invalidEdges = findInvalidEdges(nodeId, tempGraph, state.atlasIndex);
+
+      return ({ graph: graphReducer(state.graph, { type: "SET_NODE_RECIPE", payload: { nodeId, recipeId, invalidEdges, behavior: state.invalidEdgeBehavior } }) });
+    });
+    },
+
+    setNodeRecipes: (updates: { nodeId: ProcessrNodeId; recipeId: RecipeId | null }[]) =>
+    {set((state) => {
+      const behavior = state.invalidEdgeBehavior;
+      const fullUpdates = updates.reduce<{ tempGraph: typeof state.graph; acc: { nodeId: ProcessrNodeId; recipeId: RecipeId | null; invalidEdges: Readonly<Record<string, Edge>> }[] }>(
+        ({ tempGraph, acc }, { nodeId, recipeId }) => {
+          const updatedGraph = { ...tempGraph, nodes: { ...tempGraph.nodes, [nodeId]: { ...tempGraph.nodes[nodeId], recipeId } } };
+          const invalidEdges = findInvalidEdges(nodeId, updatedGraph, state.atlasIndex);
+          return { tempGraph: updatedGraph, acc: [...acc, { nodeId, recipeId, invalidEdges }] };
+        },
+        { tempGraph: state.graph, acc: [] }
+      ).acc;
+      return { graph: graphReducer(state.graph, { type: "SET_MULTI_NODE_RECIPES", payload: { updates: fullUpdates, behavior } }) };
+    });
     },
 
     addEdge: (edge: Edge) =>
     {set((state) =>
-      ({ graph: graphReducer(state.graph, { type: "ADD_EDGE", edge }) }));
+      ({ graph: graphReducer(state.graph, { type: "ADD_EDGE",  payload: { edge } }) }));
     },
 
     removeEdge: (edgeId: EdgeId) =>
     {set((state) =>
-      ({ graph: graphReducer(state.graph, { type: "REMOVE_EDGE", edgeId }) }));
+      ({ graph: graphReducer(state.graph, { type: "REMOVE_EDGE",  payload: { edgeId } }) }));
     },
 
     setViewport: (viewport: Viewport) =>
     {set((state) =>
-      ({ graph: graphReducer(state.graph, { type: "SET_VIEWPORT", viewport }) }));
+      ({ graph: graphReducer(state.graph, { type: "SET_VIEWPORT",  payload: { viewport } }) }));
     },
 
-    setSelectedNodeId: (id: ProcessrNodeId | null) =>
-    {set(() =>
-      ({ selectedNodeId: id }));
+    setSelectedNodeIds: (ids: readonly ProcessrNodeId[]) =>
+    {set((state) => {
+      if (ids.length === state.selectedNodeIds.length && ids.every((id, i) => id === state.selectedNodeIds[i])) return {};
+      return { selectedNodeIds: ids };
+    });
+    },
+
+    stackNodes: (selectedNodeIds: readonly ProcessrNodeId[]) =>
+    {set((state) => {
+      const nodes = selectedNodeIds.map(id => state.graph.nodes[id]).filter(Boolean);
+      if (nodes.length < 2) return state;
+      const survivor = nodes.reduce((min, n) => n.position.y < min.position.y ? n : min);
+      const removedIds = selectedNodeIds.filter(id => id !== survivor.id);
+      return {
+        selectedNodeIds: [survivor.id],
+        graph: graphReducer(state.graph, {
+          type: "STACK_NODES",
+          payload: { survivorId: survivor.id, removedIds, newCount: nodes.length },
+        }),
+      };
+    });
+    },
+
+    unstackNode: (nodeId: ProcessrNodeId) =>
+    {set((state) => {
+      const source = state.graph.nodes[nodeId];
+      if (source.count <= 1) return state;
+      const template = state.atlasIndex.nodeTemplatesById.get(source.templateId);
+      if (!template) return state;
+
+      const count = source.count;
+      const newNodes = Array.from({ length: count - 1 }, (_, i) =>
+        cloneNode(source, template, { x: source.position.x, y: source.position.y + (i + 1) * 160 })
+      );
+
+      const sourceEdges = Object.values(pickNodeEdges(state.graph.edges, nodeId));
+      const newEdges = Object.fromEntries(
+        newNodes.flatMap(newNode =>
+          sourceEdges.map(edge => {
+            const newEdge: Edge = {
+              ...edge,
+              id: newEdgeId(),
+              sourceNodeId: edge.sourceNodeId === nodeId ? newNode.id : edge.sourceNodeId,
+              targetNodeId: edge.targetNodeId === nodeId ? newNode.id : edge.targetNodeId,
+            };
+            return [newEdge.id, newEdge] as const;
+          })
+        )
+      );
+
+      return {
+        graph: graphReducer(state.graph, {
+          type: "UNSTACK_NODE",
+          payload: { nodeId, newNodes, newEdges },
+        }),
+      };
+    });
     },
 
     loadGraph: (data:SetGraphData) =>
     {set((state) => {
-      const { graph, packIndex } = data;
+      const { graph, atlasIndex } = data;
       return { ...state,
-        graph: graph ? graph : createGraph(packIndex.pack.id, "My Factory"),
-        packIndex: packIndex };
+        graph: graph ? graph : createGraph(atlasIndex.pack.id, "My Factory"),
+        atlasIndex: atlasIndex };
     });
     },
 
@@ -134,10 +210,10 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice, [], [], Gr
       ({ ...state, draggedTemplateId: id }));
     },
 
-    loadGamePack: (pack: Atlas) =>
+    loadAtlas: (pack: Atlas) =>
     {set((state) => {
-      const packIndex = buildGamePackIndex(pack);
-      const portRemapping = buildPortRemapping(state.packIndex, packIndex);
+      const packIndex = buildAtlasIndex(pack);
+      const portRemapping = buildPortRemapping(state.atlasIndex, packIndex);
 
       const remappedEdges = Object.fromEntries(
         Object.entries(state.graph.edges)
@@ -147,7 +223,7 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice, [], [], Gr
 
       saveAtlas(pack);
       const graph = { ...state.graph, edges: remappedEdges };
-      return { ...state, packIndex, graph };
+      return { ...state, atlasIndex: packIndex, graph };
     });
     },
 

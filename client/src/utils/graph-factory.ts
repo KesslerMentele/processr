@@ -1,14 +1,12 @@
 import type {
-  Edge,
   GamePackId,
   Graph,
   Metadata,
   NodeTemplate,
   Position,
-  ProcessrNode, ProcessrNodeId,
+  ProcessrNode,
 } from "../models";
-import { newEdgeId, newGraphId, newProcessrNodeId } from "./id.ts";
-
+import { newGraphId, newProcessrNodeId } from "./id.ts";
 
 const newViewport = () => ({ x: 0, y: 0, zoom: 1 });
 
@@ -32,28 +30,16 @@ export const createProcessrNode = (
   };
 };
 
-type CreateEdgeOptions = Partial<Pick<Edge, 'itemId' | 'label' | 'metadata' | 'sourcePortId' | 'targetPortId' >>
-
-export const createEdge = (
-  sourceNodeId: ProcessrNodeId,
-  targetNodeId: ProcessrNodeId,
-  options?: CreateEdgeOptions
-): Edge => {
-  const base = {
-   id: newEdgeId(),
-   sourceNodeId,
-   targetNodeId,
-   itemId: options?.itemId,
-   label: options?.label,
-   metadata: options?.metadata ? options.metadata : {} as Metadata,
-  };
-  if ((options?.sourcePortId && options.targetPortId === undefined) || (options?.targetPortId && options.sourcePortId === undefined)) {
-    throw new Error('You must provide either both source and target port, or neither');
-  }
-  return options?.sourcePortId !== undefined && options.targetPortId !== undefined
-  ? { ...base, sourcePortId:options.sourcePortId, targetPortId: options.targetPortId }
-  : { ...base };
-};
+export const cloneNode = (
+  source: ProcessrNode,
+  template: NodeTemplate,
+  position: Position,
+): ProcessrNode => createProcessrNode(template, position, {
+  recipeId: source.recipeId,
+  statsOverride: source.statsOverride,
+  label: source.label,
+  count: 1,
+});
 
 export const createGraph = (
   gamePackId: GamePackId,
@@ -73,4 +59,3 @@ export const createGraph = (
     metadata: {} as Metadata,
   };
 };
-

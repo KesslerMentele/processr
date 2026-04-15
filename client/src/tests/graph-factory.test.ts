@@ -8,7 +8,8 @@ import {
   portId, type Position,
   processrNodeId
 } from "../models";
-import { createEdge, createGraph, createProcessrNode } from "./graph-factory.ts";
+import { createGraph, createProcessrNode } from "../utils/graph-factory.ts";
+import { createEdge } from "../utils/edge-factory.ts";
 
 
 
@@ -39,37 +40,32 @@ describe('createEdge', () => {
   const targetNodeId = processrNodeId('target');
   const sourcePortId = portId('sourcePort');
   const targetPortId = portId('targetPort');
-  const minimalEdge = createEdge(sourceNodeId, targetNodeId);
+  const ports = { sourcePortId, targetPortId };
+  const minimalEdge = createEdge(sourceNodeId, targetNodeId, ports);
 
 
   it('uses source and target nodes', () => {
     expect(minimalEdge.sourceNodeId).toBe(sourceNodeId);
     expect(minimalEdge.targetNodeId).toBe(targetNodeId);
   });
-  it('does not have source/target ports when not specified', () => {
 
-    expect(minimalEdge.sourcePortId).toBeUndefined();
-    expect(minimalEdge.targetPortId).toBeUndefined();
-  });
-  it('optionally includes source and target ports', () => {
-    const edge = createEdge(sourceNodeId, targetNodeId, { sourcePortId, targetPortId });
+  it('includes source and target ports', () => {
+    const edge = createEdge(sourceNodeId, targetNodeId, ports);
     expect(edge.sourcePortId).toBe(sourcePortId);
     expect(edge.targetPortId).toBe(targetPortId);
   });
-  it('fails if there is not both source and target ports or neither', () => {
-    expect(() => createEdge(sourceNodeId, targetNodeId, { sourcePortId })).toThrow();
-  });
+
   it('is created with empty metadata by default', () => {
     expect(minimalEdge.metadata).toEqual({});
   });
   it('optionally includes metadata', () => {
     const metadata = { foo: 'bar' };
-    const edgeWithMetadata = createEdge(sourceNodeId, targetNodeId, { metadata });
+    const edgeWithMetadata = createEdge(sourceNodeId, targetNodeId, ports, { metadata });
     expect(edgeWithMetadata.metadata).toBe(metadata);
   });
   it('optionally includes itemId and label', () => {
     const exampleItemId = itemId('itemId');
-    const edgeWithItemAndLabel = createEdge(sourceNodeId, targetNodeId, { itemId:exampleItemId, label:'test' });
+    const edgeWithItemAndLabel = createEdge(sourceNodeId, targetNodeId, ports, { itemId:exampleItemId, label:'test' });
     expect(edgeWithItemAndLabel.itemId).toBe(exampleItemId);
     expect(edgeWithItemAndLabel.label).toBe('test');
   });

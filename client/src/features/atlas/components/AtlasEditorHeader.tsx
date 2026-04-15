@@ -11,10 +11,10 @@ import {
 } from "react-icons/lu";
 import { type ChangeEvent, useRef } from "react";
 import type { MouseEvent as ReactMouseEvent } from 'react';
-import { downloadPackAs, parsePackFile } from "../../utils/pack-api.ts";
-import type { Atlas } from "../../models";
-import { useAtlasEditorHeaderState } from "../../hooks/useAtlasEditorHeaderState.ts";
-import { saveAtlasEditorText } from "../../utils/persistence.ts";
+import { downloadAtlasAs, parseAtlasFile } from "../atlas-api.ts";
+import type { Atlas } from "../../../models";
+import { useAtlasEditorHeaderState } from "../hooks/useAtlasEditorHeaderState.ts";
+import { saveAtlasEditorText } from "../../../utils/persistence.ts";
 
 // eslint-disable-next-line functional/no-mixed-types
 interface AtlasEditorHeaderProps {
@@ -67,7 +67,7 @@ const AtlasEditorHeader = ({ getCurrentText, replaceAll, pack, abortGenerate }: 
     const file = e.target.files?.[0];
     if (!file) return;
     setStatus('parsing');
-    const [result, text] = await Promise.all([parsePackFile(file), file.text()]);
+    const [result, text] = await Promise.all([parseAtlasFile(file), file.text()]);
     if (result.errors) {
       setErrors(result.errors);
       setStatus('error');
@@ -93,7 +93,7 @@ const AtlasEditorHeader = ({ getCurrentText, replaceAll, pack, abortGenerate }: 
 
   const handleDownload = () => {
     const filename = `${packIndex.pack.name.toLowerCase().replaceAll(' ', '-')}.prat`;
-    downloadPackAs(getCurrentText(), filename);
+    downloadAtlasAs(getCurrentText(), filename);
   };
 
   const handleAbortAndReset = () => { abortGenerate(); setStatus('idle'); setAIMode(true); };
