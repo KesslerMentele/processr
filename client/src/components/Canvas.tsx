@@ -82,7 +82,7 @@ const Canvas: FC = () => {
 
     setRfEdges(Object.values(graph.edges).map(e => {
 
-      return { ...toRFEdge(e), type: edgeType, animated: e.invalid };
+      return { ...toRFEdge(e), type: edgeType, animated: e.invalid, style: { stroke: e.invalid ? 'red' : "gray" } };
     }));
 
   }, [setRfEdges, graph.edges, edgeType]);
