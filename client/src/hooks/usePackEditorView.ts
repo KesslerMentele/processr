@@ -9,9 +9,13 @@ import { parseAtlasText, serializeAtlasToText } from '../utils/pack-api.ts';
 import { loadAtlasEditorText } from '../utils/persistence.ts';
 import { generatePackText } from '../utils/ai-api.ts';
 import { logger } from '../utils/logger.ts';
+import { splitAtlasText, joinAtlasText, ATLAS_TABS } from '../utils/atlas-text-tabs.ts';
+import type { AtlasTab } from '../utils/atlas-text-tabs.ts';
 import type { Atlas, AtlasIndex } from '../models';
 import { EditorState } from '../models';
 import type { EditorStatus } from '../models';
+
+import type React from 'react';
 
 const DEBOUNCE_MS = 600;
 
@@ -26,7 +30,9 @@ interface UsePackEditorViewOptions {
 
 // eslint-disable-next-line functional/no-mixed-types
 interface UsePackEditorViewResult {
-  readonly containerRef: React.RefObject<HTMLDivElement | null>;
+  readonly containerRefs: Record<AtlasTab, React.RefObject<HTMLDivElement | null>>;
+  readonly activeTab: AtlasTab;
+  readonly setActiveTab: (tab: AtlasTab) => void;
   readonly focused: boolean;
   readonly getCurrentText: () => string;
   readonly replaceAll: (text: string) => void;
@@ -35,8 +41,6 @@ interface UsePackEditorViewResult {
   readonly abortGenerate: () => void;
 }
 
-import type React from 'react';
-
 export const usePackEditorView = ({
   packIndex,
   setPack,
@@ -44,20 +48,66 @@ export const usePackEditorView = ({
   setEditorStatus,
   setAIMode,
 }: UsePackEditorViewOptions): UsePackEditorViewResult => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const editorViewRef = useRef<EditorView | null>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const parseGenRef = useRef(0);
-  const abortRef = useRef<AbortController | null>(null);
-  const isGeneratingRef = useRef(false);
+  const packContainerRef    = useRef<HTMLDivElement>(null);
+  const itemsContainerRef   = useRef<HTMLDivElement>(null);
+  const nodesContainerRef   = useRef<HTMLDivElement>(null);
+  const recipesContainerRef = useRef<HTMLDivElement>(null);
 
-  const [focused, setFocused] = useState(false);
+  const containerRefs: Record<AtlasTab, React.RefObject<HTMLDivElement | null>> = {
+    pack:    packContainerRef,
+    items:   itemsContainerRef,
+    nodes:   nodesContainerRef,
+    recipes: recipesContainerRef,
+  };
+
+  const tabViewsRef = useRef<Record<AtlasTab, EditorView | null>>({
+    pack: null, items: null, nodes: null, recipes: null,
+  });
+
+  const debounceRef           = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const parseGenRef           = useRef(0);
+  const abortRef              = useRef<AbortController | null>(null);
+  const isGeneratingRef       = useRef(false);
+  const generationAccumRef    = useRef('');
+  const preGenerationTextRef  = useRef('');
+
+  const [focused,    setFocused]    = useState(false);
+  const [activeTab,  setActiveTabState] = useState<AtlasTab>('pack');
+  const activeTabRef = useRef<AtlasTab>('pack');
+
+  const setActiveTab = (tab: AtlasTab) => {
+    // eslint-disable-next-line functional/immutable-data
+    activeTabRef.current = tab;
+    setActiveTabState(tab);
+  };
+
+  // Remeasure the editor when a tab becomes visible (was hidden via display:none)
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      tabViewsRef.current[activeTab]?.requestMeasure();
+    });
+  }, [activeTab]);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    const containers = {
+      pack:    packContainerRef.current,
+      items:   itemsContainerRef.current,
+      nodes:   nodesContainerRef.current,
+      recipes: recipesContainerRef.current,
+    };
+
+    if (ATLAS_TABS.some(tab => !containers[tab])) return;
 
     const savedText = loadAtlasEditorText();
     const initialText = savedText ?? `// Pack: ${packIndex.pack.name}\n`;
+    const sections = splitAtlasText(initialText);
+
+    const getFullText = () => joinAtlasText(
+      ATLAS_TABS.reduce((acc, tab) => ({
+        ...acc,
+        [tab]: tabViewsRef.current[tab]?.state.doc.toString() ?? '',
+      }), {} as Record<AtlasTab, string>)
+    );
 
     const handleParseResult = (result: Awaited<ReturnType<typeof parseAtlasText>>, gen: number) => {
       if (gen !== parseGenRef.current) return;
@@ -82,76 +132,95 @@ export const usePackEditorView = ({
       });
     };
 
-    const view = new EditorView({
-      state: CodeMirrorEditorState.create({
-        doc: initialText,
-        extensions: [
-          basicSetup,
-          oneDark,
-          atlasLanguage,
-          atlasColorPicker,
-          EditorView.updateListener.of((update) => {
-            if (!update.docChanged) return;
-            if (isGeneratingRef.current) return;
-            setEditorStatus(EditorState.Parsing);
-            if (debounceRef.current) clearTimeout(debounceRef.current);
-            // eslint-disable-next-line functional/immutable-data
-            parseGenRef.current += 1;
-            const gen = parseGenRef.current;
-            const value = update.state.doc.toString();
-            // eslint-disable-next-line functional/immutable-data
-            debounceRef.current = setTimeout(() => {
-              debouncedParse(value, gen);
-            }, DEBOUNCE_MS);
-          }),
-        ],
-      }),
-      parent: containerRef.current,
+    const makeUpdateListener = () => EditorView.updateListener.of((update) => {
+      if (!update.docChanged) return;
+      if (isGeneratingRef.current) return;
+      setEditorStatus(EditorState.Parsing);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      // eslint-disable-next-line functional/immutable-data
+      parseGenRef.current += 1;
+      const gen = parseGenRef.current;
+      const value = getFullText();
+      // eslint-disable-next-line functional/immutable-data
+      debounceRef.current = setTimeout(() => {
+        debouncedParse(value, gen);
+      }, DEBOUNCE_MS);
     });
 
-    // eslint-disable-next-line functional/immutable-data
-    editorViewRef.current = view;
+    const makeView = (container: HTMLDivElement, doc: string): EditorView =>
+      new EditorView({
+        state: CodeMirrorEditorState.create({
+          doc,
+          extensions: [basicSetup, oneDark, atlasLanguage, atlasColorPicker, makeUpdateListener()],
+        }),
+        parent: container,
+      });
 
-    const container = containerRef.current;
+    const views = ATLAS_TABS.reduce((acc, tab) => ({
+      ...acc,
+      [tab]: makeView(containers[tab] as HTMLDivElement, sections[tab]),
+    }), {} as Record<AtlasTab, EditorView>);
+
+    // eslint-disable-next-line functional/immutable-data
+    tabViewsRef.current = views;
+
     const onFocusIn  = () => { setFocused(true); };
     const onFocusOut = () => { setFocused(false); };
-    container.addEventListener('focusin', onFocusIn);
-    container.addEventListener('focusout', onFocusOut);
+
+    const containerList = ATLAS_TABS.map(tab => containers[tab] as HTMLDivElement);
+    containerList.forEach(c => {
+      c.addEventListener('focusin',  onFocusIn);
+      c.addEventListener('focusout', onFocusOut);
+    });
 
     if (!savedText) {
       logger.debug('no pack, making from default');
       void serializeAtlasToText(packIndex.pack).then((text) => {
-        const v = editorViewRef.current;
-        if (!v) return;
-        v.dispatch({ changes: { from: 0, to: v.state.doc.length, insert: text } });
+        const splitSections = splitAtlasText(text);
+        ATLAS_TABS.forEach(tab => {
+          const view = tabViewsRef.current[tab];
+          if (!view) return;
+          view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: splitSections[tab] } });
+        });
       });
     }
 
     return () => {
-      container.removeEventListener('focusin', onFocusIn);
-      container.removeEventListener('focusout', onFocusOut);
-      view.destroy();
+      containerList.forEach(c => {
+        c.removeEventListener('focusin',  onFocusIn);
+        c.removeEventListener('focusout', onFocusOut);
+      });
+      ATLAS_TABS.forEach(tab => { views[tab].destroy(); });
     };
   }, [packIndex.pack, setEditorErrors, setEditorStatus, setPack]);
 
-  const getCurrentText = () => editorViewRef.current?.state.doc.toString() ?? '';
+  const getCurrentText = () => joinAtlasText(
+    ATLAS_TABS.reduce((acc, tab) => ({
+      ...acc,
+      [tab]: tabViewsRef.current[tab]?.state.doc.toString() ?? '',
+    }), {} as Record<AtlasTab, string>)
+  );
 
   const replaceAll = (text: string) => {
-    const view = editorViewRef.current;
-    if (!view) return;
-    view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: text } });
+    const sections = splitAtlasText(text);
+    ATLAS_TABS.forEach(tab => {
+      const view = tabViewsRef.current[tab];
+      if (!view) return;
+      view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: sections[tab] } });
+    });
   };
 
   const appendChunk = (chunk: string) => {
-    const view = editorViewRef.current;
+    if (isGeneratingRef.current) {
+      // eslint-disable-next-line functional/immutable-data
+      generationAccumRef.current += chunk;
+    }
+    const view = tabViewsRef.current[activeTabRef.current];
     if (!view) return;
     view.dispatch({ changes: { from: view.state.doc.length, insert: chunk } });
   };
 
   const handleGenerate = async (prompt: string) => {
-    const view = editorViewRef.current;
-    if (!view) return;
-
     abortRef.current?.abort();
     const controller = new AbortController();
     // eslint-disable-next-line functional/immutable-data
@@ -160,6 +229,10 @@ export const usePackEditorView = ({
     const currentPackText = getCurrentText();
     const mode = currentPackText.trim() ? 'append' : 'generate';
 
+    // eslint-disable-next-line functional/immutable-data
+    preGenerationTextRef.current = currentPackText;
+    // eslint-disable-next-line functional/immutable-data
+    generationAccumRef.current = '';
     // eslint-disable-next-line functional/immutable-data
     isGeneratingRef.current = true;
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -178,15 +251,40 @@ export const usePackEditorView = ({
 
     setEditorErrors([]);
     setEditorStatus(EditorState.Thinking);
-    await generatePackText(prompt, currentPackText, {
+    await generatePackText(prompt, preGenerationTextRef.current, {
       onChunk: appendChunk,
-      onDone: () => { stopGenerating(); setEditorStatus(EditorState.Ok); setAIMode(false); },
-      onError: (message) => { stopGenerating(); setEditorErrors([message]); setEditorStatus(EditorState.Error); },
+      onDone: () => {
+        stopGenerating();
+        // Redistribute generated content across the correct tabs
+        const fullText = mode === 'generate'
+          ? generationAccumRef.current
+          : preGenerationTextRef.current + '\n\n' + generationAccumRef.current;
+        replaceAll(fullText);
+        // eslint-disable-next-line functional/immutable-data
+        generationAccumRef.current = '';
+        setEditorStatus(EditorState.Ok);
+        setAIMode(false);
+      },
+      onError: (message) => {
+        stopGenerating();
+        setEditorErrors([message]);
+        setEditorStatus(EditorState.Error);
+      },
     }, controller.signal, mode);
     stopGenerating();
   };
 
   const abortGenerate = () => { abortRef.current?.abort(); };
 
-  return { containerRef, focused, getCurrentText, replaceAll, appendChunk, handleGenerate, abortGenerate };
+  return {
+    containerRefs,
+    activeTab,
+    setActiveTab,
+    focused,
+    getCurrentText,
+    replaceAll,
+    appendChunk,
+    handleGenerate,
+    abortGenerate,
+  };
 };
