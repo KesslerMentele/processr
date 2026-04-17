@@ -345,6 +345,10 @@ html, body {
     inset 0 1px 0 rgb(255 255 255 / 4%);
 }
 
+.processr-node-count-badge {
+  cursor: pointer;
+}
+
 .processr-node-error {
   --node-accent: #c0392b;
   opacity: 0.85;
@@ -376,6 +380,9 @@ html, body {
   font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
+  justify-content: space-between;
+  align-items: center;
+  display: flex;
   color: var(--node-label);
 }
 
