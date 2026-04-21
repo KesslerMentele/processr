@@ -8,14 +8,14 @@ import {
   ReactFlow, SelectionMode,
 } from "@xyflow/react";
 import { useEdgesState, useNodesState } from "@xyflow/react";
-import { toRFEdge, toRFNode } from "../utils/reactflow-bridge.ts";
-import { type ProcessrNodeData, processrNodeId } from "../models";
-import ProcessrNodeComponent from "./node/ProcessrNodeComponent.tsx";
+import { toRFEdge, toRFNode } from "../../utils/reactflow-bridge.ts";
+import { type ProcessrNodeData, processrNodeId } from "../../models";
+import ProcessrNodeComponent from "../node/ProcessrNodeComponent.tsx";
 import { useShortcut } from "react-keyhub";
 import CanvasToolbar from "./CanvasToolbar.tsx";
-import AtlasEditor from "../features/atlas/components/AtlasEditor.tsx";
-import { useCanvasHandlers } from "../hooks/useCanvasHandlers.ts";
-import { useCanvasState } from "../hooks/useCanvasState.ts";
+import AtlasEditor from "../../features/atlas/components/AtlasEditor.tsx";
+import { useCanvasHandlers } from "../../hooks/useCanvasHandlers.ts";
+import { useCanvasState } from "../../hooks/useCanvasState.ts";
 
 const nodeTypes = { processor: ProcessrNodeComponent };
 const initialNodes: RFNode<ProcessrNodeData>[] = [];
@@ -90,7 +90,12 @@ const Canvas: FC = () => {
   useShortcut('redo', redo);
 
   return (
-    <div className="canvas-container">
+    <div
+      className="canvas-container"
+      onContextMenu={(e) => {
+        e.preventDefault();
+      }}
+    >
       {packEditorOpen && <AtlasEditor />}
       <ReactFlow
         nodes={rfNodes}

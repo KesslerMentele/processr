@@ -1,6 +1,6 @@
 import { type FC, useEffect } from 'react';
 import { ReactFlowProvider } from "@xyflow/react";
-import Canvas from "./Canvas.tsx";
+import Canvas from "./canvas/Canvas.tsx";
 import Sidebar from "./sidebar/Sidebar.tsx";
 import { saveProcessrGraph } from "../utils/persistence.ts";
 import { useProcessrStore } from "../state/store.ts";

@@ -144,8 +144,13 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISetting
         selectedNodeIds: [survivor.id],
         graph: graphReducer(state.graph, {
           type: "STACK_NODES",
-          payload: { survivorId: survivor.id, removedIds, newCount: nodes.length },
-        }),
+          payload: {
+            survivorId: survivor.id,
+            removedIds,
+            newCount: nodes.reduce((acc, node) => {
+              return acc + node.count;
+            }, 0)
+          } }),
       };
     });
     },
@@ -184,6 +189,11 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISetting
         }),
       };
     });
+    },
+
+    setNodeStackSize: (nodeId: ProcessrNodeId, newStackSize: number) =>
+    {set((state) =>
+      ({ graph: graphReducer(state.graph, { type: "SET_STACK_SIZE", payload: { nodeId, newStackSize } }) }));
     },
 
     loadGraph: (data:SetGraphData) =>

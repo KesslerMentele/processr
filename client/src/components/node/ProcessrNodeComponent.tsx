@@ -1,4 +1,4 @@
-import {type CSSProperties, type FC} from "react";
+import { type CSSProperties, type FC } from "react";
 import type { ProcessrNodeData } from "../../models";
 import { type Node as RFNode, type NodeProps as RFNodeProps } from "@xyflow/react";
 import { getInputPorts, getOutputPorts } from "../../utils/node-utils.ts";
@@ -7,7 +7,7 @@ import type { PortEntry } from "../../models";
 import Port from "./Port.tsx";
 import { logger } from "../../utils/logger.ts";
 import NodeDetails from "./NodeDetails.tsx";
-import NodeStackCount from "./NodeStackCount.ts";
+import NodeStackCount from "./NodeStackCount.tsx";
 
 type ProcessrNodeComponentProps = RFNodeProps<RFNode<ProcessrNodeData>>
 

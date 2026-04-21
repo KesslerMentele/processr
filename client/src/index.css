@@ -163,7 +163,7 @@ html, body {
 
 /* ── sidebar ───────────────────────────────────────────── */
 .sidebar {
-  min-width: 200px;
+  width: 200px;
   min-height: 0;
   flex-shrink: 0;
   background: var(--surface-raised);
@@ -347,6 +347,14 @@ html, body {
 
 .processr-node-count-badge {
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  min-width: 50px;
+  justify-content: space-between;
+}
+
+.processr-node-count-badge input {
+  max-width: 36px;
 }
 
 .processr-node-error {

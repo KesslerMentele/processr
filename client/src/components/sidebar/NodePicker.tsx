@@ -1,4 +1,4 @@
-import { DraggableNodeTemplate } from "../NodeTemplate.tsx";
+import { DraggableNodeTemplate } from "./NodeTemplate.tsx";
 import { useProcessrStore } from "../../state/store.ts";
 
 
