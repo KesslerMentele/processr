@@ -1,4 +1,4 @@
-import type { GamePackId, ItemId, RecipeId, NodeTemplateId, CategoryId } from "./ids.ts";
+import type { AtlasId, ItemId, RecipeId, NodeTemplateId, CategoryId } from "./ids.ts";
 import type { Metadata } from "./common.ts";
 import type { Item, Category } from "./items.ts";
 import type { Recipe } from "./recipes.ts";
@@ -13,7 +13,7 @@ export type SemVer = `${number}.${number}.${number}`;
  *
  */
 export interface Atlas {
-  readonly id: GamePackId;
+  readonly id: AtlasId;
   readonly name: string;
   readonly gameName: string;
   readonly version: SemVer;
@@ -31,11 +31,11 @@ export interface Atlas {
 }
 
 /**
- * Indexed/normalized form of a Atlas for efficient lookups.
+ * Indexed/normalized form of an Atlas for efficient lookups.
  * Created at load time from the raw Atlas arrays. Not serialized.
  */
 export interface AtlasIndex {
-  readonly pack: Atlas;
+  readonly atlas: Atlas;
   readonly itemsById: ReadonlyMap<ItemId, Item>;
   readonly recipesById: ReadonlyMap<RecipeId, Recipe>;
   readonly nodeTemplatesById: ReadonlyMap<NodeTemplateId, NodeTemplate>;

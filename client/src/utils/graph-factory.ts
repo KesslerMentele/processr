@@ -1,5 +1,5 @@
 import type {
-  GamePackId,
+  AtlasId,
   Graph,
   Metadata,
   NodeTemplate,
@@ -42,7 +42,7 @@ export const cloneNode = (
 });
 
 export const createGraph = (
-  gamePackId: GamePackId,
+  gamePackId: AtlasId,
   name:string
 ): Graph => {
   const now = new Date().toISOString();

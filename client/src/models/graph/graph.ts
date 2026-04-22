@@ -1,4 +1,4 @@
-import type { GraphId, GamePackId, ProcessrNodeId, RecipeId, EdgeId } from "../ids.ts";
+import type { GraphId, AtlasId, ProcessrNodeId, RecipeId, EdgeId } from "../ids.ts";
 import type { Metadata, Position } from "../common.ts";
 import type { ProcessrNode } from "./processr-node.ts";
 import type { Edge } from "./edge.ts";
@@ -94,7 +94,7 @@ export interface Graph {
   readonly id: GraphId;
   readonly name: string;
   readonly description?: string;
-  readonly gamePackId: GamePackId;
+  readonly gamePackId: AtlasId;
   readonly nodes: Readonly<Record<string, ProcessrNode>>;
   readonly edges: Readonly<Record<string, Edge>>;
   readonly viewport: Viewport;

@@ -200,7 +200,7 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISetting
     {set((state) => {
       const { graph, atlasIndex } = data;
       return { ...state,
-        graph: graph ? graph : createGraph(atlasIndex.pack.id, "My Factory"),
+        graph: graph ? graph : createGraph(atlasIndex.atlas.id, "My Factory"),
         atlasIndex: atlasIndex };
     });
     },

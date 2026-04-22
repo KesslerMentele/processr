@@ -1,9 +1,9 @@
-export type AtlasTab = 'pack' | 'items' | 'nodes' | 'recipes';
+export type AtlasTab = 'atlas' | 'items' | 'nodes' | 'recipes';
 
-export const ATLAS_TABS: readonly AtlasTab[] = ['pack', 'items', 'nodes', 'recipes'];
+export const ATLAS_TABS: readonly AtlasTab[] = ['atlas', 'items', 'nodes', 'recipes'];
 
 export const ATLAS_TAB_LABELS: Record<AtlasTab, string> = {
-  pack: 'Pack',
+  atlas: 'Atlas',
   items: 'Items',
   nodes: 'Nodes',
   recipes: 'Recipes',
@@ -13,7 +13,7 @@ export const ATLAS_TAB_LABELS: Record<AtlasTab, string> = {
  * Splits a full Atlas text document into per-tab sections.
  *
  * Assignment rules (applied at brace depth 0):
- *   gamepack / category  → 'pack'
+ *   atlas / category  → 'atlas'
  *   item                 → 'items'
  *   node                 → 'nodes'
  *   recipe               → 'recipes'
@@ -29,9 +29,9 @@ export const splitAtlasText = (text: string): Record<AtlasTab, string> => {
   }
 
   const initial: Acc = {
-    currentSection: 'pack',
+    currentSection: 'atlas',
     braceDepth: 0,
-    sectionLines: { pack: [], items: [], nodes: [], recipes: [] },
+    sectionLines: { atlas: [], items: [], nodes: [], recipes: [] },
   };
 
   const result = text.split('\n').reduce((acc, line) => {
@@ -41,7 +41,7 @@ export const splitAtlasText = (text: string): Record<AtlasTab, string> => {
       if (acc.braceDepth !== 0 || trimmed.length === 0 || trimmed.startsWith('//')) {
         return acc.currentSection;
       }
-      if (trimmed.startsWith('gamepack') || trimmed.startsWith('category')) return 'pack';
+      if (trimmed.startsWith('atlas') || trimmed.startsWith('category')) return 'atlas';
       if (trimmed.startsWith('item ') || trimmed === 'item') return 'items';
       if (trimmed.startsWith('node ') || trimmed === 'node') return 'nodes';
       if (trimmed.startsWith('recipe ') || trimmed === 'recipe') return 'recipes';
@@ -63,7 +63,7 @@ export const splitAtlasText = (text: string): Record<AtlasTab, string> => {
   }, initial);
 
   return {
-    pack: result.sectionLines.pack.join('\n').trimEnd(),
+    atlas: result.sectionLines.atlas.join('\n').trimEnd(),
     items: result.sectionLines.items.join('\n').trimEnd(),
     nodes: result.sectionLines.nodes.join('\n').trimEnd(),
     recipes: result.sectionLines.recipes.join('\n').trimEnd(),

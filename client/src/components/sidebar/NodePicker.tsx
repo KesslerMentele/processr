@@ -8,7 +8,7 @@ const NodePicker =  () => {
     return (
       <div className="sidebar-nodetemplates">
         <h1>Nodes</h1>
-        {atlasIndex.pack.nodeTemplates.map(template => (
+        {atlasIndex.atlas.nodeTemplates.map(template => (
           <DraggableNodeTemplate key={template.id} template={template}/>
         ))}
       </div>
