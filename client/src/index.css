@@ -163,7 +163,7 @@ html, body {
 
 /* ── sidebar ───────────────────────────────────────────── */
 .sidebar {
-  min-width: 200px;
+  width: 200px;
   min-height: 0;
   flex-shrink: 0;
   background: var(--surface-raised);
@@ -345,6 +345,18 @@ html, body {
     inset 0 1px 0 rgb(255 255 255 / 4%);
 }
 
+.processr-node-count-badge {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  min-width: 50px;
+  justify-content: space-between;
+}
+
+.processr-node-count-badge input {
+  max-width: 36px;
+}
+
 .processr-node-error {
   --node-accent: #c0392b;
   opacity: 0.85;
@@ -376,6 +388,9 @@ html, body {
   font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
+  justify-content: space-between;
+  align-items: center;
+  display: flex;
   color: var(--node-label);
 }
 

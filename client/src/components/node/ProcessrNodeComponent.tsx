@@ -1,12 +1,13 @@
-import type { CSSProperties, FC } from "react";
+import { type CSSProperties, type FC } from "react";
 import type { ProcessrNodeData } from "../../models";
 import { type Node as RFNode, type NodeProps as RFNodeProps } from "@xyflow/react";
 import { getInputPorts, getOutputPorts } from "../../utils/node-utils.ts";
 import { useNodeComponentState } from "../../hooks/useNodeComponentState.ts";
 import type { PortEntry } from "../../models";
 import Port from "./Port.tsx";
-import PortIcon from "./PortIcon.tsx";
 import { logger } from "../../utils/logger.ts";
+import NodeDetails from "./NodeDetails.tsx";
+import NodeStackCount from "./NodeStackCount.tsx";
 
 type ProcessrNodeComponentProps = RFNodeProps<RFNode<ProcessrNodeData>>
 
@@ -14,6 +15,7 @@ const ProcessrNodeComponent: FC<ProcessrNodeComponentProps> = ({ data, selected 
   const { packIndex, detailedMode } = useNodeComponentState();
   const template = packIndex.nodeTemplatesById.get(data.templateId);
   const recipe = data.recipeId === null ? undefined : packIndex.recipesById.get(data.recipeId);
+
 
   if (template === undefined) {
     logger.warn(`[ProcessrNode] template not found: ${data.templateId} — Atlas may be missing this node type`);
@@ -37,6 +39,8 @@ const ProcessrNodeComponent: FC<ProcessrNodeComponentProps> = ({ data, selected 
       item: recipe ? packIndex.itemsById.get(recipe.outputs[i]?.itemId) : undefined,
     }));
 
+
+
   return (
     <div
       className={`processr-node ${selected ? "selected" : ""}`}
@@ -44,34 +48,17 @@ const ProcessrNodeComponent: FC<ProcessrNodeComponentProps> = ({ data, selected 
     >
       {inputs.map((p, i) => (<Port key={i} {...p} />))}
       <div className="processr-node-label">
-        {data.label ?? template.name}
-        {data.count > 1 && <span className="processr-node-count-badge">×{data.count}</span>}
+
+        <p>{data.label ?? template.name}</p>
+
+        <NodeStackCount id={data.id} count={data.count} />
+
       </div>
       {recipe && (
         <div className="processr-node-recipe">{recipe.name}</div>
       )}
 
-      {detailedMode && recipe &&
-        <div className="processr-node-details">
-          {inputs.map(({ port, item, stack }) => item && stack && (
-
-            <div key={port.id} className="processr-node-detail-row">
-              <PortIcon {...item}/>
-              <span className="processr-node-detail-name">{item.name}</span>
-              <span className="processr-node-detail-amount">×{stack.amount * data.count}</span>
-            </div>
-          ))}
-          {inputs.length > 0 ? <div className="processr-node-detail-sep"/> : null}
-          {outputs.map(({ port, item, stack }) => item && stack && (
-            <div key={port.id} className="processr-node-detail-row processr-node-detail-row-out">
-              <PortIcon {...item}/>
-              <span className="processr-node-detail-name">{item.name}</span>
-              <span className="processr-node-detail-amount">×{stack.amount * data.count}</span>
-            </div>
-          ))}
-          <div className="processr-node-detail-duration">{recipe.duration}s cycle</div>
-        </div>
-      }
+      {detailedMode && recipe && <NodeDetails recipe={recipe} count={data.count} inputs={inputs} outputs={outputs} />}
 
       {outputs.map((p, i) => (<Port key={i} {...p} />))}
     </div>

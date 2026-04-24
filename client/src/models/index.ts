@@ -4,7 +4,7 @@ export type {
   RecipeId,
   NodeTemplateId,
   CategoryId,
-  GamePackId,
+  AtlasId,
   ProcessrNodeId,
   EdgeId,
   GraphId,

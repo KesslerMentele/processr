@@ -38,7 +38,6 @@ const applyActionToGraph = (graph: Graph, action: GraphAction<ReversibleAction>)
       );
       return { ...graph, nodes: { ...graph.nodes, ...updates } };
     }
-
     case "SET_NODE_RECIPE": {
       const { nodeId, recipeId, invalidEdges, behavior } = payload;
 
@@ -56,17 +55,14 @@ const applyActionToGraph = (graph: Graph, action: GraphAction<ReversibleAction>)
         return [id, Object.hasOwn(invalidEdges, id) ? { ...edge, invalid: true } : { ...edge, invalid: undefined }];
       })) };
     }
-
     case "ADD_EDGE": {
       const { edge } = payload;
       return { ...graph, edges: { ...graph.edges, [edge.id]: edge } };
     }
-
     case "REMOVE_EDGE": {
       const { edgeId } = payload;
       return { ...graph, edges: omitKey(graph.edges, edgeId) };
     }
-
     case "SET_MULTI_NODE_RECIPES": {
       const { updates, behavior } = payload;
       return updates.reduce((g, { nodeId, recipeId, invalidEdges }) => {
@@ -81,7 +77,6 @@ const applyActionToGraph = (graph: Graph, action: GraphAction<ReversibleAction>)
         })) };
       }, graph);
     }
-
     case "STACK_NODES": {
       const { survivorId, removedIds, newCount } = payload;
       const removedSet = new Set<string>(removedIds);
@@ -113,7 +108,6 @@ const applyActionToGraph = (graph: Graph, action: GraphAction<ReversibleAction>)
 
       return { ...graph, nodes, edges };
     }
-
     case "UNSTACK_NODE": {
       const { nodeId, newNodes, newEdges } = payload;
       const nodes = {
@@ -122,6 +116,10 @@ const applyActionToGraph = (graph: Graph, action: GraphAction<ReversibleAction>)
         ...Object.fromEntries(newNodes.map(n => [n.id, n])),
       };
       return { ...graph, nodes, edges: { ...graph.edges, ...newEdges } };
+    }
+    case "SET_STACK_SIZE": {
+      const { nodeId, newStackSize } = payload;
+      return { ...graph, nodes: { ...omitKey(graph.nodes, nodeId), [nodeId]:{ ...graph.nodes[nodeId], count: newStackSize } } };
     }
   }
 };
@@ -206,9 +204,16 @@ const undoAction = (graph: Graph, change: GraphChange): Graph => {
       );
       return { ...graph, nodes, edges };
     }
+    case "SET_STACK_SIZE": return applySingleNodeUpdate(graph, action.payload.nodeId, { count: change.payload.previousStackSize });
   }
 };
 
+
+/**
+ * Creates the appropriate GraphChange object from an action.
+ * @param graph
+ * @param action
+ */
 const createGraphChangeForHistory = (graph: Graph, action:GraphAction<ReversibleAction>):GraphChange => {
   const { type } = action;
   switch (type) {
@@ -260,20 +265,35 @@ const createGraphChangeForHistory = (graph: Graph, action:GraphAction<Reversible
       } };
     }
     case "UNSTACK_NODE": {
-      const { newNodes, newEdges } = action.payload;
+      const { newNodes, newEdges, nodeId } = action.payload;
       return { type, action, payload: {
         newNodeIds: newNodes.map(n => n.id),
         newEdgeIds: Object.keys(newEdges),
-        originalCount: graph.nodes[action.payload.nodeId].count,
+        originalCount: graph.nodes[nodeId].count,
       } };
+    }
+    case "SET_STACK_SIZE": {
+      const { nodeId } = action.payload;
+
+      return { type, action, payload: {
+          previousStackSize: graph.nodes[nodeId].count
+        }
+      };
     }
   }
 };
 
+/**
+ * Applies an action to the graph, including history processing
+ * @param graph - The state of the graph before the change
+ * @param action - The action to apply to the graph
+ * 
+ * @return Graph - The state of the graph after the change
+ */
 export const graphReducer = (graph: Graph, action: GraphAction): Graph => {
   const { type } = action;
   switch (type) {
-
+    // ReversibleActions all work the same way 
     case "ADD_NODE":
     case "REMOVE_NODE":
     case "SET_NODE_POSITIONS":
@@ -283,12 +303,12 @@ export const graphReducer = (graph: Graph, action: GraphAction): Graph => {
     case "REMOVE_EDGE":
     case "STACK_NODES":
     case "UNSTACK_NODE":
+    case "SET_STACK_SIZE":
       return addChangeToHistory(graph, applyActionToGraph(graph, action), createGraphChangeForHistory(graph, action));
 
-
+    // TransientActions
     case "SET_VIEWPORT":
       return { ...graph, viewport: action.payload.viewport };
-
     case "UNDO": {
       const lastChange = graph.history.past.at(-1);
       if (lastChange === undefined) return graph;
@@ -298,7 +318,6 @@ export const graphReducer = (graph: Graph, action: GraphAction): Graph => {
         updatedAt: now(),
       };
     }
-
     case "REDO": {
       const lastChange = graph.history.future.at(-1);
       if (lastChange === undefined) return graph;
