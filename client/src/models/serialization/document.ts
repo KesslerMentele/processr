@@ -1,4 +1,4 @@
-import type { GraphId, GamePackId } from "../ids.ts";
+import type { GraphId, AtlasId } from "../ids.ts";
 import type { Graph } from "../graph/graph.ts";
 import type { Atlas } from "../atlas.ts";
 
@@ -26,7 +26,7 @@ export interface ProcessrGraph {
 export interface DocumentSummary {
   readonly graphId: GraphId;
   readonly name: string;
-  readonly gamePackId: GamePackId;
+  readonly gamePackId: AtlasId;
   readonly gamePackName: string;
   readonly updatedAt: string;
   readonly nodeCount: number;

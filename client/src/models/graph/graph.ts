@@ -1,4 +1,4 @@
-import type { GraphId, GamePackId, ProcessrNodeId, RecipeId, EdgeId } from "../ids.ts";
+import type { GraphId, AtlasId, ProcessrNodeId, RecipeId, EdgeId } from "../ids.ts";
 import type { Metadata, Position } from "../common.ts";
 import type { ProcessrNode } from "./processr-node.ts";
 import type { Edge } from "./edge.ts";
@@ -20,6 +20,7 @@ export const ReversibleAction = {
   RemoveEdge: "REMOVE_EDGE",
   StackNodes: "STACK_NODES",
   UnstackNode: "UNSTACK_NODE",
+  SetStackSize: "SET_STACK_SIZE"
 } as const;
 
 export const TransientAction = {
@@ -44,6 +45,7 @@ interface GraphActionPayloadMap {
   [ReversibleAction.RemoveEdge]: { readonly edgeId: EdgeId };
   [ReversibleAction.StackNodes]: { readonly survivorId: ProcessrNodeId; readonly removedIds: readonly ProcessrNodeId[]; readonly newCount: number };
   [ReversibleAction.UnstackNode]: { readonly nodeId: ProcessrNodeId; readonly newNodes: readonly ProcessrNode[]; readonly newEdges: Readonly<Record<string, Edge>> };
+  [ReversibleAction.SetStackSize]: {readonly nodeId: ProcessrNodeId, readonly newStackSize: number};
   [TransientAction.SetViewport]: { readonly viewport: Viewport };
   [TransientAction.Undo]: undefined;
   [TransientAction.Redo]: undefined;
@@ -65,6 +67,7 @@ interface GraphChangePayloadMap {
   [ReversibleAction.RemoveEdge]: { readonly removedEdge: Edge };
   [ReversibleAction.StackNodes]: { readonly originalSurvivorCount: number; readonly removedNodes: readonly ProcessrNode[]; readonly edgeSnapshot: Readonly<Record<string, Edge>> };
   [ReversibleAction.UnstackNode]: { readonly newNodeIds: readonly ProcessrNodeId[]; readonly newEdgeIds: readonly string[]; readonly originalCount: number };
+  [ReversibleAction.SetStackSize]: {readonly previousStackSize: number}
 }
 
 export type GraphChange<T extends ReversibleAction = ReversibleAction> = {
@@ -91,7 +94,7 @@ export interface Graph {
   readonly id: GraphId;
   readonly name: string;
   readonly description?: string;
-  readonly gamePackId: GamePackId;
+  readonly gamePackId: AtlasId;
   readonly nodes: Readonly<Record<string, ProcessrNode>>;
   readonly edges: Readonly<Record<string, Edge>>;
   readonly viewport: Viewport;

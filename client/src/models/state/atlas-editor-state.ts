@@ -7,7 +7,6 @@ export const EditorState = {
   Ok: 'ok',
   Error: 'error',
   Applied: 'applied',
-  Thinking: 'thinking',
 } as const;
 
 export type EditorStatus = (typeof EditorState)[keyof typeof EditorState];

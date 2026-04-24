@@ -33,7 +33,7 @@ export function buildAtlasIndex(atlas: Atlas): AtlasIndex {
   );
 
   return {
-    pack: atlas,
+    atlas: atlas,
     itemsById: new Map(atlas.items.map((i) => [i.id, i])),
     recipesById: new Map(atlas.recipes.map((r) => [r.id, r])),
     nodeTemplatesById: new Map(atlas.nodeTemplates.map((n) => [n.id, n])),
