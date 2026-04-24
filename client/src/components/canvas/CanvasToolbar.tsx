@@ -1,8 +1,9 @@
 import type { FC } from 'react';
 import { Panel } from '@xyflow/react';
-import { type EdgeType } from '../state/ui-slice.ts';
+import { type EdgeType } from '../../state/ui-slice.ts';
 import { LuMove, LuLassoSelect, LuSettings2, LuPackage, LuSun, LuMoon, LuLayers, LuLayers2 } from 'react-icons/lu';
-import { useToolbarState } from '../hooks/useToolbarState.ts';
+import { useToolbarState } from '../../hooks/useToolbarState.ts';
+import type { ProcessrNode } from "../../models";
 
 interface EdgeOption  { readonly value: EdgeType; readonly label: string }
 
@@ -38,10 +39,10 @@ const CanvasToolbar: FC = () => {
   } = useToolbarState();
 
   const canStack = selectedNodeIds.length > 1 &&
-    selectedNodeIds.map(id => graph.nodes[id].templateId).every((t, _, arr) => t === arr[0]);
+    selectedNodeIds.map(id => (graph.nodes[id] as ProcessrNode | undefined)?.templateId).every((t, _, arr) => t !== undefined && t === arr[0]);
 
   const canUnstack = selectedNodeIds.length === 1 &&
-    graph.nodes[selectedNodeIds[0]].count > 1;
+    ((graph.nodes[selectedNodeIds[0]] as ProcessrNode | undefined)?.count ?? 0) > 1;
 
   return (
     <Panel position="top-right" className="canvas-toolbar">

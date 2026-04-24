@@ -61,6 +61,8 @@ export const omitKey = <T>(obj: Readonly<Record<string, T>>, key: string): Recor
  * @param graph - The state of the graph prior to the change
  * @param nodeId - The node to be targeted
  * @param update - The updates to the node state.
+ *
+ * @return Graph - The state of the graph after the update
  */
 export const applySingleNodeUpdate = (graph: Graph, nodeId: string, update: Partial<ProcessrNode>): Graph => ({
   ...graph,

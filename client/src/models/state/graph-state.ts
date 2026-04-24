@@ -18,13 +18,14 @@ export interface GraphActionSlice {
   setNodeRecipes: (updates: { nodeId: ProcessrNodeId; recipeId: RecipeId | null }[]) => void;
   addEdge: (edge: Edge) => void;
   removeEdge: (edgeId: EdgeId) => void;
-  setViewport: (viewport: Viewport) => void;
   loadGraph: (options:SetGraphData) => void;
   loadAtlas: (pack: Atlas) => void;
   setSelectedNodeIds: (ids: readonly ProcessrNodeId[]) => void;
   setDraggedTemplateId: (id: NodeTemplateId | null) => void;
   stackNodes: (selectedNodeIds: readonly ProcessrNodeId[]) => void;
   unstackNode: (nodeId: ProcessrNodeId) => void;
+  setNodeStackSize: (nodeId: ProcessrNodeId, size: number) => void;
+  setViewport: (viewport: Viewport) => void;
   undo: () => void
   redo: () => void
 }

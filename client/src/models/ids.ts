@@ -14,7 +14,7 @@ export type ItemId = Branded<string, "ItemId">;
 export type RecipeId = Branded<string, "RecipeId">;
 export type NodeTemplateId = Branded<string, "NodeTemplateId">;
 export type CategoryId = Branded<string, "CategoryId">;
-export type GamePackId = Branded<string, "GamePackId">;
+export type AtlasId = Branded<string, "AtlasId">;
 
 // ---- Graph IDs (user-mutable instances) ----
 
@@ -43,8 +43,8 @@ export function categoryId(id: string): CategoryId {
   return id as CategoryId;
 }
 
-export function gamePackId(id: string): GamePackId {
-  return id as GamePackId;
+export function gamePackId(id: string): AtlasId {
+  return id as AtlasId;
 }
 
 export function processrNodeId(id: string): ProcessrNodeId {

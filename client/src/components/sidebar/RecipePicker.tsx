@@ -3,28 +3,9 @@ import { useSidebarState } from "../../hooks/useSidebarState.ts";
 
 
 const RecipePicker = () => {
-  const { packIndex, selectedNodes, setNodeRecipe, setNodeRecipes } = useSidebarState();
+  const { packIndex, selectedNodes, setNodeRecipes } = useSidebarState();
 
   if (selectedNodes.length === 0) return <div className="sidebar-recipes" />;
-
-  if (selectedNodes.length === 1) {
-    const node = selectedNodes[0];
-    const recipes = packIndex.recipesByNodeType.get(node.templateId) ?? [];
-    return (
-      <div className="sidebar-recipes">
-        <h1>Select a Recipe:</h1>
-        {recipes.map(recipe => (
-          <button
-            key={recipe.id}
-            className={`sidebar-recipe-btn${node.recipeId === recipe.id ? " active" : ""}`}
-            onClick={() => { setNodeRecipe(node.id, recipe.id); }}
-          >
-            {recipe.name}
-          </button>
-        ))}
-      </div>
-    );
-  }
 
   // Multi-select: group by templateId
   const groupsObj = selectedNodes.reduce<Record<NodeTemplateId, ProcessrNode[]>>((acc, n) => ({
@@ -45,7 +26,7 @@ const RecipePicker = () => {
               return (
                 <button
                   key={recipe.id}
-                  className={`sidebar-recipe-btn${allActive ? " active" : ""}`}
+                  className={`sidebar-recipe-btn ${allActive ? "active" : ""}`}
                   onClick={() => { setNodeRecipes(nodes.map(n => ({ nodeId: n.id, recipeId: recipe.id }))); }}
                 >
                   {recipe.name}

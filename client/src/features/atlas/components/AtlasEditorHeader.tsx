@@ -1,11 +1,9 @@
 import {
-  LuBrainCircuit,
   LuCheck,
   LuChevronDown,
   LuChevronUp,
   LuCircleHelp,
   LuDownload,
-  LuOctagonX,
   LuUpload,
   LuX,
 } from "react-icons/lu";
@@ -15,25 +13,19 @@ import { downloadAtlasAs, parseAtlasFile } from "../atlas-api.ts";
 import type { Atlas } from "../../../models";
 import { useAtlasEditorHeaderState } from "../hooks/useAtlasEditorHeaderState.ts";
 import { saveAtlasEditorText } from "../../../utils/persistence.ts";
+import { useProcessrStore } from "../../../state/store.ts";
 
-// eslint-disable-next-line functional/no-mixed-types
 interface AtlasEditorHeaderProps {
   getCurrentText: () => string;
   replaceAll: (text: string) => void;
-  pack: Atlas | null;
-  abortGenerate: () => void;
 }
 
-const AtlasEditorHeader = ({ getCurrentText, replaceAll, pack, abortGenerate }: Readonly<AtlasEditorHeaderProps>) => {
-
+const AtlasEditorHeader = ({ getCurrentText, replaceAll }: Readonly<AtlasEditorHeaderProps>) => {
+  const atlas = useProcessrStore.use.atlasIndex().atlas;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const posRef = useRef({ x: 0, y: 0 });
 
-  const { packIndex, status, collapsed, errors, helpOpen, loadAtlas, togglePackEditor, setPosition, setStatus, setErrors, setAIMode, setHelpOpen, setCollapsed } = useAtlasEditorHeaderState();
-
-  const handleAIModeStart = () => {
-    setAIMode(true);
-  };
+  const { packIndex, status, collapsed, errors, helpOpen, loadAtlas, togglePackEditor, setPosition, setStatus, setErrors, setHelpOpen, setCollapsed } = useAtlasEditorHeaderState();
 
   const handleHeaderMouseDown = (e: Readonly<ReactMouseEvent>) => {
     if ((e.target as HTMLElement).closest('button')) return;
@@ -80,8 +72,7 @@ const AtlasEditorHeader = ({ getCurrentText, replaceAll, pack, abortGenerate }: 
   };
 
   const handleApplyPack = () => {
-    if (!pack) return;
-    applyResult(pack);
+    applyResult(atlas);
     saveAtlasEditorText(getCurrentText());
     setStatus('applied');
   };
@@ -92,11 +83,11 @@ const AtlasEditorHeader = ({ getCurrentText, replaceAll, pack, abortGenerate }: 
   };
 
   const handleDownload = () => {
-    const filename = `${packIndex.pack.name.toLowerCase().replaceAll(' ', '-')}.prat`;
+    const filename = `${packIndex.atlas.name.toLowerCase().replaceAll(' ', '-')}.prat`;
     downloadAtlasAs(getCurrentText(), filename);
   };
 
-  const handleAbortAndReset = () => { abortGenerate(); setStatus('idle'); setAIMode(true); };
+
   const handleToggleHelp     = () => { setHelpOpen(!helpOpen); };
   const handleToggleCollapsed = () => { setCollapsed(!collapsed); };
   const handleFileChange     = (e: ChangeEvent<HTMLInputElement>) => { void handleFileUpload(e); };
@@ -108,7 +99,6 @@ const AtlasEditorHeader = ({ getCurrentText, replaceAll, pack, abortGenerate }: 
       case "ok": return 'Atlas is Valid';
       case "error": return `${errors.length.toString()} error${errors.length === 1 ? '' : 's'}`;
       case "applied": return 'Atlas applied';
-      case "thinking": return 'Thinking';
     }
   };
 
@@ -117,15 +107,6 @@ const AtlasEditorHeader = ({ getCurrentText, replaceAll, pack, abortGenerate }: 
 
       <span className="pack-editor-title">Atlas Editor</span>
       <span className={`pack-editor-status pack-editor-status-${status}`}>{getStatusLabel()}</span>
-
-      {status === 'thinking'
-        ? <button className="pack-editor-icon-btn" title="cancel generation" onClick={handleAbortAndReset}>
-            <LuOctagonX />
-          </button>
-        : <button className="pack-editor-icon-btn" title="Generate with AI" onClick={handleAIModeStart}>
-            <LuBrainCircuit/>
-          </button>
-      }
 
       <button className={`pack-editor-icon-btn${helpOpen ? ' pack-editor-icon-btn-active' : ''}`} title="Grammar reference" onClick={handleToggleHelp}>
         <LuCircleHelp />
