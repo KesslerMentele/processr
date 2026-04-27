@@ -11,7 +11,7 @@ const AtlasEditor: FC = () => {
   const { atlasIndex, editorPosition, editorCollapsed, helpOpen, errors } = useAtlasEditorState();
 
   const { containerRefs, activeTab, setActiveTab, focused, getCurrentText, replaceAll } = useAtlasEditorView(
-    atlasIndex: atlasIndex
+    atlasIndex
   );
 
   // const { handleGenerate, abortGenerate, onDocChange } = useEditorGenerate({
