@@ -1,0 +1,235 @@
+
+/* ── Processr node ────────────────────────────────────── */
+.processr-node {
+    position: relative;
+    background: linear-gradient(150deg, var(--node-bg-from) 0%, var(--node-bg-to) 100%);
+    padding: 10px 20px;
+    min-width: 150px;
+    border: 1px solid var(--node-border);
+    border-left: 3px solid var(--node-accent, #3b6ea5);
+    border-radius: 4px;
+    box-shadow:
+            0 2px 6px rgb(0 0 0 / 50%),
+            0 8px 28px rgb(0 0 0 / 35%),
+            inset 0 1px 0 rgb(255 255 255 / 4%);
+}
+
+.processr-node-count-badge {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    min-width: 50px;
+    justify-content: space-between;
+}
+
+.processr-node-count-badge input {
+    max-width: 36px;
+}
+
+.processr-node-error {
+    --node-accent: #c0392b;
+    opacity: 0.85;
+}
+
+.processr-node-error-detail {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.processr-node-error-detail code {
+    font-family: monospace;
+    color: #e07070;
+}
+
+.processr-node.selected {
+    border-color: var(--node-border-selected);
+    border-left-color: var(--node-accent, var(--accent));
+    box-shadow:
+            0 2px 6px rgb(0 0 0 / 50%),
+            0 8px 28px rgb(0 0 0 / 35%),
+            0 0 0 1px rgb(var(--accent-rgb), 0.3),
+            0 0 28px rgb(var(--accent-rgb), 0.1);
+}
+
+.processr-node-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    justify-content: space-between;
+    align-items: center;
+    display: flex;
+    color: var(--node-label);
+}
+
+.processr-node-recipe {
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--node-recipe);
+    letter-spacing: 0.01em;
+}
+
+/* ── Ports ────────────────────────────────────────────── */
+
+/* bare port — dim dot, colored by form */
+.port-handle {
+    --port-color: var(--port-default);
+    --port-rgb: var(--port-default-rgb);
+
+    width: 10px !important;
+    height: 10px !important;
+    border-radius: 50% !important;
+    background: rgb(var(--port-rgb), 0.3) !important;
+    border: 1.5px solid var(--port-color) !important;
+    transition: box-shadow 0.15s !important;
+}
+
+/* Restore React Flow's border-straddling transforms (X component) + vertical centering */
+.react-flow__handle-left.port-handle  { transform: translate(-50%, -50%) !important; }
+.react-flow__handle-right.port-handle { transform: translate(50%, -50%)  !important; }
+
+/* item port — compact badge */
+.port-handle-has-item {
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 3px !important;
+    background: var(--node-deep) !important;
+    border: 1.5px solid var(--port-color) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 4px !important;
+    box-shadow:
+            inset 0 0 8px rgb(0 0 0 / 70%),
+            0 0 8px rgb(var(--port-rgb), 0.18) !important;
+}
+
+.port-handle:hover,
+.port-handle-has-item:hover {
+    box-shadow: 0 0 12px rgb(var(--port-rgb), 0.55) !important;
+}
+
+/* ── Form-coded port colors + shapes ────────────────── */
+.port-handle-fluid {
+    --port-color: #3b9eff;
+    --port-rgb: 59,158,255;
+
+    border-radius: 50% 50% 50% 0 !important;
+}
+.react-flow__handle-left.port-handle-fluid  { transform: translate(-50%, -50%) !important; }
+.react-flow__handle-right.port-handle-fluid { transform: translate(50%,  -50%) !important; }
+
+.port-handle-gas {
+    --port-color: #4ecdc4;
+    --port-rgb: 78,205,196;
+
+    border-radius: 50% !important;
+}
+
+.port-handle-energy {
+    --port-color: #fbbf24;
+    --port-rgb: 251,191,36;
+
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%) !important;
+    border-radius: 0 !important;
+}
+
+.port-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    display: block;
+}
+
+.port-icon-color {
+    border-radius: 2px;
+}
+
+/* ── Node detailed mode ────────────────────────────────── */
+.processr-node-details {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--node-detail-border);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.processr-node-detail-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    color: var(--io-in-text);
+}
+
+.processr-node-detail-row:not(.processr-node-detail-row-out)::before {
+    content: '→';
+    font-size: 9px;
+    color: var(--io-in-arrow);
+    flex-shrink: 0;
+}
+
+.processr-node-detail-row-out {
+    color: var(--io-in-text);
+}
+
+.processr-node-detail-row-out::before {
+    content: '→';
+    font-size: 9px;
+    color: transparent;
+    flex-shrink: 0;
+}
+
+.processr-node-detail-row-out::after {
+    content: '→';
+    color: var(--io-out-arrow);
+}
+
+.processr-node-detail-row .port-icon {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+}
+
+.processr-node-detail-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 90px;
+    color: var(--io-in-name);
+}
+
+.processr-node-detail-row-out .processr-node-detail-name {
+    color: var(--io-out-name);
+}
+
+.processr-node-detail-amount {
+    font-variant-numeric: tabular-nums;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--io-in-amount);
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+}
+
+.processr-node-detail-row-out .processr-node-detail-amount {
+    color: var(--io-out-amount);
+}
+
+.processr-node-detail-sep {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--node-detail-sep-mid), transparent);
+    margin: 3px 0;
+}
+
+.processr-node-detail-duration {
+    font-size: 10px;
+    color: var(--io-duration);
+    margin-top: 3px;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+}

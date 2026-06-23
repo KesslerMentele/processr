@@ -10,24 +10,18 @@ import { loadAtlasEditorText } from '../../../utils/persistence.ts';
 import { logger } from '../../../utils/logger.ts';
 import { splitAtlasText, joinAtlasText, ATLAS_TABS } from '../atlas-text-tabs.ts';
 import type { AtlasTab } from '../atlas-text-tabs.ts';
-import type { AtlasIndex } from '../../../models';
+import { type AtlasIndex } from '../../../models';
 
 import type React from 'react';
+import type { AtlasEditorView } from "../atlas-types.ts";
 
-// eslint-disable-next-line functional/no-mixed-types
-interface UseAtlasEditorViewResult {
-  readonly containerRefs: Record<AtlasTab, React.RefObject<HTMLDivElement | null>>;
-  readonly activeTab: AtlasTab;
-  readonly setActiveTab: (tab: AtlasTab) => void;
-  readonly focused: boolean;
-  readonly getCurrentText: () => string;
-  readonly replaceAll: (text: string) => void;
-  readonly appendChunk: (chunk: string) => void;
-}
 
-export const useAtlasEditorView = (
-  atlasIndex: AtlasIndex
-): UseAtlasEditorViewResult => {
+export const useEditorView = (
+  atlasIndex: AtlasIndex,
+  onDocChange?: (text: string) => void,
+): AtlasEditorView => {
+  const onDocChangeRef = useRef(onDocChange);
+  onDocChangeRef.current = onDocChange;
   const atlasContainerRef    = useRef<HTMLDivElement>(null);
   const itemsContainerRef   = useRef<HTMLDivElement>(null);
   const nodesContainerRef   = useRef<HTMLDivElement>(null);
@@ -86,7 +80,15 @@ export const useAtlasEditorView = (
       new EditorView({
         state: CodeMirrorEditorState.create({
           doc,
-          extensions: [basicSetup, oneDark, atlasLanguage, atlasColorPicker],
+          extensions: [
+            basicSetup,
+            oneDark,
+            atlasLanguage,
+            atlasColorPicker,
+            EditorView.updateListener.of(update => {
+              if (update.docChanged) onDocChangeRef.current?.(getCurrentText());
+            }),
+          ],
         }),
         parent: container,
       });
@@ -138,12 +140,6 @@ export const useAtlasEditorView = (
     });
   };
 
-  const appendChunk = (chunk: string) => {
-    const view = tabViewsRef.current[activeTabRef.current];
-    if (!view) return;
-    view.dispatch({ changes: { from: view.state.doc.length, insert: chunk } });
-  };
-
   return {
     containerRefs,
     activeTab,
@@ -151,6 +147,5 @@ export const useAtlasEditorView = (
     focused,
     getCurrentText,
     replaceAll,
-    appendChunk,
   };
 };

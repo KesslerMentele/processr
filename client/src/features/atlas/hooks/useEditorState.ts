@@ -1,7 +1,7 @@
 import { useShallow } from 'zustand/react/shallow';
 import { useBoundStore } from '../../../state/store.ts';
 
-export const useAtlasEditorState = () => useBoundStore(useShallow(state => ({
+export const useEditorState = () => useBoundStore(useShallow(state => ({
   atlasIndex: state.atlasIndex,
   editorPosition: state.editorPosition,
   editorCollapsed: state.editorCollapsed,

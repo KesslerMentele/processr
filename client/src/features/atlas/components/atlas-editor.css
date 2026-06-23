@@ -1,0 +1,334 @@
+/* ── Pack Editor ───────────────────────────────────────── */
+.pack-editor {
+    position: fixed;
+    top: 5%;
+    left: 25%;
+    width: 600px;
+    height: 500px;
+    min-width: 360px;
+    min-height: 200px;
+    max-height: 90%;
+    background: var(--surface-card);
+    border: 1px solid var(--border-default);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+    box-shadow: 0 4px 16px rgb(0 0 0 / 50%);
+    resize: both;
+    overflow: hidden;
+}
+
+.pack-editor-collapsed {
+    height: auto !important;
+    max-height: 3%;
+    min-height: 40px;
+    resize: none;
+}
+
+.pack-editor-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border-default);
+    background: var(--surface-overlay);
+    flex-shrink: 0;
+    cursor: grab;
+    user-select: none;
+}
+
+.pack-editor-header:active {
+    cursor: grabbing;
+}
+
+.pack-editor-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+}
+
+.pack-editor-status {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: var(--surface-hover);
+    color: var(--text-faint);
+}
+
+.pack-editor-status-ok {
+    background: var(--status-ok-bg);
+    color: var(--status-ok);
+}
+
+.pack-editor-status-error {
+    background: var(--status-error-bg);
+    color: var(--status-error);
+}
+
+.pack-editor-status-parsing {
+    color: var(--text-muted);
+}
+
+.pack-editor-status-thinking {
+    background: linear-gradient(90deg, #D60270, #9B4F96, #0038A8, #9B4F96, #D60270);
+    background-size: 300% 100%;
+    color: white;
+    animation: bi-slide 2s linear infinite;
+}
+
+@keyframes bi-slide {
+    0%   { background-position: 0 50%; }
+    100% { background-position: 100% 50%; }
+}
+
+.pack-editor-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: var(--text-faint);
+    cursor: pointer;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.pack-editor-icon-btn:disabled {
+    background: var(--surface-overlay);
+    color: var(--surface-overlay);
+}
+
+.pack-editor-icon-btn:not(:disabled):hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+}
+
+.pack-editor-tabs {
+    display: flex;
+    gap: 0;
+    background: var(--surface-overlay);
+    border-bottom: 1px solid var(--border-default);
+    flex-shrink: 0;
+}
+
+.pack-editor-tab {
+    padding: 5px 14px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-faint);
+    font-size: 12px;
+    cursor: pointer;
+    margin-bottom: -1px;
+}
+
+.pack-editor-tab:hover {
+    color: var(--text-secondary);
+    background: var(--surface-hover);
+}
+
+.pack-editor-tab-active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    background: var(--surface-card);
+}
+
+.pack-editor-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.pack-editor-cm {
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.pack-editor-cm .cm-editor {
+    height: 100%;
+    font-size: 12px;
+}
+
+.cm-atlas-color-swatch {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    cursor: pointer;
+    vertical-align: middle;
+    margin: 0 4px 1px;
+    flex-shrink: 0;
+}
+
+.cm-atlas-color-swatch:hover {
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.pack-editor-prompt {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border-top: 1px solid var(--border-default);
+    background: var(--surface-overlay);
+    flex-shrink: 0;
+}
+
+.pack-editor-prompt-input {
+    flex: 1;
+    background: var(--surface-base);
+    border: 1px solid var(--border-default);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 12px;
+    padding: 4px 8px;
+    outline: none;
+    font-family: system-ui, sans-serif;
+}
+
+.pack-editor-prompt-input:focus {
+    border-color: var(--focus-ring);
+}
+
+.pack-editor-prompt-input::placeholder {
+    color: var(--text-placeholder);
+}
+
+.pack-editor-errors {
+    border-top: 1px solid var(--status-error-border);
+    background: var(--status-error-bg-deep);
+    padding: 8px 10px;
+    flex-shrink: 0;
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.pack-editor-error {
+    font-size: 11px;
+    color: var(--status-error);
+    font-family: 'Courier New', Courier, monospace;
+    padding: 1px 0;
+}
+
+.pack-editor-icon-btn-active {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+}
+
+.pack-editor-help {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 16px;
+    min-height: 0;
+}
+
+.pack-editor-help-loading {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.pack-editor-help-section {
+    margin-bottom: 20px;
+}
+
+.pack-editor-help-section:last-child {
+    margin-bottom: 0;
+}
+
+.pack-editor-help-content {
+    font-size: 12px;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+.pack-editor-help-content h1 {
+    font-size: 13px;
+    font-weight: 700;
+    margin: 0 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-default);
+    color: var(--text-primary);
+}
+
+.pack-editor-help-content h2 {
+    font-size: 12px;
+    font-weight: 600;
+    margin: 14px 0 6px;
+    color: var(--text-primary);
+}
+
+.pack-editor-help-content h3 {
+    font-size: 11px;
+    font-weight: 600;
+    margin: 10px 0 4px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.pack-editor-help-content p {
+    margin: 0 0 8px;
+}
+
+.pack-editor-help-content code {
+    background: var(--surface-overlay);
+    border-radius: 3px;
+    padding: 1px 4px;
+    font-size: 11px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.pack-editor-help-content pre {
+    background: var(--surface-overlay);
+    border: 1px solid var(--border-default);
+    border-radius: 4px;
+    padding: 8px 10px;
+    overflow-x: auto;
+    margin: 6px 0 10px;
+}
+
+.pack-editor-help-content pre code {
+    background: none;
+    padding: 0;
+    font-size: 11px;
+}
+
+.pack-editor-help-content ul,
+.pack-editor-help-content ol {
+    margin: 0 0 8px;
+    padding-left: 18px;
+}
+
+.pack-editor-help-content li {
+    margin-bottom: 2px;
+}
+
+.pack-editor-help-content table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 6px 0 10px;
+    font-size: 11px;
+}
+
+.pack-editor-help-content th,
+.pack-editor-help-content td {
+    border: 1px solid var(--border-default);
+    padding: 4px 8px;
+    text-align: left;
+}
+
+.pack-editor-help-content th {
+    background: var(--surface-overlay);
+    font-weight: 600;
+}

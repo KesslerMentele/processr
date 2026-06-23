@@ -1,37 +1,18 @@
 import type { FC } from 'react';
 import { Panel } from '@xyflow/react';
-import { type EdgeType } from '../../state/ui-slice.ts';
-import { LuMove, LuLassoSelect, LuSettings2, LuPackage, LuSun, LuMoon, LuLayers, LuLayers2 } from 'react-icons/lu';
+import { LuMove, LuLassoSelect, LuSettings2, LuPackage, LuLayers, LuLayers2 } from 'react-icons/lu';
 import { useToolbarState } from '../../hooks/useToolbarState.ts';
 import type { ProcessrNode } from "../../models";
-
-interface EdgeOption  { readonly value: EdgeType; readonly label: string }
-
-const EDGE_OPTIONS: readonly EdgeOption[] = [
-  { value: 'default', label: 'Bezier' },
-  { value: 'straight', label: 'Straight' },
-  { value: 'step', label: 'Step' },
-  { value: 'smoothstep', label: 'Smooth' },
-];
+import SettingsPanel from "./SettingsPanel.tsx";
 
 const CanvasToolbar: FC = () => {
   const {
     toolMode,
-    snapToGrid,
-    detailedMode,
-    edgeType,
-    lightTheme,
-    invalidEdgeBehavior,
     settingsPanelOpen,
     packEditorOpen,
     selectedNodeIds,
     graph,
     setToolMode,
-    toggleSnap,
-    toggleDetailed,
-    setEdgeType,
-    toggleLightTheme,
-    setInvalidEdgeBehavior,
     toggleSettingsPanel,
     togglePackEditor,
     stackNodes,
@@ -56,6 +37,7 @@ const CanvasToolbar: FC = () => {
         >
           <LuMove />
         </button>
+
         <button
           className={`canvas-toolbar-btn${toolMode === 'select' ? ' active' : ''}`}
           title="Select tool — drag to box-select, Shift+click to multi-select"
@@ -65,6 +47,7 @@ const CanvasToolbar: FC = () => {
         >
           <LuLassoSelect />
         </button>
+
         <div className="canvas-toolbar-sep" />
         <button
           className="canvas-toolbar-btn"
@@ -74,6 +57,7 @@ const CanvasToolbar: FC = () => {
         >
           <LuLayers />
         </button>
+
         <button
           className="canvas-toolbar-btn"
           title="Unstack node"
@@ -82,6 +66,7 @@ const CanvasToolbar: FC = () => {
         >
           <LuLayers2  />
         </button>
+
         <div className="canvas-toolbar-sep" />
         <button
           className={`canvas-toolbar-btn${packEditorOpen ? ' active' : ''}`}
@@ -90,6 +75,7 @@ const CanvasToolbar: FC = () => {
         >
           <LuPackage />
         </button>
+
         <button
           className={`canvas-toolbar-btn${settingsPanelOpen ? ' active' : ''}`}
           title="Display & grid settings"
@@ -97,54 +83,9 @@ const CanvasToolbar: FC = () => {
         >
           <LuSettings2 />
         </button>
-      </div>
 
-      {settingsPanelOpen && (
-        <div className="canvas-settings-panel">
-          <label className="canvas-settings-panel-toggle">
-            <input type="checkbox" checked={snapToGrid} onChange={toggleSnap} />
-            Snap to grid
-          </label>
-          <label className="canvas-settings-panel-toggle">
-            <input type="checkbox" checked={detailedMode} onChange={toggleDetailed} />
-            Detailed mode
-          </label>
-          <label className="canvas-settings-panel-toggle">
-            <input type="checkbox" checked={lightTheme} onChange={toggleLightTheme} />
-            {lightTheme ? <LuSun size={13} /> : <LuMoon size={13} />}
-            Light theme
-          </label>
-          <div className="canvas-settings-panel-section-label">Invalid edges</div>
-          <div className="canvas-settings-panel-edge-btns">
-            <button
-              className={`canvas-settings-panel-edge-btn${invalidEdgeBehavior === 'delete' ? ' active' : ''}`}
-              onClick={() => { setInvalidEdgeBehavior('delete'); }}
-            >
-              Delete
-            </button>
-            <button
-              className={`canvas-settings-panel-edge-btn${invalidEdgeBehavior === 'highlight' ? ' active' : ''}`}
-              onClick={() => { setInvalidEdgeBehavior('highlight'); }}
-            >
-              Highlight
-            </button>
-          </div>
-          <div className="canvas-settings-panel-section-label">Edge style</div>
-          <div className="canvas-settings-panel-edge-btns">
-            {EDGE_OPTIONS.map(({ value, label }) => (
-              <button
-                key={value}
-                className={`canvas-settings-panel-edge-btn${edgeType === value ? ' active' : ''}`}
-                onClick={() => {
-                  setEdgeType(value);
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      </div>
+      {settingsPanelOpen && <SettingsPanel/>}
     </Panel>
   );
 };

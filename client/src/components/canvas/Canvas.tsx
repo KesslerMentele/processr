@@ -16,6 +16,8 @@ import CanvasToolbar from "./CanvasToolbar.tsx";
 import AtlasEditor from "../../features/atlas/components/AtlasEditor.tsx";
 import { useCanvasHandlers } from "../../hooks/useCanvasHandlers.ts";
 import { useCanvasState } from "../../hooks/useCanvasState.ts";
+import "./canvas.css";
+import StatsPanel from "./StatsPanel.tsx";
 
 const nodeTypes = { processor: ProcessrNodeComponent };
 const initialNodes: RFNode<ProcessrNodeData>[] = [];
@@ -32,21 +34,6 @@ const Canvas: FC = () => {
 
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState(initialNodes);
   const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState(initialEdges);
-
-  const {
-    onSelectionStart,
-    onSelectionEnd,
-    onNodeDragStart,
-    onNodeDragStop,
-    isValidConnection,
-    onConnectStart,
-    onConnectEnd,
-    onConnect,
-    onMoveEnd,
-    onNodesDelete,
-    onEdgesDelete,
-  } = useCanvasHandlers();
-
 
   /* Handle all settled changes.
   A settled change is a change to the position of a node,
@@ -90,12 +77,7 @@ const Canvas: FC = () => {
   useShortcut('redo', redo);
 
   return (
-    <div
-      className="canvas-container"
-      onContextMenu={(e) => {
-        e.preventDefault();
-      }}
-    >
+    <div className="canvas-container" >
       {packEditorOpen && <AtlasEditor />}
       <ReactFlow
         nodes={rfNodes}
@@ -104,17 +86,6 @@ const Canvas: FC = () => {
         nodeOrigin={[0.5, 0.5]}
         onNodesChange={handleNodesChange}
         onEdgesChange={onEdgesChange}
-        onSelectionStart={onSelectionStart}
-        onSelectionEnd={onSelectionEnd}
-        onNodeDragStart={onNodeDragStart}
-        onNodeDragStop={onNodeDragStop}
-        onNodesDelete={onNodesDelete}
-        onEdgesDelete={onEdgesDelete}
-        onConnectStart={onConnectStart}
-        onConnectEnd={onConnectEnd}
-        onConnect={onConnect}
-        isValidConnection={isValidConnection}
-        onMoveEnd={onMoveEnd}
         defaultViewport={graph.viewport}
         snapToGrid={snapToGrid}
         snapGrid={[20, 20]}
@@ -122,10 +93,12 @@ const Canvas: FC = () => {
         panOnDrag={toolMode === 'select' ? [1, 2] : true}
         multiSelectionKeyCode="Shift"
         selectionMode={SelectionMode.Partial}
+        {...useCanvasHandlers()}
       >
         <Background/>
         <Controls className="canvas-controls"/>
-        <CanvasToolbar />
+        <CanvasToolbar/>
+        <StatsPanel/>
       </ReactFlow>
     </div>
   );

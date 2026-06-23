@@ -10,7 +10,7 @@ import type {
 import createGraphSlice from "./graph-slice.ts";
 import createGraphActions from "./graph-actions-slice.ts";
 import { createUISlice } from "./ui-slice.ts";
-import { createAtlasSlice } from "./atlas-editor-slice.ts";
+import { createAtlasSlice } from "./atlas-slice.ts";
 
 
 export const useBoundStore = create<

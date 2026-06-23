@@ -1,58 +1,55 @@
-import type { FC } from 'react';
-import { useAtlasEditorState } from '../hooks/useAtlasEditorState.ts';
-import { useAtlasEditorView } from '../hooks/useAtlasEditorView.ts';
+import { type FC, useRef } from 'react';
+import { useEditorState } from '../hooks/useEditorState.ts';
+import { useEditorView } from '../hooks/useEditorView.ts';
 import { useShortcutPause } from 'react-keyhub';
-import HelpPanel from "./HelpPanel.tsx";
 import AtlasEditorHeader from "./AtlasEditorHeader.tsx";
+import './atlas-editor.css';
+import AtlasTabs from "./AtlasTabs.tsx";
+import AtlasText from "./AtlasText.tsx";
+import { parseAtlasText } from '../atlas-api.ts';
+import { EditorState } from '../../../models';
+import { useProcessrStore } from '../../../state/store.ts';
 
-import { ATLAS_TABS, ATLAS_TAB_LABELS } from '../atlas-text-tabs.ts';
+const DEBOUNCE_MS = 600;
 
 const AtlasEditor: FC = () => {
-  const { atlasIndex, editorPosition, editorCollapsed, helpOpen, errors } = useAtlasEditorState();
+  const { atlasIndex, editorPosition, editorCollapsed, setEditorErrors, setEditorStatus } = useEditorState();
+  const loadAtlas = useProcessrStore.getState().loadAtlas;
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { containerRefs, activeTab, setActiveTab, focused, getCurrentText, replaceAll } = useAtlasEditorView(atlasIndex);
+  const onDocChange = (text: string) => {
+    if (!text || text.trim() === '') {
+      setEditorStatus(EditorState.Idle);
+      setEditorErrors([]);
+      return;
+    }
+    setEditorStatus(EditorState.Parsing);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    // eslint-disable-next-line functional/immutable-data
+    debounceRef.current = setTimeout(() => {
+      void parseAtlasText(text).then((result) => {
+        if (result.errors) {
+          setEditorErrors(result.errors);
+          setEditorStatus(EditorState.Error);
+        } else {
+          loadAtlas(result.pack);
+          setEditorStatus(EditorState.Ok);
+          setEditorErrors([]);
+        }
+      });
+    }, DEBOUNCE_MS);
+  };
 
-  useShortcutPause(focused);
+  const atlasEditorView = useEditorView(atlasIndex, onDocChange);
+
+  useShortcutPause(atlasEditorView.focused);
 
 
   return (
     <div className={`pack-editor${editorCollapsed ? ' pack-editor-collapsed' : ''}`} style={{ transform: `translate(${editorPosition.x.toString()}px, ${editorPosition.y.toString()}px)` }}>
-      <AtlasEditorHeader
-        getCurrentText={getCurrentText}
-        replaceAll={replaceAll}
-      />
-
-      <div className="pack-editor-tabs">
-        {ATLAS_TABS.map(tab => (
-          <button
-            key={tab}
-            className={`pack-editor-tab${activeTab === tab ? ' pack-editor-tab-active' : ''}`}
-            onClick={() => { setActiveTab(tab); }}
-          >
-            {ATLAS_TAB_LABELS[tab]}
-          </button>
-        ))}
-      </div>
-
-      <div className="pack-editor-body">
-        {ATLAS_TABS.map(tab => (
-          <div
-            key={tab}
-            ref={containerRefs[tab]}
-            className="pack-editor-cm"
-            style={helpOpen || activeTab !== tab ? { display: 'none' } : undefined}
-          />
-        ))}
-        {helpOpen && <HelpPanel/>}
-        {errors.length > 0 && (
-          <div className="pack-editor-errors">
-            {errors.map((err, i) => (
-              <div key={i} className="pack-editor-error">{err}</div>
-            ))}
-          </div>
-        )}
-      </div>
-
+      <AtlasEditorHeader view={atlasEditorView} />
+      <AtlasTabs view={atlasEditorView} />
+      <AtlasText view={atlasEditorView} />
     </div>
   );
 };

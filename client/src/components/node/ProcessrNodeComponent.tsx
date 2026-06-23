@@ -8,6 +8,7 @@ import Port from "./Port.tsx";
 import { logger } from "../../utils/logger.ts";
 import NodeDetails from "./NodeDetails.tsx";
 import NodeStackCount from "./NodeStackCount.tsx";
+import "./processr-node.css";
 
 type ProcessrNodeComponentProps = RFNodeProps<RFNode<ProcessrNodeData>>
 
@@ -51,7 +52,7 @@ const ProcessrNodeComponent: FC<ProcessrNodeComponentProps> = ({ data, selected 
 
         <p>{data.label ?? template.name}</p>
 
-        <NodeStackCount id={data.id} count={data.count} />
+        {data.count === 1 ? '' : <NodeStackCount id={data.id} count={data.count} /> }
 
       </div>
       {recipe && (

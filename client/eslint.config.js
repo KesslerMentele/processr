@@ -17,12 +17,6 @@ export default defineConfig([
     },
   },
   {
-    files: ['src/components/**/*.tsx'],
-      rules: {
-      'functional/no-mixed-types': 'off',
-      },
-  },
-  {
     files: ['src/state/**/*.tsx'],
     rules: {
       'functional/no-mixed-types': 'off',
@@ -92,6 +86,12 @@ export default defineConfig([
       'functional/no-class-inheritance': 'off',
       'functional/prefer-immutable-types': 'off',
       'functional/immutable-data': 'off',
+    },
+  },
+  {
+    files: ['src/components/**/*.tsx'],
+    rules: {
+      'functional/no-mixed-types': 'off',
     },
   },
 ])

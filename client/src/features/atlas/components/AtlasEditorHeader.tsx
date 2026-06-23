@@ -6,25 +6,28 @@ import {
   LuUpload,
   LuX,
 } from "react-icons/lu";
-import { type ChangeEvent, useRef } from "react";
+import { type ChangeEvent, type FC, useRef } from "react";
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import { downloadAtlasAs, parseAtlasFile } from "../atlas-api.ts";
 import type { Atlas } from "../../../models";
-import { useAtlasEditorHeaderState } from "../hooks/useAtlasEditorHeaderState.ts";
+import { useEditorHeaderState } from "../hooks/useEditorHeaderState.ts";
 import { saveAtlasEditorText } from "../../../utils/persistence.ts";
 import { useProcessrStore } from "../../../state/store.ts";
+import type { AtlasEditorView } from "../atlas-types.ts";
 
 interface AtlasEditorHeaderProps {
-  getCurrentText: () => string;
-  replaceAll: (text: string) => void;
+  view: AtlasEditorView
 }
 
-const AtlasEditorHeader = ({ getCurrentText, replaceAll }: Readonly<AtlasEditorHeaderProps>) => {
+const AtlasEditorHeader: FC<AtlasEditorHeaderProps> = ({ view }) => {
+
+  const { getCurrentText, replaceAll } = view;
+
   const atlas = useProcessrStore.use.atlasIndex().atlas;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const posRef = useRef({ x: 0, y: 0 });
 
-  const { packIndex, status, collapsed, errors, loadAtlas, togglePackEditor, setPosition, setStatus, setErrors, setCollapsed } = useAtlasEditorHeaderState();
+  const { packIndex, status, collapsed, errors, loadAtlas, togglePackEditor, setPosition, setStatus, setErrors, setCollapsed } = useEditorHeaderState();
 
   const handleHeaderMouseDown = (e: Readonly<ReactMouseEvent>) => {
     if ((e.target as HTMLElement).closest('button')) return;
