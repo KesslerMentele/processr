@@ -703,7 +703,7 @@ html, body {
 .pack-editor-collapsed {
   height: auto !important;
   max-height: 3%;
-  min-height: unset;
+  min-height: 40px;
   resize: none;
 }
 

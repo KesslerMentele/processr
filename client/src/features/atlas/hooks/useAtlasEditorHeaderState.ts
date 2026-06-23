@@ -6,13 +6,11 @@ export const useAtlasEditorHeaderState = () => useBoundStore(useShallow(state =>
   status: state.editorStatus,
   collapsed: state.editorCollapsed,
   errors: state.editorErrors,
-  helpOpen: state.editorHelp,
   loadAtlas: state.loadAtlas,
   togglePackEditor: state.togglePackEditor,
   setPosition: state.setEditorPosition,
   setStatus: state.setEditorStatus,
   setErrors: state.setEditorErrors,
   setAIMode: state.setAIMode,
-  setHelpOpen: state.setEditorHelp,
   setCollapsed: state.setEditorCollapsed,
 })));

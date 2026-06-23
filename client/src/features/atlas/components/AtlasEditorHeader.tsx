@@ -2,7 +2,6 @@ import {
   LuCheck,
   LuChevronDown,
   LuChevronUp,
-  LuCircleHelp,
   LuDownload,
   LuUpload,
   LuX,
@@ -25,7 +24,7 @@ const AtlasEditorHeader = ({ getCurrentText, replaceAll }: Readonly<AtlasEditorH
   const fileInputRef = useRef<HTMLInputElement>(null);
   const posRef = useRef({ x: 0, y: 0 });
 
-  const { packIndex, status, collapsed, errors, helpOpen, loadAtlas, togglePackEditor, setPosition, setStatus, setErrors, setHelpOpen, setCollapsed } = useAtlasEditorHeaderState();
+  const { packIndex, status, collapsed, errors, loadAtlas, togglePackEditor, setPosition, setStatus, setErrors, setCollapsed } = useAtlasEditorHeaderState();
 
   const handleHeaderMouseDown = (e: Readonly<ReactMouseEvent>) => {
     if ((e.target as HTMLElement).closest('button')) return;
@@ -88,7 +87,6 @@ const AtlasEditorHeader = ({ getCurrentText, replaceAll }: Readonly<AtlasEditorH
   };
 
 
-  const handleToggleHelp     = () => { setHelpOpen(!helpOpen); };
   const handleToggleCollapsed = () => { setCollapsed(!collapsed); };
   const handleFileChange     = (e: ChangeEvent<HTMLInputElement>) => { void handleFileUpload(e); };
 
@@ -107,10 +105,6 @@ const AtlasEditorHeader = ({ getCurrentText, replaceAll }: Readonly<AtlasEditorH
 
       <span className="pack-editor-title">Atlas Editor</span>
       <span className={`pack-editor-status pack-editor-status-${status}`}>{getStatusLabel()}</span>
-
-      <button className={`pack-editor-icon-btn${helpOpen ? ' pack-editor-icon-btn-active' : ''}`} title="Grammar reference" onClick={handleToggleHelp}>
-        <LuCircleHelp />
-      </button>
 
       <button className="pack-editor-icon-btn" title="Upload .prat file" onClick={() => fileInputRef.current?.click()}>
         <LuUpload />
