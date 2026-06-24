@@ -2,7 +2,7 @@ import type {
   AtlasIndex,
   Edge,
   Graph,
-  GraphChange,
+  GraphChange, PortInstance,
   ProcessrNode,
   ProcessrNodeId,
 } from "../models";
@@ -96,3 +96,8 @@ export const addChangeToHistory = (graph: Graph, nextGraph: Graph, change: Graph
   history: { past: [...graph.history.past, change], future: [] },
   updatedAt: now(),
 });
+
+export const getFloatingPorts = (graph: Graph): PortInstance[] => {
+  const fulfilledPorts = Array.from(Object.entries(graph.edges).flatMap(([,e]) => [e.targetPortId, e.sourcePortId]));
+  return Array.from(Object.entries(graph.nodes).flatMap(([,node]) => node.ports).filter((p) => !fulfilledPorts.includes(p.id)));
+};

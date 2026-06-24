@@ -15,13 +15,14 @@ export type RecipeId = Branded<string, "RecipeId">;
 export type NodeTemplateId = Branded<string, "NodeTemplateId">;
 export type CategoryId = Branded<string, "CategoryId">;
 export type AtlasId = Branded<string, "AtlasId">;
+export type PortId = Branded<string, "PortId">;
 
 // ---- Graph IDs (user-mutable instances) ----
 
 export type ProcessrNodeId = Branded<string, "ProcessrNodeId">;
 export type EdgeId = Branded<string, "EdgeId">;
 export type GraphId = Branded<string, "GraphId">;
-export type PortId = Branded<string, "PortId">;
+export type PortInstanceId = Branded<string, "PortInstanceId">;
 
 // ---- ID factory functions ----
 // Cast a plain string to a branded type.
@@ -61,4 +62,8 @@ export function graphId(id: string): GraphId {
 
 export function portId(id: string): PortId {
   return id as PortId;
+}
+
+export function portInstanceId(id:string): PortInstanceId {
+  return id as PortInstanceId;
 }

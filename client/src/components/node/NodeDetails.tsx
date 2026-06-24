@@ -35,4 +35,4 @@ const NodeDetails: FC<NodeDetailsProps> = ({ inputs, outputs, recipe, count }) =
   );
 };
 
-export default NodeDetails
+export default NodeDetails;

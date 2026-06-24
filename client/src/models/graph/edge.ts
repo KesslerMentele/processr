@@ -1,4 +1,4 @@
-import type { EdgeId, ProcessrNodeId, PortId, ItemId } from "../ids.ts";
+import type { EdgeId, ProcessrNodeId, ItemId, PortInstanceId } from "../ids.ts";
 import type { Metadata } from "../common.ts";
 
 /** Fields shared by all edge variants. */
@@ -6,8 +6,8 @@ export interface Edge {
   readonly id: EdgeId;
   readonly sourceNodeId: ProcessrNodeId;
   readonly targetNodeId: ProcessrNodeId;
-  readonly sourcePortId: PortId;
-  readonly targetPortId: PortId;
+  readonly sourcePortId: PortInstanceId;
+  readonly targetPortId: PortInstanceId;
   readonly itemId?: ItemId;
   readonly label?: string;
   readonly metadata: Metadata;

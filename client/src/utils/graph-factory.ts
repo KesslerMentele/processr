@@ -7,6 +7,7 @@ import type {
   ProcessrNode,
 } from "../models";
 import { newGraphId, newProcessrNodeId } from "./id.ts";
+import { portInstanceId } from "../models/ids.ts";
 
 const newViewport = () => ({ x: 0, y: 0, zoom: 1 });
 
@@ -24,7 +25,7 @@ export const createProcessrNode = (
     position,
     recipeId: options?.recipeId ?? null,
     statsOverride: options?.statsOverride ?? { metadata: {} },
-    ports: template.ports.map((p) => ({ id: p.id, definitionId: p.id })),
+    ports: template.ports.map((p) => ({ id: portInstanceId(p.id), definitionId: p.id })),
     count: options?.count ?? 1,
     metadata: template.metadata
   };

@@ -2,22 +2,14 @@ import type {
   ProcessrNodeId,
   NodeTemplateId,
   RecipeId,
-  PortId,
+  PortInstanceId,
 } from "../ids.ts";
 import type { Position, Metadata } from "../common.ts";
 import type { Item } from "../items.ts";
 import type { RecipeItemStack } from "../recipes.ts";
 import type { PortDefinition } from "../nodes.ts";
 
-/**
- * A port instance on a placed processor node.
- * Created from the template's PortDefinition when the node is instantiated.
- */
-export interface PortInstance {
-  readonly id: PortId;
-  /** References the PortDefinition.id from the template. */
-  readonly definitionId: PortId;
-}
+
 
 /**
  * User-overridden stats for a specific node instance.
@@ -45,13 +37,19 @@ export interface ProcessrNode {
   /** The Currently assigned recipe. Null if no recipe is set. */
   readonly recipeId: RecipeId | null;
   readonly statsOverride: NodeStatsOverride;
-  readonly ports: readonly PortInstance[];
+  readonly ports: readonly PortEntry[];
   /** How many of this machine run in parallel. Defaults to 1. */
   readonly count: number;
   readonly metadata: Metadata;
 }
 
+
+/**
+ * A port instance on a placed processor node.
+ * Created from the template's PortDefinition when the node is instantiated.
+ */
 export interface PortEntry {
+  readonly id: PortInstanceId;
   readonly port: PortDefinition;
   readonly item: Item | undefined;
   readonly stack: RecipeItemStack | undefined;
