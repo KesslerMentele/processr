@@ -1,12 +1,13 @@
-import type { Edge, Metadata, PortId, ProcessrNodeId } from "../models";
+import type { Edge, Metadata, ProcessrNodeId } from "../models";
 import { newEdgeId } from "./id.ts";
 import { getInputPorts, getOutputPorts } from "./node-utils.ts";
 import { useBoundStore } from "../state/store.ts";
+import type { PortInstanceId } from "../models/ids.ts";
 
 type CreateEdgeOptions = Partial<Pick<Edge, 'itemId' | 'label' | 'metadata'>>
 
 /** Explicit port pair — use when you already know which ports to connect. */
-interface EdgePortSpec { readonly sourcePortId: PortId; readonly targetPortId: PortId }
+interface EdgePortSpec { readonly sourcePortId: PortInstanceId; readonly targetPortId: PortInstanceId }
 
 /**
  * Looks up the source and target nodes from the store, then picks the best
@@ -29,8 +30,8 @@ const resolvePortPair = (
   const targetTemplate = atlasIndex.nodeTemplatesById.get(targetNode.templateId);
   if (!sourceTemplate || !targetTemplate) throw new Error(`createEdge: template not found for node`);
 
-  const outputPorts = getOutputPorts(sourceTemplate);
-  const inputPorts = getInputPorts(targetTemplate);
+  const outputPorts = getOutputPorts(sourceNode);
+  const inputPorts = getInputPorts(targetNode);
   if (outputPorts.length === 0 || inputPorts.length === 0) {
     throw new Error(`createEdge: no connectable ports (source outputs=${String(outputPorts.length)}, target inputs=${String(inputPorts.length)})`);
   }

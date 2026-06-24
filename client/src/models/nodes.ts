@@ -17,7 +17,7 @@ export type PortDirection = (typeof PortDirection)[keyof typeof PortDirection];
  * More complex nodes (e.g., Satisfactory Manufacturer with 4 input slots)
  * have multiple named ports.
  */
-export interface PortDefinition {
+export interface PortTemplate {
   readonly id: PortId;
   readonly name: string;
   readonly direction: PortDirection;
@@ -50,7 +50,7 @@ export interface NodeTemplate {
   readonly name: string;
   readonly display: DisplayInfo;
   readonly categoryId?: CategoryId;
-  readonly ports: readonly PortDefinition[];
+  readonly ports: readonly PortTemplate[];
   readonly stats: NodeStats;
   readonly metadata: Metadata;
   readonly tags: readonly string[];

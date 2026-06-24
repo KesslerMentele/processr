@@ -25,7 +25,7 @@ export const createProcessrNode = (
     position,
     recipeId: options?.recipeId ?? null,
     statsOverride: options?.statsOverride ?? { metadata: {} },
-    ports: template.ports.map((p) => ({ id: portInstanceId(p.id), definitionId: p.id })),
+    ports: template.ports.map((p) => ({ id: portInstanceId(p.id), template: p })),
     count: options?.count ?? 1,
     metadata: template.metadata
   };

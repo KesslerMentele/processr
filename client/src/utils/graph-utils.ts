@@ -25,8 +25,8 @@ export const areItemsCompatible = (connection: Readonly<ConnectionQuery>, graph:
   const targetRecipe = atlasIndex.recipesById.get(targetNode.recipeId);
   if (!sourceRecipe || !targetRecipe) { logger.debug('[areItemsCompatible] recipe lookup failed'); return true; }
 
-  const srcIdx = getOutputPorts(atlasIndex.nodeTemplatesById.get(sourceNode.templateId)).findIndex(p => p.id === connection.sourceHandle);
-  const tgtIdx = getInputPorts(atlasIndex.nodeTemplatesById.get(targetNode.templateId)).findIndex(p => p.id === connection.targetHandle);
+  const srcIdx = getOutputPorts(sourceNode).findIndex(p => p.id === connection.sourceHandle);
+  const tgtIdx = getInputPorts(targetNode).findIndex(p => p.id === connection.targetHandle);
   const srcItem = srcIdx >= 0 ? sourceRecipe.outputs[srcIdx]?.itemId : undefined;
   const tgtItem = tgtIdx >= 0 ? targetRecipe.inputs[tgtIdx]?.itemId : undefined;
   logger.debug(`[areItemsCompatible] item check srcIdx=${String(srcIdx)} srcItem=${srcItem ?? 'none'} tgtIdx=${String(tgtIdx)} tgtItem=${tgtItem ?? 'none'}`);
