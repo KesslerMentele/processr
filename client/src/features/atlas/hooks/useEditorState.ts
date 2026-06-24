@@ -10,4 +10,13 @@ export const useEditorState = () => useBoundStore(useShallow(state => ({
   status: state.editorStatus,
   setEditorErrors: state.setEditorErrors,
   setEditorStatus: state.setEditorStatus,
+  packIndex: state.atlasIndex,
+  collapsed: state.editorCollapsed,
+  loadAtlas: state.loadAtlas,
+  togglePackEditor: state.togglePackEditor,
+  setPosition: state.setEditorPosition,
+  setStatus: state.setEditorStatus,
+  setErrors: state.setEditorErrors,
+  setAIMode: state.setAIMode,
+  setCollapsed: state.setEditorCollapsed,
 })));

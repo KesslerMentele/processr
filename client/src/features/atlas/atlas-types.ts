@@ -1,5 +1,6 @@
 import type { AtlasTab } from "./atlas-text-tabs.ts";
 import type { RefObject } from "react";
+import type { Atlas } from "../../models";
 
 // eslint-disable-next-line functional/no-mixed-types
 export interface AtlasEditorView {
@@ -21,3 +22,9 @@ export interface AtlasEditorView {
   /* Replace the current text with the given text. */
   readonly replaceAll: (text: string) => void;
 }
+
+export interface AtlasParseSuccess { pack: Atlas; errors?: never }
+
+export interface AtlasParseError { errors: string[]; pack?: never }
+
+export type AtlasParseResult = AtlasParseSuccess | AtlasParseError;

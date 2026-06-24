@@ -1,138 +1,41 @@
-import {
-  LuCheck,
-  LuChevronDown,
-  LuChevronUp,
-  LuDownload,
-  LuUpload,
-  LuX,
-} from "react-icons/lu";
-import { type ChangeEvent, type FC, useRef } from "react";
-import type { MouseEvent as ReactMouseEvent } from 'react';
-import { downloadAtlasAs, parseAtlasFile } from "../atlas-api.ts";
-import type { Atlas } from "../../../models";
-import { useEditorHeaderState } from "../hooks/useEditorHeaderState.ts";
-import { saveAtlasEditorText } from "../../../utils/persistence.ts";
-import { useProcessrStore } from "../../../state/store.ts";
-import type { AtlasEditorView } from "../atlas-types.ts";
+import { type FC } from 'react';
+import { LuChevronDown, LuChevronUp, LuX } from 'react-icons/lu';
+import { useEditorState } from '../hooks/useEditorState.ts';
+import { useDraggable } from '../hooks/useDraggable.ts';
+import type { AtlasEditorView } from '../atlas-types.ts';
+import AtlasEditorStatus from './AtlasEditorStatus.tsx';
+import AtlasFileActions from './AtlasFileActions.tsx';
 
 interface AtlasEditorHeaderProps {
-  view: AtlasEditorView
+  view: AtlasEditorView;
+  onApply: () => void;
 }
 
-const AtlasEditorHeader: FC<AtlasEditorHeaderProps> = ({ view }) => {
-
-  const { getCurrentText, replaceAll } = view;
-
-  const atlas = useProcessrStore.use.atlasIndex().atlas;
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const posRef = useRef({ x: 0, y: 0 });
-
-  const { packIndex, status, collapsed, errors, loadAtlas, togglePackEditor, setPosition, setStatus, setErrors, setCollapsed } = useEditorHeaderState();
-
-  const handleHeaderMouseDown = (e: Readonly<ReactMouseEvent>) => {
-    if ((e.target as HTMLElement).closest('button')) return;
-    e.preventDefault();
-    const startX = e.clientX - posRef.current.x;
-    const startY = e.clientY - posRef.current.y;
-
-    const onMove = (ev: Readonly<globalThis.MouseEvent>) => {
-      const newPos = { x: ev.clientX - startX, y: ev.clientY - startY };
-      // eslint-disable-next-line functional/immutable-data
-      posRef.current = newPos;
-      setPosition(newPos);
-    };
-
-    const onUp = () => {
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-    };
-
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-  };
-
-  const applyResult = (atlas: Atlas) => {
-    loadAtlas(atlas);
-    setErrors([]);
-    setStatus('ok');
-  };
-
-  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setStatus('parsing');
-    const [result, text] = await Promise.all([parseAtlasFile(file), file.text()]);
-    if (result.errors) {
-      setErrors(result.errors);
-      setStatus('error');
-    } else {
-      applyResult(result.pack);
-      replaceAll(text);
-    }
-    // eslint-disable-next-line functional/immutable-data
-    e.target.value = '';
-  };
-
-  const handleApplyPack = () => {
-    applyResult(atlas);
-    saveAtlasEditorText(getCurrentText());
-    setStatus('applied');
-  };
+const AtlasEditorHeader: FC<AtlasEditorHeaderProps> = ({ view, onApply }) => {
+  const { status, collapsed, setCollapsed, setStatus, togglePackEditor, setPosition } = useEditorState();
+  const { onMouseDown } = useDraggable(setPosition);
 
   const handleClose = () => {
-    saveAtlasEditorText(getCurrentText());
+    if (status === 'ok' && !window.confirm('You have unapplied changes. Close anyway?')) return;
+    setStatus('idle');
     togglePackEditor();
   };
 
-  const handleDownload = () => {
-    const filename = `${packIndex.atlas.name.toLowerCase().replaceAll(' ', '-')}.prat`;
-    downloadAtlasAs(getCurrentText(), filename);
-  };
-
-
-  const handleToggleCollapsed = () => { setCollapsed(!collapsed); };
-  const handleFileChange     = (e: ChangeEvent<HTMLInputElement>) => { void handleFileUpload(e); };
-
-  const getStatusLabel = () => {
-    switch (status) {
-      case "idle": return 'Ready';
-      case "parsing": return 'Parsing…';
-      case "ok": return 'Atlas is Valid';
-      case "error": return `${errors.length.toString()} error${errors.length === 1 ? '' : 's'}`;
-      case "applied": return 'Atlas applied';
-    }
+  const handleCollapse = () => {
+    setCollapsed(!collapsed);
   };
 
   return (
-    <div className="pack-editor-header" onMouseDown={handleHeaderMouseDown}>
-
+    <div className="pack-editor-header" onMouseDown={onMouseDown}>
       <span className="pack-editor-title">Atlas Editor</span>
-      <span className={`pack-editor-status pack-editor-status-${status}`}>{getStatusLabel()}</span>
-
-      <button className="pack-editor-icon-btn" title="Upload .prat file" onClick={() => fileInputRef.current?.click()}>
-        <LuUpload />
-      </button>
-
-      <button className="pack-editor-icon-btn" title="Download .prat file" onClick={handleDownload}>
-        <LuDownload />
-      </button>
-
-      {status === 'ok' &&
-        <button className="pack-editor-icon-btn" title="Apply" onClick={handleApplyPack}>
-          <LuCheck />
-        </button>
-      }
-
-      <button className="pack-editor-icon-btn" title={collapsed ? 'Expand' : 'Collapse'} onClick={handleToggleCollapsed}>
+      <AtlasEditorStatus onApply={onApply} getCurrentText={view.getCurrentText} />
+      <AtlasFileActions view={view} />
+      <button className="pack-editor-icon-btn" title={collapsed ? 'Expand' : 'Collapse'} onClick={handleCollapse}>
         {collapsed ? <LuChevronDown /> : <LuChevronUp />}
       </button>
-
       <button className="pack-editor-icon-btn" title="Close" onClick={handleClose}>
         <LuX />
       </button>
-
-      <input ref={fileInputRef} type="file" accept=".prat" style={{ display: 'none' }} onChange={handleFileChange}/>
-
     </div>
   );
 };

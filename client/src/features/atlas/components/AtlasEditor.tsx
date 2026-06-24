@@ -1,13 +1,13 @@
 import { type FC, useRef } from 'react';
 import { useEditorState } from '../hooks/useEditorState.ts';
-import { useEditorView } from '../hooks/useEditorView.ts';
+import { useAtlasEditor } from '../hooks/useAtlasEditor.ts';
 import { useShortcutPause } from 'react-keyhub';
 import AtlasEditorHeader from "./AtlasEditorHeader.tsx";
 import './atlas-editor.css';
 import AtlasTabs from "./AtlasTabs.tsx";
 import AtlasText from "./AtlasText.tsx";
 import { parseAtlasText } from '../atlas-api.ts';
-import { EditorState } from '../../../models';
+import { EditorState, type Atlas } from '../../../models';
 import { useProcessrStore } from '../../../state/store.ts';
 
 const DEBOUNCE_MS = 600;
@@ -16,6 +16,7 @@ const AtlasEditor: FC = () => {
   const { atlasIndex, editorPosition, editorCollapsed, setEditorErrors, setEditorStatus } = useEditorState();
   const loadAtlas = useProcessrStore.getState().loadAtlas;
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingPackRef = useRef<Atlas | null>(null);
 
   const onDocChange = (text: string) => {
     if (!text || text.trim() === '') {
@@ -32,7 +33,8 @@ const AtlasEditor: FC = () => {
           setEditorErrors(result.errors);
           setEditorStatus(EditorState.Error);
         } else {
-          loadAtlas(result.pack);
+          // eslint-disable-next-line functional/immutable-data
+          pendingPackRef.current = result.pack;
           setEditorStatus(EditorState.Ok);
           setEditorErrors([]);
         }
@@ -40,14 +42,22 @@ const AtlasEditor: FC = () => {
     }, DEBOUNCE_MS);
   };
 
-  const atlasEditorView = useEditorView(atlasIndex, onDocChange);
+  const onApply = () => {
+    if (pendingPackRef.current) {
+      loadAtlas(pendingPackRef.current);
+      // eslint-disable-next-line functional/immutable-data
+      pendingPackRef.current = null;
+    }
+  };
+
+  const atlasEditorView = useAtlasEditor(atlasIndex, onDocChange);
 
   useShortcutPause(atlasEditorView.focused);
 
 
   return (
     <div className={`pack-editor${editorCollapsed ? ' pack-editor-collapsed' : ''}`} style={{ transform: `translate(${editorPosition.x.toString()}px, ${editorPosition.y.toString()}px)` }}>
-      <AtlasEditorHeader view={atlasEditorView} />
+      <AtlasEditorHeader view={atlasEditorView} onApply={onApply} />
       <AtlasTabs view={atlasEditorView} />
       <AtlasText view={atlasEditorView} />
     </div>

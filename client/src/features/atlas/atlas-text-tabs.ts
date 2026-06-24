@@ -11,13 +11,6 @@ export const ATLAS_TAB_LABELS: Record<AtlasTab, string> = {
 
 /**
  * Splits a full Atlas text document into per-tab sections.
- *
- * Assignment rules (applied at brace depth 0):
- *   atlas / category  → 'atlas'
- *   item                 → 'items'
- *   node                 → 'nodes'
- *   recipe               → 'recipes'
- *
  * Lines inside a block (depth > 0) and blank/comment lines between blocks
  * inherit the current section.
  */
