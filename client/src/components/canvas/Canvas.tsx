@@ -17,7 +17,7 @@ import AtlasEditor from "../../features/atlas/components/AtlasEditor.tsx";
 import { useCanvasHandlers } from "../../hooks/useCanvasHandlers.ts";
 import { useCanvasState } from "../../hooks/useCanvasState.ts";
 import "./canvas.css";
-import StatsPanel from "./StatsPanel.tsx";
+import StatsPanel from "../../features/stats/components/StatsPanel.tsx";
 
 const nodeTypes = { processor: ProcessrNodeComponent };
 const initialNodes: RFNode<ProcessrNodeData>[] = [];

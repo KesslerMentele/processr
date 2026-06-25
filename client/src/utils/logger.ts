@@ -1,6 +1,8 @@
 const LEVELS = { off: 0, error: 1, warn: 2, info: 3, debug: 4 } as const;
 type LogLevel = keyof typeof LEVELS;
 
+const noop = () => { /* empty */ };
+
 const getLevel = (): number => {
   const stored = localStorage.getItem('logLevel') as LogLevel | null;
   if (stored !== null && stored in LEVELS) return LEVELS[stored];

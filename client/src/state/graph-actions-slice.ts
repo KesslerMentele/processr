@@ -15,6 +15,7 @@ import { cloneNode, createGraph } from "../utils/graph-factory.ts";
 import { saveAtlas } from "../utils/persistence.ts";
 import type { SetGraphData } from "../models/state/graph-state.ts";
 import { findInvalidEdges, pickNodeEdges } from "../utils/graph-utils.ts";
+import { applyRecipeToPorts } from "../utils/node-utils.ts";
 import { newEdgeId } from "../utils/id.ts";
 
 /**
@@ -88,23 +89,25 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISetting
 
     setNodeRecipe: (nodeId: ProcessrNodeId, recipeId: RecipeId | null) =>
     {set((state) => {
+      const ports = applyRecipeToPorts(state.graph.nodes[nodeId], recipeId, state.atlasIndex);
       // Compute invalid edges against the graph with the new recipe already applied,
       // so we detect incompatibilities introduced by the change (not the old state).
-      const tempGraph = { ...state.graph, nodes: { ...state.graph.nodes, [nodeId]: { ...state.graph.nodes[nodeId], recipeId } } };
+      const tempGraph = { ...state.graph, nodes: { ...state.graph.nodes, [nodeId]: { ...state.graph.nodes[nodeId], recipeId, ports } } };
       const invalidEdges = findInvalidEdges(nodeId, tempGraph, state.atlasIndex);
 
-      return ({ graph: graphReducer(state.graph, { type: "SET_NODE_RECIPE", payload: { nodeId, recipeId, invalidEdges, behavior: state.invalidEdgeBehavior } }) });
+      return ({ graph: graphReducer(state.graph, { type: "SET_NODE_RECIPE", payload: { nodeId, recipeId, ports, invalidEdges, behavior: state.invalidEdgeBehavior } }) });
     });
     },
 
     setNodeRecipes: (updates: { nodeId: ProcessrNodeId; recipeId: RecipeId | null }[]) =>
     {set((state) => {
       const behavior = state.invalidEdgeBehavior;
-      const fullUpdates = updates.reduce<{ tempGraph: typeof state.graph; acc: { nodeId: ProcessrNodeId; recipeId: RecipeId | null; invalidEdges: Readonly<Record<string, Edge>> }[] }>(
+      const fullUpdates = updates.reduce<{ tempGraph: typeof state.graph; acc: { nodeId: ProcessrNodeId; recipeId: RecipeId | null; ports: ReturnType<typeof applyRecipeToPorts>; invalidEdges: Readonly<Record<string, Edge>> }[] }>(
         ({ tempGraph, acc }, { nodeId, recipeId }) => {
-          const updatedGraph = { ...tempGraph, nodes: { ...tempGraph.nodes, [nodeId]: { ...tempGraph.nodes[nodeId], recipeId } } };
+          const ports = applyRecipeToPorts(tempGraph.nodes[nodeId], recipeId, state.atlasIndex);
+          const updatedGraph = { ...tempGraph, nodes: { ...tempGraph.nodes, [nodeId]: { ...tempGraph.nodes[nodeId], recipeId, ports } } };
           const invalidEdges = findInvalidEdges(nodeId, updatedGraph, state.atlasIndex);
-          return { tempGraph: updatedGraph, acc: [...acc, { nodeId, recipeId, invalidEdges }] };
+          return { tempGraph: updatedGraph, acc: [...acc, { nodeId, recipeId, ports, invalidEdges }] };
         },
         { tempGraph: state.graph, acc: [] }
       ).acc;

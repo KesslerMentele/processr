@@ -39,10 +39,10 @@ const applyActionToGraph = (graph: Graph, action: GraphAction<ReversibleAction>)
       return { ...graph, nodes: { ...graph.nodes, ...updates } };
     }
     case "SET_NODE_RECIPE": {
-      const { nodeId, recipeId, invalidEdges, behavior } = payload;
+      const { nodeId, recipeId, ports, invalidEdges, behavior } = payload;
 
       if (!Object.hasOwn(graph.nodes, nodeId)) return graph;
-      const graphWithNewRecipe = applySingleNodeUpdate(graph, nodeId, { recipeId: recipeId });
+      const graphWithNewRecipe = applySingleNodeUpdate(graph, nodeId, { recipeId, ports });
 
       // if the behavior is 'delete', remove all edges that are invalid
       if (behavior === 'delete') {
@@ -65,9 +65,9 @@ const applyActionToGraph = (graph: Graph, action: GraphAction<ReversibleAction>)
     }
     case "SET_MULTI_NODE_RECIPES": {
       const { updates, behavior } = payload;
-      return updates.reduce((g, { nodeId, recipeId, invalidEdges }) => {
+      return updates.reduce((g, { nodeId, recipeId, ports, invalidEdges }) => {
         if (!Object.hasOwn(g.nodes, nodeId)) return g;
-        const withRecipe = applySingleNodeUpdate(g, nodeId, { recipeId });
+        const withRecipe = applySingleNodeUpdate(g, nodeId, { recipeId, ports });
         if (behavior === 'delete') {
           return { ...withRecipe, edges: Object.fromEntries(Object.entries(withRecipe.edges).filter(([id]) => !Object.hasOwn(invalidEdges, id))) };
         }
@@ -154,14 +154,12 @@ const undoAction = (graph: Graph, change: GraphChange): Graph => {
       return { ...graph, nodes: { ...graph.nodes, ...restores } };
     }
     case "SET_NODE_RECIPE": {
-      const { previousRecipeId, changedEdges } = change.payload;
+      const { previousRecipeId, previousPorts, changedEdges } = change.payload;
       const { nodeId } = action.payload;
 
       if (!Object.hasOwn(graph.nodes, nodeId)) return graph;
-      const restored = applySingleNodeUpdate(graph, nodeId, { recipeId: previousRecipeId });
-
+      const restored = applySingleNodeUpdate(graph, nodeId, { recipeId: previousRecipeId, ports: previousPorts });
       return { ...restored, edges: { ...restored.edges, ...changedEdges } };
-
     }
     case "ADD_EDGE": {
       const { edge } = action.payload;
@@ -174,10 +172,10 @@ const undoAction = (graph: Graph, change: GraphChange): Graph => {
       return { ...graph, edges: { ...graph.edges, [removedEdge.id]: removedEdge } };
     }
     case "SET_MULTI_NODE_RECIPES": {
-      const { previousRecipes, changedEdges } = change.payload;
+      const { previousRecipes, previousPorts, changedEdges } = change.payload;
       const restoredNodes = Object.entries(previousRecipes).reduce((g, [nodeId, recipeId]) => {
         if (!Object.hasOwn(g.nodes, nodeId)) return g;
-        return applySingleNodeUpdate(g, nodeId, { recipeId });
+        return applySingleNodeUpdate(g, nodeId, { recipeId, ports: previousPorts[nodeId] });
       }, graph);
       return { ...restoredNodes, edges: { ...restoredNodes.edges, ...changedEdges } };
     }
@@ -240,11 +238,8 @@ const createGraphChangeForHistory = (graph: Graph, action:GraphAction<Reversible
     case "SET_NODE_RECIPE": {
       const { nodeId, invalidEdges } = action.payload;
       const previousRecipeId = graph.nodes[nodeId].recipeId ?? null;
-
-
-      return { type, action, payload: { previousRecipeId, changedEdges: invalidEdges } };
-
-
+      const previousPorts = graph.nodes[nodeId].ports;
+      return { type, action, payload: { previousRecipeId, previousPorts, changedEdges: invalidEdges } };
     }
     case "REMOVE_EDGE": return {
       type, action, payload: { removedEdge: graph.edges[action.payload.edgeId] }
@@ -253,8 +248,11 @@ const createGraphChangeForHistory = (graph: Graph, action:GraphAction<Reversible
       const previousRecipes = Object.fromEntries(
         action.payload.updates.map(({ nodeId }) => [nodeId, graph.nodes[nodeId].recipeId])
       );
+      const previousPorts = Object.fromEntries(
+        action.payload.updates.map(({ nodeId }) => [nodeId, graph.nodes[nodeId].ports])
+      );
       const changedEdges = action.payload.updates.reduce<Record<string, Edge>>((acc, u) => ({ ...acc, ...u.invalidEdges }), {});
-      return { type, action, payload: { previousRecipes, changedEdges } };
+      return { type, action, payload: { previousRecipes, previousPorts, changedEdges } };
     }
     case "STACK_NODES": {
       const { survivorId, removedIds } = action.payload;

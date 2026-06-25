@@ -1,4 +1,4 @@
-import type { AtlasIndex, Edge, EdgeId, Graph, ItemId, ProcessrNodeId } from "../models";
+import type { AtlasIndex, Edge, EdgeId, Graph, ItemId, ProcessrNodeId, RecipeId } from "../models";
 import { PortDirection, type PortInstance, type ProcessrNode } from "../models";
 import type { PortInstanceId } from "../models/ids.ts";
 import { logger } from "./logger.ts";
@@ -23,6 +23,22 @@ interface GraphRateStats {
 
 const byPosition = (a: PortInstance, b: PortInstance) => (a.template.position ?? 0.5) - (b.template.position ?? 0.5);
 
+export const applyRecipeToPorts = (node: ProcessrNode, recipeId: RecipeId | null, atlas: AtlasIndex): readonly PortInstance[] => {
+  const recipe = recipeId ? atlas.recipesById.get(recipeId) : null;
+  if (!recipe) return node.ports.map(p => ({ id: p.id, template: p.template }));
+  const inputPorts = getInputPorts(node);
+  const outputPorts = getOutputPorts(node);
+  const stackByPortId = new Map(
+    [...inputPorts.map((p, i) => [p.id, recipe.inputs[i]] as const),
+     ...outputPorts.map((p, i) => [p.id, recipe.outputs[i]] as const)]
+      .filter(([, stack]) => stack !== undefined)
+  );
+  return node.ports.map(p => {
+    const stack = stackByPortId.get(p.id);
+    return stack ? { id: p.id, template: p.template, stack } : { id: p.id, template: p.template };
+  });
+};
+
 export const getInputPorts = (instance: ProcessrNode): PortInstance[] =>
    [...instance.ports.filter(p => p.template.direction === PortDirection.Input)].sort(byPosition);
 
@@ -31,11 +47,9 @@ export const getOutputPorts = (instance: ProcessrNode): PortInstance[] =>
 
 
 const constructRate = (ports: PortInstance[], speed: number): PortStats =>
-  Object.fromEntries(ports.flatMap(p => {
-    if (p.stack) return [[p.id, { itemId: p.stack.itemId, rate: p.stack.amount * speed }]];
-    if (!p.item) return [];
-    return [[p.id, { itemId: p.item.id, rate: speed }]];
-  })) as PortStats;
+  Object.fromEntries(ports.flatMap(p =>
+    p.stack ? [[p.id, { itemId: p.stack.itemId, rate: p.stack.amount * speed }]] : []
+  )) as PortStats;
 
 /*
 All ratios are calculated in items/second.
