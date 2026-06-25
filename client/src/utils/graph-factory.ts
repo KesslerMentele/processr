@@ -8,6 +8,7 @@ import type {
 } from "../models";
 import { newGraphId, newProcessrNodeId } from "./id.ts";
 import { portInstanceId } from "../models/ids.ts";
+import { logger } from "./logger.ts";
 
 const newViewport = () => ({ x: 0, y: 0, zoom: 1 });
 
@@ -19,35 +20,41 @@ export const createProcessrNode = (
   position:Position,
   options?: CreateProcessrNodeOptions,
 ): ProcessrNode => {
-  return {
-    id: newProcessrNodeId(),
+  const id = newProcessrNodeId();
+  const node = {
+    id,
     templateId: template.id,
     position,
     recipeId: options?.recipeId ?? null,
     statsOverride: options?.statsOverride ?? { metadata: {} },
-    ports: template.ports.map((p) => ({ id: portInstanceId(p.id), template: p })),
+    ports: template.ports.map((p) => ({ id: portInstanceId(id + p.id), template: p })),
     count: options?.count ?? 1,
     metadata: template.metadata
   };
+  logger.debug(`[createProcessrNode] id=${id} template=${template.id} pos=(${position.x},${position.y})`);
+  return node;
 };
 
 export const cloneNode = (
   source: ProcessrNode,
   template: NodeTemplate,
   position: Position,
-): ProcessrNode => createProcessrNode(template, position, {
-  recipeId: source.recipeId,
-  statsOverride: source.statsOverride,
-  label: source.label,
-  count: 1,
-});
+): ProcessrNode => {
+  logger.debug(`[cloneNode] source=${source.id} template=${template.id}`);
+  return createProcessrNode(template, position, {
+    recipeId: source.recipeId,
+    statsOverride: source.statsOverride,
+    label: source.label,
+    count: 1,
+  });
+};
 
 export const createGraph = (
   gamePackId: AtlasId,
   name:string
 ): Graph => {
   const now = new Date().toISOString();
-  return {
+  const graph = {
     id: newGraphId(),
     name,
     gamePackId,
@@ -59,4 +66,6 @@ export const createGraph = (
     updatedAt: now,
     metadata: {} as Metadata,
   };
+  logger.info(`[createGraph] id=${graph.id} name="${name}" gamePackId=${gamePackId}`);
+  return graph;
 };

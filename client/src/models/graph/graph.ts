@@ -95,8 +95,8 @@ export interface Graph {
   readonly name: string;
   readonly description?: string;
   readonly gamePackId: AtlasId;
-  readonly nodes: Readonly<Record<string, ProcessrNode>>;
-  readonly edges: Readonly<Record<string, Edge>>;
+  readonly nodes: Readonly<Record<ProcessrNodeId, ProcessrNode>>;
+  readonly edges: Readonly<Record<EdgeId, Edge>>;
   readonly viewport: Viewport;
   readonly history: GraphHistory;
   /** ISO 8601 timestamps. */

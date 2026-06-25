@@ -8,8 +8,8 @@ const getLevel = (): number => {
 };
 
 export const logger = {
-  debug: (msg: string) => { if (getLevel() >= LEVELS.debug) console.debug(msg); },
-  info:  (msg: string) => { if (getLevel() >= LEVELS.info)  console.info(msg); },
-  warn:  (msg: string) => { if (getLevel() >= LEVELS.warn)  console.warn(msg); },
-  error: (msg: string) => { if (getLevel() >= LEVELS.error) console.error(msg); },
+  get debug() { return getLevel() >= LEVELS.debug ? console.debug.bind(console) : noop; },
+  get info()  { return getLevel() >= LEVELS.info  ? console.info.bind(console)  : noop; },
+  get warn()  { return getLevel() >= LEVELS.warn  ? console.warn.bind(console)  : noop; },
+  get error() { return getLevel() >= LEVELS.error ? console.error.bind(console) : noop; },
 };

@@ -1,6 +1,8 @@
-import { type Edge, portId, type ProcessrNode, type ProcessrNodeData, processrNodeId } from "../models";
+import { type Edge, type ProcessrNode, type ProcessrNodeData, processrNodeId } from "../models";
 import type { Node as RFNode, Edge as RFEdge } from "@xyflow/react";
 import { createEdge } from "./edge-factory.ts";
+import { portInstanceId } from "../models/ids.ts";
+import { logger } from "./logger.ts";
 
 export const toRFNode = (node:ProcessrNode): RFNode<ProcessrNodeData> => {
   return {
@@ -24,11 +26,13 @@ export const toRFEdge = (edge:Edge): RFEdge => {
 
 export const fromRFConnection = (rfEge:RFEdge): Edge => {
   if (!rfEge.sourceHandle || !rfEge.targetHandle) {
+    logger.error(`[fromRFConnection] missing handles — source=${rfEge.source} target=${rfEge.target}`);
     throw new Error("Invalid RF connection");
   }
+  logger.debug(`[fromRFConnection] source=${rfEge.source}:${rfEge.sourceHandle} target=${rfEge.target}:${rfEge.targetHandle}`);
   return createEdge(
     processrNodeId(rfEge.source),
     processrNodeId(rfEge.target),
-    { sourcePortId: portId(rfEge.sourceHandle), targetPortId: portId(rfEge.targetHandle) }
+    { sourcePortId: portInstanceId(rfEge.sourceHandle), targetPortId: portInstanceId(rfEge.targetHandle) }
   );
 };

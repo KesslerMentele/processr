@@ -2,7 +2,7 @@ import type {
   AtlasIndex,
   Edge,
   Graph,
-  GraphChange, PortInstance,
+  GraphChange,
   ProcessrNode,
   ProcessrNodeId,
 } from "../models";
@@ -10,8 +10,8 @@ import { getInputPorts, getOutputPorts } from "./node-utils.ts";
 import { logger } from "./logger.ts";
 
 export interface ConnectionQuery {
-  source: string;
-  target: string;
+  source: ProcessrNodeId;
+  target: ProcessrNodeId;
   sourceHandle?: string | null;
   targetHandle?: string | null;
 }
@@ -64,7 +64,7 @@ export const omitKey = <T>(obj: Readonly<Record<string, T>>, key: string): Recor
  *
  * @return Graph - The state of the graph after the update
  */
-export const applySingleNodeUpdate = (graph: Graph, nodeId: string, update: Partial<ProcessrNode>): Graph => ({
+export const applySingleNodeUpdate = (graph: Graph, nodeId: ProcessrNodeId, update: Partial<ProcessrNode>): Graph => ({
   ...graph,
   nodes: { ...graph.nodes, [nodeId]: { ...graph.nodes[nodeId], ...update } },
 });
@@ -96,8 +96,3 @@ export const addChangeToHistory = (graph: Graph, nextGraph: Graph, change: Graph
   history: { past: [...graph.history.past, change], future: [] },
   updatedAt: now(),
 });
-
-export const getFloatingPorts = (graph: Graph): PortInstance[] => {
-  const fulfilledPorts = Array.from(Object.entries(graph.edges).flatMap(([,e]) => [e.targetPortId, e.sourcePortId]));
-  return Array.from(Object.entries(graph.nodes).flatMap(([,node]) => node.ports).filter((p) => !fulfilledPorts.includes(p.id)));
-};

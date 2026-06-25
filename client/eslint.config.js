@@ -89,7 +89,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['src/components/**/*.tsx'],
+    files: ['src/**/components/**/*.tsx'],
     rules: {
       'functional/no-mixed-types': 'off',
     },

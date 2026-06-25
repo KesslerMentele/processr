@@ -3,6 +3,7 @@ import { newEdgeId } from "./id.ts";
 import { getInputPorts, getOutputPorts } from "./node-utils.ts";
 import { useBoundStore } from "../state/store.ts";
 import type { PortInstanceId } from "../models/ids.ts";
+import { logger } from "./logger.ts";
 
 type CreateEdgeOptions = Partial<Pick<Edge, 'itemId' | 'label' | 'metadata'>>
 
@@ -21,6 +22,7 @@ const resolvePortPair = (
   const { graph, atlasIndex } = useBoundStore.getState();
 
   if (!Object.hasOwn(graph.nodes, sourceNodeId) || !Object.hasOwn(graph.nodes, targetNodeId)) {
+    logger.error(`[resolvePortPair] node not found — source=${sourceNodeId} target=${targetNodeId}`);
     throw new Error(`createEdge: node not found (source=${sourceNodeId}, target=${targetNodeId})`);
   }
   const sourceNode = graph.nodes[sourceNodeId];
@@ -28,11 +30,15 @@ const resolvePortPair = (
 
   const sourceTemplate = atlasIndex.nodeTemplatesById.get(sourceNode.templateId);
   const targetTemplate = atlasIndex.nodeTemplatesById.get(targetNode.templateId);
-  if (!sourceTemplate || !targetTemplate) throw new Error(`createEdge: template not found for node`);
+  if (!sourceTemplate || !targetTemplate) {
+    logger.error(`[resolvePortPair] template not found — source=${sourceNode.templateId} target=${targetNode.templateId}`);
+    throw new Error(`createEdge: template not found for node`);
+  }
 
   const outputPorts = getOutputPorts(sourceNode);
   const inputPorts = getInputPorts(targetNode);
   if (outputPorts.length === 0 || inputPorts.length === 0) {
+    logger.error(`[resolvePortPair] no connectable ports — sourceOutputs=${outputPorts.length} targetInputs=${inputPorts.length}`);
     throw new Error(`createEdge: no connectable ports (source outputs=${String(outputPorts.length)}, target inputs=${String(inputPorts.length)})`);
   }
 
@@ -47,9 +53,13 @@ const resolvePortPair = (
       }))
       .find(({ inPort }) => inPort !== undefined);
 
-    if (match?.inPort) return { sourcePortId: match.outPort.id, targetPortId: match.inPort.id };
+    if (match?.inPort) {
+      logger.debug(`[resolvePortPair] item match — src=${match.outPort.id} tgt=${match.inPort.id}`);
+      return { sourcePortId: match.outPort.id, targetPortId: match.inPort.id };
+    }
   }
 
+  logger.debug(`[resolvePortPair] no item match — falling back to first ports src=${outputPorts[0].id} tgt=${inputPorts[0].id}`);
   return { sourcePortId: outputPorts[0].id, targetPortId: inputPorts[0].id };
 };
 
@@ -71,7 +81,7 @@ export const createEdge = (
   options?: CreateEdgeOptions
 ): Edge => {
   const { sourcePortId, targetPortId } = ports ?? resolvePortPair(sourceNodeId, targetNodeId);
-  return {
+  const edge = {
     id: newEdgeId(),
     sourceNodeId,
     targetNodeId,
@@ -81,4 +91,6 @@ export const createEdge = (
     label: options?.label,
     metadata: options?.metadata ? options.metadata : {} as Metadata,
   };
+  logger.debug(`[createEdge] id=${edge.id} ${sourceNodeId}:${sourcePortId} → ${targetNodeId}:${targetPortId}`);
+  return edge;
 };
