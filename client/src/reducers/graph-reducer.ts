@@ -1,5 +1,5 @@
 import type {
-  Edge, Graph, GraphAction, GraphChange, ReversibleAction
+  Edge, EdgeId, Graph, GraphAction, GraphChange, ProcessrNodeId, ReversibleAction
 } from "../models";
 import {
   addChangeToHistory,
@@ -34,7 +34,7 @@ const applyActionToGraph = (graph: Graph, action: GraphAction<ReversibleAction>)
       const updates = Object.fromEntries(
         Object.entries(positions)
           .filter(([id]) => Object.hasOwn(graph.nodes, id))
-          .map(([id, position]) => [id, { ...graph.nodes[id], position }])
+          .map(([id, position]) => [id, { ...graph.nodes[id as ProcessrNodeId], position }])
       );
       return { ...graph, nodes: { ...graph.nodes, ...updates } };
     }
@@ -84,7 +84,7 @@ const applyActionToGraph = (graph: Graph, action: GraphAction<ReversibleAction>)
       const filteredNodes = Object.fromEntries(Object.entries(graph.nodes).filter(([id]) => !removedSet.has(id)));
       const nodes = { ...filteredNodes, [survivorId]: { ...filteredNodes[survivorId], count: newCount } };
 
-      const edges = Object.entries(graph.edges).reduce<Record<string, typeof graph.edges[string]>>((acc, [id, edge]) => {
+      const edges = Object.entries(graph.edges).reduce<Record<string, typeof graph.edges[EdgeId]>>((acc, [id, edge]) => {
         const srcRemoved = removedSet.has(edge.sourceNodeId);
         const tgtRemoved = removedSet.has(edge.targetNodeId);
         if (!srcRemoved && !tgtRemoved) { return { ...acc, [id]: edge }; }
@@ -148,7 +148,7 @@ const undoAction = (graph: Graph, change: GraphChange): Graph => {
       const restores = Object.fromEntries(
         Object.entries(previousPositions)
           .filter(([id]) => Object.hasOwn(graph.nodes, id))
-          .map(([id, position]) => [id, { ...graph.nodes[id], position }])
+          .map(([id, position]) => [id, { ...graph.nodes[id as ProcessrNodeId], position }])
       );
 
       return { ...graph, nodes: { ...graph.nodes, ...restores } };
@@ -175,7 +175,7 @@ const undoAction = (graph: Graph, change: GraphChange): Graph => {
       const { previousRecipes, previousPorts, changedEdges } = change.payload;
       const restoredNodes = Object.entries(previousRecipes).reduce((g, [nodeId, recipeId]) => {
         if (!Object.hasOwn(g.nodes, nodeId)) return g;
-        return applySingleNodeUpdate(g, nodeId, { recipeId, ports: previousPorts[nodeId] });
+        return applySingleNodeUpdate(g, nodeId as ProcessrNodeId, { recipeId, ports: previousPorts[nodeId] });
       }, graph);
       return { ...restoredNodes, edges: { ...restoredNodes.edges, ...changedEdges } };
     }
@@ -230,7 +230,7 @@ const createGraphChangeForHistory = (graph: Graph, action:GraphAction<Reversible
       const previousPositions = Object.fromEntries(
         Object.entries(positions)
         .filter(([id]) => Object.hasOwn(graph.nodes, id))
-        .map(([id]) => [id, graph.nodes[id].position])
+        .map(([id]) => [id, graph.nodes[id as ProcessrNodeId].position])
       );
 
       return { type, action, payload: { previousPositions } };

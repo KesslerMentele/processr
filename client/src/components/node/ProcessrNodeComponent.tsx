@@ -9,6 +9,7 @@ import { logger } from "../../utils/logger.ts";
 import NodeDetails from "./NodeDetails.tsx";
 import NodeStackCount from "./NodeStackCount.tsx";
 import "./processr-node.css";
+import ProcessrNodeError from "./ProcessrNodeError.tsx";
 
 type ProcessrNodeComponentProps = RFNodeProps<RFNode<ProcessrNodeData>>
 
@@ -20,12 +21,6 @@ const ProcessrNodeComponent: FC<ProcessrNodeComponentProps> = ({ data, selected 
 
   if (template === undefined) {
     logger.warn(`[ProcessrNode] template not found: ${data.templateId} — Atlas may be missing this node type`);
-    return (
-      <div className={`processr-node processr-node-error ${selected ? 'selected' : ''}`}>
-        <div className="processr-node-label">Unknown node</div>
-        <div className="processr-node-error-detail">Missing from Atlas: <code>{data.templateId}</code></div>
-      </div>
-    );
   }
 
   const inputs: PortInstance[] = getInputPorts(data).map((port, i): PortInstance  => ({
@@ -43,7 +38,9 @@ const ProcessrNodeComponent: FC<ProcessrNodeComponentProps> = ({ data, selected 
 
 
   return (
-    <div
+    template === undefined ?
+      <ProcessrNodeError data={data} selected={selected}/>
+    : <div
       className={`processr-node ${selected ? "selected" : ""}`}
       style={{ '--node-accent': template.display.color ?? '#3b6ea5' } as CSSProperties}
     >
