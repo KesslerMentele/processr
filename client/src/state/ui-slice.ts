@@ -8,6 +8,7 @@ export type InvalidEdgeBehavior = 'delete' | 'highlight';
 
 const saved = loadUISettings();
 
+/** Zustand slice for canvas/UI preferences, persisted to localStorage on change. */
 export const createUISlice: StateCreator<UISettingsSlice> = (set) => ({
   snapToGrid: saved?.snapToGrid ?? false,
   detailedMode: saved?.detailedMode ?? false,
@@ -17,6 +18,10 @@ export const createUISlice: StateCreator<UISettingsSlice> = (set) => ({
   invalidEdgeBehavior: (saved?.invalidEdgeBehavior as InvalidEdgeBehavior | undefined) ?? 'delete',
   settingsPanelOpen: false,
   packEditorOpen: false,
+  contextMenuOpen: false,
+  contextMenuData: null,
+
+  /** Toggles snap-to-grid for node dragging. */
   toggleSnap: () => {
     set((state) => {
       const next = { snapToGrid: !state.snapToGrid };
@@ -31,12 +36,16 @@ export const createUISlice: StateCreator<UISettingsSlice> = (set) => ({
       return next;
     });
   },
+
+  /** Sets the React Flow edge rendering style (default/straight/step/smoothstep). */
   setEdgeType: (edgeType) => {
     set((state) => {
       persist({ ...state, edgeType });
       return { edgeType };
     });
   },
+
+  /** Switches the canvas tool between pan and select mode. */
   setToolMode: (toolMode) => {
     set((state) => {
       persist({ ...state, toolMode });
@@ -50,6 +59,8 @@ export const createUISlice: StateCreator<UISettingsSlice> = (set) => ({
       return next;
     });
   },
+
+  /** Sets whether an invalid edge (created by a recipe/template change) is deleted or highlighted. */
   setInvalidEdgeBehavior: (invalidEdgeBehavior) => {
     set((state) => {
       persist({ ...state, invalidEdgeBehavior });
@@ -62,8 +73,18 @@ export const createUISlice: StateCreator<UISettingsSlice> = (set) => ({
   togglePackEditor: () => {
     set((state) => ({ packEditorOpen: !state.packEditorOpen }));
   },
+
+  /** Opens the context menu with the given target data, or closes it if already open. */
+  toggleContextMenu: (data) => {
+    set((state) => {
+      return state.contextMenuOpen
+        ? { contextMenuOpen: false, contextMenuData: null }
+        : { contextMenuOpen: true, contextMenuData: data };
+    });
+  },
 });
 
+/** Persists the subset of UI settings that should survive a reload. */
 const persist = (state: UISettingsSlice): void => {
   saveUISettings({
     snapToGrid: state.snapToGrid,

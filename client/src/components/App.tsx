@@ -5,6 +5,8 @@ import Sidebar from "./sidebar/Sidebar.tsx";
 import { saveProcessrGraph } from "../utils/persistence.ts";
 import { useProcessrStore } from "../state/store.ts";
 import { defaultShortcuts, KeyHubProvider } from "react-keyhub";
+import ContextMenu from "./ContextMenu.tsx";
+import { useContextMenu } from "../hooks/useContextMenu.ts";
 
 
 const myShortcuts = { ...defaultShortcuts };
@@ -13,6 +15,8 @@ const App: FC = () => {
 
   const graph = useProcessrStore.use.graph();
   const lightTheme = useProcessrStore.use.lightTheme();
+  const { isOpen, toggleContextMenu } = useContextMenu();
+
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -34,9 +38,14 @@ const App: FC = () => {
     <div className="app-root">
       <ReactFlowProvider>
         <KeyHubProvider shortcuts={myShortcuts}>
-            <div className='app-layout'>
+            <div className='app-layout'
+                 onClick={() => {
+                   if (isOpen)  toggleContextMenu(null);
+                 }}
+            >
               <Sidebar />
               <Canvas />
+              {isOpen && <ContextMenu />}
             </div>
         </KeyHubProvider>
       </ReactFlowProvider>

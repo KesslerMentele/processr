@@ -1,4 +1,4 @@
-import { type FC, useCallback, useEffect } from "react";
+import { type FC, type MouseEvent, useCallback, useEffect } from "react";
 import {
   Background, Controls,
   type Node as RFNode,
@@ -18,6 +18,7 @@ import { useCanvasHandlers } from "../../hooks/useCanvasHandlers.ts";
 import { useCanvasState } from "../../hooks/useCanvasState.ts";
 import "./canvas.css";
 import StatsPanel from "../../features/stats/components/StatsPanel.tsx";
+import { useContextMenu } from "../../hooks/useContextMenu.ts";
 
 const nodeTypes = { processor: ProcessrNodeComponent };
 const initialNodes: RFNode<ProcessrNodeData>[] = [];
@@ -34,6 +35,7 @@ const Canvas: FC = () => {
 
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState(initialNodes);
   const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const { toggleContextMenu } = useContextMenu();
 
   /* Handle all settled changes.
   A settled change is a change to the position of a node,
@@ -77,7 +79,14 @@ const Canvas: FC = () => {
   useShortcut('redo', redo);
 
   return (
-    <div className="canvas-container" >
+    <div
+      className="canvas-container"
+      onContextMenu={(e: MouseEvent) => {
+        e.preventDefault();
+        toggleContextMenu({ x: e.clientX, y:e.clientY, data: "Canvas" });
+      }}
+    >
+
       {packEditorOpen && <AtlasEditor />}
       <ReactFlow
         nodes={rfNodes}

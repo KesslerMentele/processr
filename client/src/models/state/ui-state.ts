@@ -1,4 +1,6 @@
 import type { EdgeType, InvalidEdgeBehavior, ToolMode } from "../../state/ui-slice.ts";
+import type { ContextMenuProps } from "../contextMenu.ts";
+
 
 // eslint-disable-next-line functional/no-mixed-types
 export interface UISettingsSlice {
@@ -10,6 +12,8 @@ export interface UISettingsSlice {
   readonly invalidEdgeBehavior: InvalidEdgeBehavior;
   readonly settingsPanelOpen: boolean;
   readonly packEditorOpen: boolean;
+  readonly contextMenuOpen: boolean;
+  readonly contextMenuData: ContextMenuProps | null;
   toggleSnap: () => void;
   toggleDetailed: () => void;
   setEdgeType: (t: EdgeType) => void;
@@ -18,4 +22,5 @@ export interface UISettingsSlice {
   setInvalidEdgeBehavior: (b: InvalidEdgeBehavior) => void;
   toggleSettingsPanel: () => void;
   togglePackEditor: () => void;
+  toggleContextMenu: (data: ContextMenuProps | null) => void;
 }
