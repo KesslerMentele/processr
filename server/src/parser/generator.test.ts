@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parsePackText } from './parse.ts';
+import { parsePackText } from './parse.js';
 
 interface ParsedNodeTemplate {
     id: string;

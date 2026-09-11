@@ -38,7 +38,7 @@ const resolvePortPair = (
   const outputPorts = getOutputPorts(sourceNode);
   const inputPorts = getInputPorts(targetNode);
   if (outputPorts.length === 0 || inputPorts.length === 0) {
-    logger.error(`[resolvePortPair] no connectable ports — sourceOutputs=${outputPorts.length} targetInputs=${inputPorts.length}`);
+    logger.error(`[resolvePortPair] no connectable ports — sourceOutputs=${outputPorts.length.toString()} targetInputs=${inputPorts.length.toString()}`);
     throw new Error(`createEdge: no connectable ports (source outputs=${String(outputPorts.length)}, target inputs=${String(inputPorts.length)})`);
   }
 
