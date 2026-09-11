@@ -2,14 +2,19 @@ import { describe, it, expect } from "vitest";
 import {
   gamePackId,
   itemId,
+  type Atlas,
   type NodeTemplate,
+  type Recipe,
   nodeTemplateId,
+  recipeId,
   PortDirection,
   portId, type Position,
   processrNodeId
 } from "../models";
-import { createGraph, createProcessrNode } from "../utils/graph-factory.ts";
+import { createGraph, createProcessrNode, cloneNode } from "../utils/graph-factory.ts";
 import { createEdge } from "../utils/edge-factory.ts";
+import { buildAtlasIndex } from "../features/atlas/atlas-index.ts";
+import { portInstanceId } from "../models/ids.ts";
 
 
 
@@ -38,8 +43,8 @@ describe('createGraph', () => {
 describe('createEdge', () => {
   const sourceNodeId = processrNodeId('source');
   const targetNodeId = processrNodeId('target');
-  const sourcePortId = portId('sourcePort');
-  const targetPortId = portId('targetPort');
+  const sourcePortId = portInstanceId('sourcePort');
+  const targetPortId = portInstanceId('targetPort');
   const ports = { sourcePortId, targetPortId };
   const minimalEdge = createEdge(sourceNodeId, targetNodeId, ports);
 
@@ -99,7 +104,7 @@ describe('createProcessrNode', () => {
   });
   it('will take the port configuration of the template', () => {
     expect(minimalNode.ports).toHaveLength(1);
-    expect(minimalNode.ports[0].definitionId).toBe(template.ports[0].id);
+    expect(minimalNode.ports[0].template.id).toBe(template.ports[0].id);
   });
   it('will default to a count of 1 node', () => {
     expect(minimalNode.count).toBe(1);
@@ -110,5 +115,48 @@ describe('createProcessrNode', () => {
   });
   it('takes the metadata from the template', () => {
     expect(minimalNode.metadata).toEqual(template.metadata);
+  });
+
+  // Regression: a recipeId passed at creation time used to leave port `.stack`
+  // unset (only `setNodeRecipe` populated it), so a node created with a
+  // recipe already assigned — e.g. drag-drop auto-selecting a template's only
+  // compatible recipe — silently contributed nothing to the stats panel.
+  describe('when created with a recipe and an atlas index', () => {
+    const recipeTemplate: NodeTemplate = {
+      ...template,
+      ports: [
+        { id: portId('port-in'), name: 'Input', direction: PortDirection.Input, metadata: {} },
+        { id: portId('port-out'), name: 'Output', direction: PortDirection.Output, metadata: {} },
+      ],
+    };
+    const testRecipeId = recipeId('smelt-iron');
+    const recipe: Recipe = {
+      id: testRecipeId,
+      name: 'Smelt Iron',
+      display: { label: 'Smelt Iron' },
+      inputs: [{ itemId: itemId('iron-ore'), amount: 1 }],
+      outputs: [{ itemId: itemId('iron-plate'), amount: 1 }],
+      duration: 1,
+      compatibleNodeTypes: [recipeTemplate.id],
+      metadata: {},
+    };
+    const atlas: Atlas = {
+      id: gamePackId('pack-1'), name: 'Pack', gameName: 'Game', version: '1.0.0',
+      items: [], recipes: [recipe], nodeTemplates: [recipeTemplate], categories: [], metadata: {},
+    };
+    const atlasIndex = buildAtlasIndex(atlas);
+
+    it('populates port stacks immediately, not just on a later setNodeRecipe call', () => {
+      const node = createProcessrNode(recipeTemplate, position, { recipeId: testRecipeId }, atlasIndex);
+      const outputPort = node.ports.find(p => p.template.direction === PortDirection.Output);
+      expect(outputPort?.stack?.itemId).toBe(recipe.outputs[0].itemId);
+    });
+
+    it('carries stacks through to a clone as well', () => {
+      const source = createProcessrNode(recipeTemplate, position, { recipeId: testRecipeId }, atlasIndex);
+      const clone = cloneNode(source, recipeTemplate, { x: 10, y: 10 }, atlasIndex);
+      const outputPort = clone.ports.find(p => p.template.direction === PortDirection.Output);
+      expect(outputPort?.stack?.itemId).toBe(recipe.outputs[0].itemId);
+    });
   });
 });

@@ -14,6 +14,7 @@ import {
   processrNodeId,
   recipeId,
 } from "../models";
+import { portInstanceId } from "../models/ids.ts";
 
 // --- Fixtures ---
 
@@ -35,7 +36,7 @@ const template: NodeTemplate = {
 const makeGraph = () => createGraph(packId, 'Test Graph');
 const makeNode = (pos = { x: 0, y: 0 }) => createProcessrNode(template, pos);
 const makeEdge = (sourceNodeId: ReturnType<typeof makeNode>['id'], targetNodeId: ReturnType<typeof makeNode>['id']) =>
-  createEdge(sourceNodeId, targetNodeId, { sourcePortId: portId('p-out'), targetPortId: portId('p-in') });
+  createEdge(sourceNodeId, targetNodeId, { sourcePortId: portInstanceId('p-out'), targetPortId: portInstanceId('p-in') });
 
 /** Applies a sequence of typed actions to a graph, starting from makeGraph() by default. */
 const applyActions = (actions: GraphAction[], graph: Graph = makeGraph()): Graph =>
@@ -153,7 +154,7 @@ describe('graphReducer', () => {
       const node = makeNode();
       const rid = recipeId('recipe-1');
       const withNode = graphReducer(makeGraph(), { type: 'ADD_NODE', payload: { node } });
-      const result = graphReducer(withNode, { type: 'SET_NODE_RECIPE', payload: { nodeId: node.id, recipeId: rid, invalidEdges: {}, behavior: 'highlight' } });
+      const result = graphReducer(withNode, { type: 'SET_NODE_RECIPE', payload: { nodeId: node.id, recipeId: rid, ports: node.ports, invalidEdges: {}, behavior: 'highlight' } });
       expect(result.nodes[node.id].recipeId).toBe(rid);
     });
 
@@ -162,16 +163,16 @@ describe('graphReducer', () => {
       const rid = recipeId('recipe-1');
       const graph = applyActions([
         { type: 'ADD_NODE', payload: { node } },
-        { type: 'SET_NODE_RECIPE', payload: { nodeId: node.id, recipeId: rid, invalidEdges: {}, behavior: 'highlight' } },
+        { type: 'SET_NODE_RECIPE', payload: { nodeId: node.id, recipeId: rid, ports: node.ports, invalidEdges: {}, behavior: 'highlight' } },
       ]);
-      const result = graphReducer(graph, { type: 'SET_NODE_RECIPE', payload: { nodeId: node.id, recipeId: null, invalidEdges: {}, behavior: 'highlight' } });
+      const result = graphReducer(graph, { type: 'SET_NODE_RECIPE', payload: { nodeId: node.id, recipeId: null, ports: node.ports, invalidEdges: {}, behavior: 'highlight' } });
       expect(result.nodes[node.id].recipeId).toBeNull();
     });
 
     it('pushes a change to history.past', () => {
       const node = makeNode();
       const withNode = graphReducer(makeGraph(), { type: 'ADD_NODE', payload: { node } });
-      const result = graphReducer(withNode, { type: 'SET_NODE_RECIPE', payload: { nodeId: node.id, recipeId: recipeId('r-1'), invalidEdges: {}, behavior: 'highlight' } });
+      const result = graphReducer(withNode, { type: 'SET_NODE_RECIPE', payload: { nodeId: node.id, recipeId: recipeId('r-1'), ports: node.ports, invalidEdges: {}, behavior: 'highlight' } });
       expect(result.history.past).toHaveLength(2);
     });
 
@@ -186,7 +187,7 @@ describe('graphReducer', () => {
       ]);
       const result = graphReducer(graph, {
         type: 'SET_NODE_RECIPE',
-        payload: { nodeId: nodeA.id, recipeId: recipeId('r-1'), invalidEdges: { [edge.id]: edge }, behavior: 'highlight' },
+        payload: { nodeId: nodeA.id, recipeId: recipeId('r-1'), ports: nodeA.ports, invalidEdges: { [edge.id]: edge }, behavior: 'highlight' },
       });
       expect(result.edges[edge.id].invalid).toBe(true);
     });
@@ -202,7 +203,7 @@ describe('graphReducer', () => {
       ]);
       const result = graphReducer(graph, {
         type: 'SET_NODE_RECIPE',
-        payload: { nodeId: nodeA.id, recipeId: recipeId('r-1'), invalidEdges: { [edge.id]: edge }, behavior: 'delete' },
+        payload: { nodeId: nodeA.id, recipeId: recipeId('r-1'), ports: nodeA.ports, invalidEdges: { [edge.id]: edge }, behavior: 'delete' },
       });
       expect(result.edges).not.toHaveProperty(edge.id);
     });
@@ -325,7 +326,7 @@ describe('graphReducer', () => {
       const rid = recipeId('recipe-1');
       const graph = applyActions([
         { type: 'ADD_NODE', payload: { node } },
-        { type: 'SET_NODE_RECIPE', payload: { nodeId: node.id, recipeId: rid, invalidEdges: {}, behavior: 'highlight' } },
+        { type: 'SET_NODE_RECIPE', payload: { nodeId: node.id, recipeId: rid, ports: node.ports, invalidEdges: {}, behavior: 'highlight' } },
       ]);
       const result = graphReducer(graph, { type: 'UNDO' });
       expect(result.nodes[node.id].recipeId).toBeNull();

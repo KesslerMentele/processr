@@ -67,8 +67,8 @@ export const getRates = (atlas: AtlasIndex, instance: ProcessrNode): InstanceRat
     logger.warn(`[getRates] node=${instance.id} missing ${nodeTemplate ? 'recipe' : 'template'} — skipping`);
     return;
   }
-  const speed = recipe.duration * (nodeTemplate.stats.speedMultiplier + (instance.statsOverride.speedMultiplier ?? 0));
-  logger.debug(`[getRates] node=${instance.id} recipe=${instance.recipeId} speed=${String(speed)}`);
+  const speed = (instance.statsOverride.speedMultiplier ?? nodeTemplate.stats.speedMultiplier) / recipe.duration * instance.count;
+  logger.debug(`[getRates] node=${instance.id} recipe=${instance.recipeId} speed=${String(speed)} count=${String(instance.count)}`);
   const output = constructRate(getOutputPorts(instance), speed);
   const input = constructRate(getInputPorts(instance), speed);
 

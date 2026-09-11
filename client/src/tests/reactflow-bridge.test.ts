@@ -3,6 +3,7 @@ import { toRFNode, toRFEdge, fromRFConnection } from '../utils/reactflow-bridge.
 import { createProcessrNode } from '../utils/graph-factory.ts';
 import { createEdge } from '../utils/edge-factory.ts';
 import { nodeTemplateId, portId, processrNodeId, PortDirection, type NodeTemplate } from '../models';
+import { portInstanceId } from '../models/ids.ts';
 import type { Edge as RFEdge } from '@xyflow/react';
 
 const template: NodeTemplate = {
@@ -20,8 +21,8 @@ const template: NodeTemplate = {
 
 const nodeA = processrNodeId('node-a');
 const nodeB = processrNodeId('node-b');
-const portA = portId('port-a');
-const portB = portId('port-b');
+const portA = portInstanceId('port-a');
+const portB = portInstanceId('port-b');
 const ports = { sourcePortId: portA, targetPortId: portB };
 
 describe('toRFNode', () => {
@@ -60,7 +61,7 @@ describe('toRFEdge', () => {
   });
 
   it('maps port ids to source and target handles', () => {
-    const edge = createEdge(nodeA, nodeB, { sourcePortId: portId('p-out'), targetPortId: portId('p-in') });
+    const edge = createEdge(nodeA, nodeB, { sourcePortId: portInstanceId('p-out'), targetPortId: portInstanceId('p-in') });
     const rfEdge = toRFEdge(edge);
     expect(rfEdge.sourceHandle).toBe('p-out');
     expect(rfEdge.targetHandle).toBe('p-in');

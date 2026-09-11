@@ -84,9 +84,10 @@ export function buildGamePackJson(gamepack: Gamepack): object {
                 });
             })(),
             stats: {
-                ...(first(node.speed)       !== undefined && { speed: first(node.speed) }),
-                ...(first(node.power)       !== undefined && { power: first(node.power) }),
+                speedMultiplier: first(node.speed) ?? 1,
+                ...(first(node.power)       !== undefined && { powerConsumption: first(node.power) }),
                 ...(first(node.moduleSlots) !== undefined && { moduleSlots: first(node.moduleSlots) }),
+                metadata: {},
             },
             tags: node.tags,
             metadata: {},

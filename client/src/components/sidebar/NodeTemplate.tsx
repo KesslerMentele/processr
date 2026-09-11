@@ -33,11 +33,11 @@ export const DraggableNodeTemplate: FC<{template:NodeTemplate}> = ({ template })
         const position = screenToFlowPosition(screenPosition);
         const compatibleRecipes = atlasIndex.recipesByNodeType.get(template.id) ?? [];
         const autoRecipeId = compatibleRecipes.length === 1 ? compatibleRecipes[0].id : null;
-        const node = createProcessrNode(template, position, autoRecipeId ? { recipeId: autoRecipeId } : undefined);
+        const node = createProcessrNode(template, position, autoRecipeId ? { recipeId: autoRecipeId } : undefined, atlasIndex);
         addNode(node);
         setSelectedNodeId([node.id]);
       }
-    }, [addNode, atlasIndex.recipesByNodeType, screenToFlowPosition, setSelectedNodeId, template],
+    }, [addNode, atlasIndex, screenToFlowPosition, setSelectedNodeId, template],
   );
 
   useDraggable(draggableRef as RefObject<HTMLElement>, {

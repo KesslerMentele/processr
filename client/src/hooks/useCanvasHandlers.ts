@@ -13,7 +13,7 @@ import {
   type Node as RFNode,
   useOnSelectionChange,
 } from "@xyflow/react";
-import { edgeId, type ProcessrNodeData, processrNodeId } from "../models";
+import { edgeId, type ProcessrNodeData, type ProcessrNodeId, processrNodeId } from "../models";
 import { useProcessrStore } from "../state/store.ts";
 import { fromRFConnection } from "../utils/reactflow-bridge.ts";
 import { newEdgeId } from "../utils/id.ts";
@@ -91,7 +91,9 @@ export const useCanvasHandlers = () => {
       e.targetPortId === (connection.targetHandle ?? null)
     )) { logger.debug('[isValidConnection] REJECT: duplicate edge'); return false; }
 
-    const result = areItemsCompatible(connection, graph, atlasIndex);
+    const result = areItemsCompatible(
+      { source: connection.source as ProcessrNodeId, target: connection.target as ProcessrNodeId, sourceHandle:connection.sourceHandle, targetHandle: connection.targetHandle }
+      , graph, atlasIndex);
 
     logger.debug(`[isValidConnection] isValidConnection source=${connection.source}:${connection.sourceHandle ?? 'none'} → target=${connection.target}:${connection.targetHandle ?? 'none'} → ${result ? 'VALID' : 'INVALID'}`);
     return result;

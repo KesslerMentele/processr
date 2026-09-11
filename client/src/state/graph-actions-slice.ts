@@ -17,6 +17,7 @@ import type { SetGraphData } from "../models/state/graph-state.ts";
 import { findInvalidEdges, pickNodeEdges } from "../utils/graph-utils.ts";
 import { applyRecipeToPorts } from "../utils/node-utils.ts";
 import { newEdgeId } from "../utils/id.ts";
+import { portInstanceId } from "../models/ids.ts";
 
 /**
  * For each template present in both indices, builds a map from old port ID
@@ -47,6 +48,10 @@ const buildPortRemapping = (
 type NodeRecord = Readonly<Record<string, ProcessrNode>>;
 type PortRemapping = ReadonlyMap<NodeTemplateId, ReadonlyMap<PortId, PortId>>;
 
+/**
+ * Rewrites an edge's port IDs using `portRemapping`, dropping it (returns `null`)
+ * if either endpoint node is gone or the remapped port no longer exists on its template.
+ */
 const remapEdge = (
   edgeId: string,
   edge: Edge,
@@ -59,17 +64,28 @@ const remapEdge = (
   const targetNode = nodes[edge.targetNodeId] as ProcessrNode | undefined;
   if (!sourceNode || !targetNode) return null;
 
-  const newSourcePortId = portRemapping.get(sourceNode.templateId)?.get(edge.sourcePortId) ?? edge.sourcePortId;
-  const newTargetPortId = portRemapping.get(targetNode.templateId)?.get(edge.targetPortId) ?? edge.targetPortId;
+  // Edge port IDs are per-instance (node ID + template port ID); resolve back
+  // to the template-level port ID before consulting the (template-keyed) remapping.
+  const sourcePortInstance = sourceNode.ports.find(p => p.id === edge.sourcePortId);
+  const targetPortInstance = targetNode.ports.find(p => p.id === edge.targetPortId);
+  if (!sourcePortInstance || !targetPortInstance) return null;
+
+  const newSourcePortId = portRemapping.get(sourceNode.templateId)?.get(sourcePortInstance.template.id) ?? sourcePortInstance.template.id;
+  const newTargetPortId = portRemapping.get(targetNode.templateId)?.get(targetPortInstance.template.id) ?? targetPortInstance.template.id;
 
   const sourceTemplate = packIndex.nodeTemplatesById.get(sourceNode.templateId);
   const targetTemplate = packIndex.nodeTemplatesById.get(targetNode.templateId);
   if (!sourceTemplate?.ports.some(p => p.id === newSourcePortId)) return null;
   if (!targetTemplate?.ports.some(p => p.id === newTargetPortId)) return null;
 
-  return [edgeId, { ...edge, sourcePortId: newSourcePortId, targetPortId: newTargetPortId }];
+  return [edgeId, {
+    ...edge,
+    sourcePortId: portInstanceId(sourceNode.id + newSourcePortId),
+    targetPortId: portInstanceId(targetNode.id + newTargetPortId),
+  }];
 };
 
+/** Zustand action creators for mutating the graph — all dispatch through `graphReducer` for undo/redo support. */
 const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISettingsSlice, [], [], GraphActionSlice> =
   (set) => ({
     addNode: (node: ProcessrNode) =>
@@ -82,11 +98,16 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISetting
       ({ graph: graphReducer(state.graph, { type: "REMOVE_NODE",  payload: { nodeId } }) }));
     },
 
+    /** Bulk-updates canvas positions for one or more nodes, keyed by node ID. */
     updateNodePositions: (positions: Readonly<Record<string, Position>>) =>
     {set((state) =>
       ({ graph: graphReducer(state.graph, { type: "SET_NODE_POSITIONS",  payload: { positions } }) }));
     },
 
+    /**
+     * Assigns or clears a recipe on a node, recomputing its ports and flagging
+     * any edges the new recipe makes invalid.
+     */
     setNodeRecipe: (nodeId: ProcessrNodeId, recipeId: RecipeId | null) =>
     {set((state) => {
       const ports = applyRecipeToPorts(state.graph.nodes[nodeId], recipeId, state.atlasIndex);
@@ -99,6 +120,7 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISetting
     });
     },
 
+    /** Same as `setNodeRecipe`, but applies a batch of recipe changes as a single atomic update. */
     setNodeRecipes: (updates: { nodeId: ProcessrNodeId; recipeId: RecipeId | null }[]) =>
     {set((state) => {
       const behavior = state.invalidEdgeBehavior;
@@ -137,6 +159,7 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISetting
     });
     },
 
+    /** Merges the selected nodes into a single stacked node (keeping the topmost), summing their counts. */
     stackNodes: (selectedNodeIds: readonly ProcessrNodeId[]) =>
     {set((state) => {
       const nodes = selectedNodeIds.map(id => state.graph.nodes[id]).filter(Boolean);
@@ -158,6 +181,7 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISetting
     });
     },
 
+    /** Splits one unit off a stacked node into a new node, cloning its edges. */
     unstackNode: (nodeId: ProcessrNodeId) =>
     {set((state) => {
       const source = state.graph.nodes[nodeId];
@@ -167,7 +191,7 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISetting
 
       const count = source.count;
       const newNodes = Array.from({ length: count - 1 }, (_, i) =>
-        cloneNode(source, template, { x: source.position.x, y: source.position.y + (i + 1) * 160 })
+        cloneNode(source, template, { x: source.position.x, y: source.position.y + (i + 1) * 160 }, state.atlasIndex)
       );
 
       const sourceEdges = Object.values(pickNodeEdges(state.graph.edges, nodeId));
@@ -194,11 +218,13 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISetting
     });
     },
 
+    /** Directly sets a stacked node's count (unit size). */
     setNodeStackSize: (nodeId: ProcessrNodeId, newStackSize: number) =>
     {set((state) =>
       ({ graph: graphReducer(state.graph, { type: "SET_STACK_SIZE", payload: { nodeId, newStackSize } }) }));
     },
 
+    /** Replaces the active graph and atlas index (or creates a fresh graph if none is given). */
     loadGraph: (data:SetGraphData) =>
     {set((state) => {
       const { graph, atlasIndex } = data;
@@ -208,21 +234,29 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISetting
     });
     },
 
+    /** Reverts the graph to the previous entry in its undo history. */
     undo: () =>
     {set((state) =>
       ({ ...state, graph:graphReducer(state.graph, { type: "UNDO" }) }));
     },
 
+    /** Re-applies the next entry in the graph's redo history. */
     redo: () =>
     {set((state) =>
       ({ ...state, graph:graphReducer(state.graph, { type: "REDO" }) }));
     },
 
+    /** Tracks which node template is currently being dragged from the sidebar, for drop handling. */
     setDraggedTemplateId: (id: NodeTemplateId | null) =>
     {set((state) =>
       ({ ...state, draggedTemplateId: id }));
     },
 
+    /**
+     * Swaps in a new atlas/game pack: rebuilds the index, remaps existing edges'
+     * port IDs to the new templates (dropping edges whose ports no longer exist),
+     * and persists the pack to localStorage.
+     */
     loadAtlas: (pack: Atlas) =>
     {set((state) => {
       const packIndex = buildAtlasIndex(pack);
