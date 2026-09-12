@@ -19,6 +19,7 @@ import { useCanvasState } from "../../hooks/useCanvasState.ts";
 import "./canvas.css";
 import StatsPanel from "../../features/stats/components/StatsPanel.tsx";
 import { useContextMenu } from "../../hooks/useContextMenu.ts";
+import { logger } from "../../utils/logger.ts";
 
 const nodeTypes = { processor: ProcessrNodeComponent };
 const initialNodes: RFNode<ProcessrNodeData>[] = [];
@@ -83,7 +84,15 @@ const Canvas: FC = () => {
       className="canvas-container"
       onContextMenu={(e: MouseEvent) => {
         e.preventDefault();
-        toggleContextMenu({ x: e.clientX, y:e.clientY, data: "Canvas" });
+        logger.info('[Canvas] Context Menu toggled');
+        toggleContextMenu({
+          x: e.clientX,
+          y: e.clientY,
+          data: { target: "Canvas" },
+          items: [
+            { label: 'Add Node', onClick: () => { logger.debug('[Canvas] Add Node clicked — not wired yet'); } },
+          ],
+        });
       }}
     >
 

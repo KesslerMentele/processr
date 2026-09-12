@@ -5,7 +5,7 @@ import Sidebar from "./sidebar/Sidebar.tsx";
 import { saveProcessrGraph } from "../utils/persistence.ts";
 import { useProcessrStore } from "../state/store.ts";
 import { defaultShortcuts, KeyHubProvider } from "react-keyhub";
-import ContextMenu from "./ContextMenu.tsx";
+import ContextMenu from "./contextMenu/ContextMenu.tsx";
 import { useContextMenu } from "../hooks/useContextMenu.ts";
 
 

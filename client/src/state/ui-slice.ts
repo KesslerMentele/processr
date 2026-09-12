@@ -74,13 +74,9 @@ export const createUISlice: StateCreator<UISettingsSlice> = (set) => ({
     set((state) => ({ packEditorOpen: !state.packEditorOpen }));
   },
 
-  /** Opens the context menu with the given target data, or closes it if already open. */
+  /** Opens the context menu with the given data, or closes it when passed null. */
   toggleContextMenu: (data) => {
-    set((state) => {
-      return state.contextMenuOpen
-        ? { contextMenuOpen: false, contextMenuData: null }
-        : { contextMenuOpen: true, contextMenuData: data };
-    });
+    set(() => ({ contextMenuOpen: data !== null, contextMenuData: data }));
   },
 });
 

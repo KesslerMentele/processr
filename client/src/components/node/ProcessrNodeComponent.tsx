@@ -10,11 +10,15 @@ import NodeDetails from "./NodeDetails.tsx";
 import NodeStackCount from "./NodeStackCount.tsx";
 import "./processr-node.css";
 import ProcessrNodeError from "./ProcessrNodeError.tsx";
+import { useContextMenu } from "../../hooks/useContextMenu.ts";
+import { useProcessrStore } from "../../state/store.ts";
 
 type ProcessrNodeComponentProps = RFNodeProps<RFNode<ProcessrNodeData>>
 
 const ProcessrNodeComponent: FC<ProcessrNodeComponentProps> = ({ data, selected }) => {
   const { packIndex, detailedMode } = useNodeComponentState();
+  const { toggleContextMenu } = useContextMenu();
+  const removeNode = useProcessrStore.use.removeNode();
   const template = packIndex.nodeTemplatesById.get(data.templateId);
   const recipe = data.recipeId === null ? undefined : packIndex.recipesById.get(data.recipeId);
 
@@ -43,6 +47,18 @@ const ProcessrNodeComponent: FC<ProcessrNodeComponentProps> = ({ data, selected 
     : <div
       className={`processr-node ${selected ? "selected" : ""}`}
       style={{ '--node-accent': template.display.color ?? '#3b6ea5' } as CSSProperties}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleContextMenu({
+          data: { target: "CanvasNode" },
+          x: e.clientX,
+          y: e.clientY,
+          items: [
+            { label: 'Delete Node', onClick: () => { removeNode(data.id); } },
+          ],
+        });
+      }}
     >
       {inputs.map((p, i) => (<Port key={i} {...p} />))}
       <div className="processr-node-label">
