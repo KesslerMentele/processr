@@ -21,6 +21,7 @@ export interface UISettingsSlice {
   readonly modalOpen: boolean;
   readonly modalData: ModalData | null;
   readonly currentSidebarTab: SidebarTab;
+  readonly sidebarOpen: boolean;
   toggleSnap: () => void;
   toggleDetailed: () => void;
   setEdgeType: (t: EdgeType) => void;
@@ -32,4 +33,5 @@ export interface UISettingsSlice {
   toggleContextMenu: (data: ContextMenuProps | null) => void;
   toggleModal: (data: ModalData | null) => void;
   setSidebarTab: (s: SidebarTab) => void;
+  setSidebarVisibility: (v: boolean) => void;
 }

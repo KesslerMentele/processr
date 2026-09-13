@@ -23,6 +23,7 @@ export const createUISlice: StateCreator<UISettingsSlice> = (set) => ({
   modalOpen: false,
   modalData: null,
   currentSidebarTab: "Node",
+  sidebarOpen: true,
   /** Toggles snap-to-grid for node dragging. */
   toggleSnap: () => {
     set((state) => {
@@ -87,6 +88,10 @@ export const createUISlice: StateCreator<UISettingsSlice> = (set) => ({
 
   setSidebarTab: (tab: SidebarTab) => {
     set(() => ({ currentSidebarTab: tab }));
+  },
+
+  setSidebarVisibility: (visible) => {
+    set(() => ({ sidebarOpen: visible }));
   }
 
 });

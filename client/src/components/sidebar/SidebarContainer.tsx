@@ -1,5 +1,5 @@
 import "./sidebarContainer.css";
-import { useRef, type FC } from "react";
+import { useRef, type FC, useState } from "react";
 import type { MouseEvent } from "react";
 import SidebarTabs from "./SidebarTabs.tsx";
 import { useProcessrStore } from "../../state/store.ts";
@@ -10,24 +10,46 @@ import ItemsTab from "./ItemsTab.tsx";
 
 const SidebarContainer: FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [prevWidth, setPrevWidth] = useState(231);
 
   const currentTab = useProcessrStore.use.currentSidebarTab();
-
+  const sidebarOpen = useProcessrStore.use.sidebarOpen();
+  const setSidebarVisibility = useProcessrStore.use.setSidebarVisibility();
 
   const onResizerMouseDown = (e: MouseEvent) => {
     e.preventDefault();
     const container = containerRef.current;
     if (!container) return;
-
+    if (!sidebarOpen) {
+      setSidebarVisibility(true);
+    }
     const startX = e.clientX;
     const startWidth = container.getBoundingClientRect().width;
 
     const onMove = (ev: globalThis.MouseEvent) => {
-      // eslint-disable-next-line functional/immutable-data
-      container.style.width = `${Math.min(Math.max(startWidth + (ev.clientX - startX), 150), 500) .toString()}px`;
+      const calculatedWidth = Math.min(Math.max(startWidth + (ev.clientX - startX), 30), 500);
+
+
+      const newWidthInPx =  `${calculatedWidth.toString()}px`;
+        // eslint-disable-next-line functional/immutable-data
+      container.style.width = newWidthInPx;
+      if (calculatedWidth >= 150) {
+        setPrevWidth(calculatedWidth);
+      }
     };
 
     const onUp = () => {
+      const container = containerRef.current;
+      if (container && container.getBoundingClientRect().width < 100) {
+         setSidebarVisibility(false);
+         if (prevWidth < 100) {
+          setPrevWidth(231);
+         }
+        // eslint-disable-next-line functional/immutable-data
+         container.style.width = '30px';
+
+      }
+
       document.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseup", onUp);
     };
@@ -45,18 +67,34 @@ const SidebarContainer: FC = () => {
     }
   };
 
+  const onResizerDoubleClick = () => {
+    const container = containerRef.current;
+    if (!container) return;
+    if (sidebarOpen) {
+      setPrevWidth(container.getBoundingClientRect().width);
+      // eslint-disable-next-line functional/immutable-data
+      container.style.width = `30px`;
+    } else {
+      // eslint-disable-next-line functional/immutable-data
+      container.style.width = prevWidth.toString() + "px";
+    }
+    setSidebarVisibility(!sidebarOpen);
+  };
+
 return (
     <div
       className="sidebar-container"
       ref={containerRef}
     >
       <SidebarTabs/>
-      <div className="sidebar">
-        {getSidebarContent()}
-        <hr/>
-        <DevTools/>
-      </div>
-      <div className="sidebar-resizer" onMouseDown={onResizerMouseDown}></div>
+      {sidebarOpen &&
+        <div className="sidebar">
+          {getSidebarContent()}
+          <hr/>
+          <DevTools/>
+        </div>
+      }
+      <div className="sidebar-resizer" onMouseDown={onResizerMouseDown} onDoubleClick={onResizerDoubleClick} ></div>
     </div>
   );
 };

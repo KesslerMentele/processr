@@ -8,7 +8,8 @@ const ItemList =  () => {
     <>
       {atlasIndex.atlas.items.map(item => (
         <button key={item.id} className="sidebar-btn">
-          {item.name} <img src={item.display.icon} alt="" className="port-icon" title={item.name} />
+          {item.name}
+          <img src={item.display.icon} alt="" className="item-icon" title={item.name} />
         </button>
       ))}
     </>

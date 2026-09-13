@@ -1,7 +1,6 @@
 /* ── sidebar ───────────────────────────────────────────── */
 .sidebar-container {
     min-height: 0;
-    min-width: 15%;
     background: var(--surface-raised);
     border-right: 1px solid var(--border-subtle);
     padding: 0 4px 0 0;
@@ -43,6 +42,7 @@
     text-align: left;
     color: var(--text-primary);
     display: flex;
+    position: relative;
 }
 
 .sidebar .sidebar-btn:hover {
@@ -51,7 +51,7 @@
 
 .sidebar-resizer {
     position: absolute;
-    width: 8px;
+    width: 4px;
     height: 100%;
     right: 0;
     top: 0;
@@ -136,6 +136,14 @@
     border-left-color: var(--accent);
     color: var(--accent);
     background: var(--accent-dim);
+}
+
+/* ── sidebar item list ─────────────────────────────────── */
+
+.item-icon {
+    height: 1.5em;
+    width: auto;
+    margin-left: auto
 }
 
 /* ── sidebar dev tools ─────────────────────────────────── */
