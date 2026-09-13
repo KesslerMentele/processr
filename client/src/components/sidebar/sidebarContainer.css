@@ -92,6 +92,13 @@
     color: var(--text-primary);
 }
 
+.sidebar-list-container {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    flex-direction: column;
+    gap: 6px;
+}
 
 /* ── sidebar node picker ────────────────────────────── */
 .sidebar-nodetemplates {
@@ -111,12 +118,32 @@
 
 
 /* ── sidebar recipe buttons ────────────────────────────── */
-.sidebar-list-container {
+
+
+.sidebar-recipe-group {
+    gap: 6px;
     display: flex;
-    flex: 1;
     min-height: 0;
     flex-direction: column;
-    gap: 6px;
+}
+
+.sidebar-recipe-group-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    padding: 2px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+
+.sidebar-recipe-group-header:hover {
+    color: var(--text-primary);
 }
 
 .sidebar-list-container .sidebar-recipe-picker {
@@ -128,7 +155,6 @@
     border-left: 3px solid transparent;
     color: var(--text-muted);
     font-size: 12px;
-    margin: 3px;
 }
 
 .sidebar-recipe-btn:hover {

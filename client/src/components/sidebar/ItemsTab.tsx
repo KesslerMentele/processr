@@ -1,12 +1,10 @@
-import { useSidebarState } from "../../hooks/useSidebarState.ts";
-import RecipePicker from "./RecipePicker.tsx";
 import { useContextMenu } from "../../hooks/useContextMenu.ts";
 import { useModal } from "../../hooks/useModal.ts";
 import type { MouseEvent } from "react";
 import ItemList from "./ItemList.tsx";
 
 const ItemsTab = () => {
-  const { selectedNodeIds } = useSidebarState();
+
   const { toggleContextMenu } = useContextMenu();
   const { toggleModal } = useModal();
 
@@ -28,7 +26,6 @@ const ItemsTab = () => {
         <h1>Items</h1>
         <ItemList/>
       </div>
-      {selectedNodeIds.length > 0 ? <> <hr/> <RecipePicker/> </>: null}
     </>
   );
 };

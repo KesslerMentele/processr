@@ -1,5 +1,5 @@
 import "./sidebarContainer.css";
-import { useRef, type FC } from "react";
+import { useEffect, useRef, type FC } from "react";
 import type { MouseEvent } from "react";
 import SidebarTabs from "./SidebarTabs.tsx";
 import { useProcessrStore } from "../../state/store.ts";
@@ -10,6 +10,7 @@ import ItemsTab from "./ItemsTab.tsx";
 
 const COLLAPSED_WIDTH = 30;
 const DEFAULT_WIDTH = 231;
+const COLLAPSE_THRESHOLD = 100;
 
 const SidebarContainer: FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -22,6 +23,19 @@ const SidebarContainer: FC = () => {
   const currentWidth = useProcessrStore.use.currentSidebarWidth();
   const setSidebarWidth = useProcessrStore.use.setSidebarWidth();
 
+  const sidebarOpenRef = useRef(sidebarOpen);
+  const currentWidthRef = useRef(currentWidth);
+  const prevTabRef = useRef(prevTab);
+
+  useEffect(() => {
+    // eslint-disable-next-line functional/immutable-data
+    sidebarOpenRef.current = sidebarOpen;
+    // eslint-disable-next-line functional/immutable-data
+    currentWidthRef.current = currentWidth;
+    // eslint-disable-next-line functional/immutable-data
+    prevTabRef.current = prevTab;
+  });
+
   const onResizerMouseDown = (e: MouseEvent) => {
     e.preventDefault();
 
@@ -31,14 +45,14 @@ const SidebarContainer: FC = () => {
     const onMove = (ev: globalThis.MouseEvent) => {
       const calculatedWidth = Math.min(Math.max(startWidth + (ev.clientX - startX), COLLAPSED_WIDTH), 500);
       setSidebarWidth(calculatedWidth);
-      if (!sidebarOpen) {
+      if (!sidebarOpenRef.current) {
         setSidebarVisibility(true);
-        setTab(prevTab);
+        setTab(prevTabRef.current);
       }
     };
 
     const onUp = () => {
-      if (currentWidth < 100 && sidebarOpen) {
+      if (currentWidthRef.current < COLLAPSE_THRESHOLD && sidebarOpenRef.current) {
         setTab(null);
         setSidebarVisibility(false);
         setSidebarWidth(DEFAULT_WIDTH);

@@ -1,8 +1,8 @@
-import RecipePicker from "./RecipePicker.tsx";
 
 import type { MouseEvent } from "react";
 import { useContextMenu } from "../../hooks/useContextMenu.ts";
 import { useModal } from "../../hooks/useModal.ts";
+import RecipeList from "./RecipeList.tsx";
 
 const RecipesTab = () => {
   const { toggleContextMenu } = useContextMenu();
@@ -24,8 +24,7 @@ const RecipesTab = () => {
   return (
       <div className="sidebar-list-container" onContextMenu={onContextMenu}>
         <h1>Recipes</h1>
-        <RecipePicker/>
-
+        <RecipeList/>
       </div>
   );
 };

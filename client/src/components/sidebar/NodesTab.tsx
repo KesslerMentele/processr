@@ -1,6 +1,6 @@
 import NodeList from "./NodeList.tsx";
 import { useSidebarState } from "../../hooks/useSidebarState.ts";
-import RecipePicker from "./RecipePicker.tsx";
+import RecipeSelector from "./RecipeSelector.tsx";
 import { useContextMenu } from "../../hooks/useContextMenu.ts";
 import { useModal } from "../../hooks/useModal.ts";
 import type { MouseEvent } from "react";
@@ -28,7 +28,7 @@ const NodesTab = () => {
         <h1>Nodes</h1>
         <NodeList/>
       </div>
-      {selectedNodeIds.length > 0 ? <RecipePicker/> : null}
+      {selectedNodeIds.length > 0 ? <RecipeSelector/> : null}
     </>
   );
 };

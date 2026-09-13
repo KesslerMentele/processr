@@ -112,9 +112,9 @@ export const createUISlice: StateCreator<UISettingsSlice> = (set) => ({
   openSidebar: (s) => {
     // set visibility to true, set width to prev
     if (s === null) {
-      set((state) => ({ prevSidebarTab:null, currentSidebarTab: state.prevSidebarTab, sidebarOpen: true, currentSidebarWidth: state.prevSidebarWidth }));
+      set((state) => ({ prevSidebarTab:null, currentSidebarTab: state.prevSidebarTab, sidebarOpen: true, currentSidebarWidth: state.prevSidebarWidth > 100 ? state.prevSidebarWidth : 231 }));
     } else {
-      set((state) => ({ prevSidebarTab:state.currentSidebarTab, currentSidebarTab: s, sidebarOpen: true, currentSidebarWidth: state.prevSidebarWidth }));
+      set((state) => ({ prevSidebarTab:state.currentSidebarTab, currentSidebarTab: s, sidebarOpen: true, currentSidebarWidth: state.prevSidebarWidth > 100 ? state.prevSidebarWidth : 231 }));
     }
   }
 
