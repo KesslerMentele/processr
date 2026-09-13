@@ -27,12 +27,7 @@ const initialEdges: RFEdge[] = [];
 
 const Canvas: FC = () => {
 
-  const {
-    graph, selectedNodeIds, toolMode,
-    snapToGrid, edgeType, packEditorOpen,
-    updateNodePositions, undo, redo
-  } = useCanvasState();
-
+  const { graph, selectedNodeIds, toolMode, snapToGrid, edgeType, packEditorOpen, updateNodePositions, undo, redo } = useCanvasState();
 
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState(initialNodes);
   const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -58,12 +53,12 @@ const Canvas: FC = () => {
   }, [onNodesChange, updateNodePositions]);
 
 
-  // Effect to reset ReactFlow Nodes array when graph.nodes or selection changes.
+  // Forces ReactFlow's nodes to match our store every time either changes.
   useEffect(() => {
     const idSet = new Set(selectedNodeIds);
     setRfNodes(Object.values(graph.nodes).map(n => (
-      { ...toRFNode(n), selected: idSet.has(n.id) })
-    ));
+      { ...toRFNode(n), selected: idSet.has(n.id) }
+    )));
   }, [setRfNodes, graph.nodes, selectedNodeIds]);
 
 
@@ -111,6 +106,8 @@ const Canvas: FC = () => {
         panOnDrag={toolMode === 'select' ? [1, 2] : true}
         multiSelectionKeyCode="Shift"
         selectionMode={SelectionMode.Partial}
+        nodeClickDistance={10}
+        deleteKeyCode={['Backspace', 'Delete']}
         {...useCanvasHandlers()}
       >
         <Background/>

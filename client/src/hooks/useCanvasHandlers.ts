@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { type MouseEvent as ReactMouseEvent, useCallback, useEffect, useRef } from "react";
 import {
   type IsValidConnection,
   type OnConnect,
@@ -34,6 +34,16 @@ export const useCanvasHandlers = () => {
   const isSelectionDragging = useRef(false);
   const pendingSelectionRef = useRef<RFNode<ProcessrNodeData>[]>([]);
 
+  // Mirrors the latest selectedNodeIds for onSelectionEnd to read without going stale.
+  // during a box-select drag, nothing commits to the store so this ref still holds
+  // the pre-drag selection until onSelectionEnd runs.
+  const selectedNodeIds = useProcessrStore.use.selectedNodeIds();
+  const selectedNodeIdsRef = useRef(selectedNodeIds);
+  useEffect(() => {
+    // eslint-disable-next-line functional/immutable-data
+    selectedNodeIdsRef.current = selectedNodeIds;
+  }, [selectedNodeIds]);
+
   useOnSelectionChange({
     onChange: useCallback<OnSelectionChangeFunc<RFNode<ProcessrNodeData>>>(({ nodes }) => {
       if (isSelectionDragging.current) {
@@ -52,11 +62,14 @@ export const useCanvasHandlers = () => {
     isSelectionDragging.current = true;
   }, []);
 
-  const onSelectionEnd = useCallback(() => {
+  const onSelectionEnd = useCallback((event: ReactMouseEvent) => {
     // eslint-disable-next-line functional/immutable-data
     isSelectionDragging.current = false;
-    const nodes = pendingSelectionRef.current;
-    setSelectedNodeIds(nodes.map(n => processrNodeId(n.id)));
+    const boxedIds = pendingSelectionRef.current.map(n => processrNodeId(n.id));
+    const finalIds = event.shiftKey
+      ? Array.from(new Set([...selectedNodeIdsRef.current, ...boxedIds]))
+      : boxedIds;
+    setSelectedNodeIds(finalIds);
   }, [setSelectedNodeIds]);
 
   const onNodeDragStart = useCallback<OnNodeDrag<RFNode<ProcessrNodeData>>>(() => {
@@ -67,8 +80,9 @@ export const useCanvasHandlers = () => {
   const onNodeDragStop = useCallback<OnNodeDrag<RFNode<ProcessrNodeData>>>((_event, _node, nodes) => {
     // eslint-disable-next-line functional/immutable-data
     isDragging.current = false;
+    setSelectedNodeIds(nodes.map(n => processrNodeId(n.id)));
     updateNodePositions(Object.fromEntries(nodes.map(n => [processrNodeId(n.id), n.position])));
-  }, [updateNodePositions]);
+  }, [setSelectedNodeIds, updateNodePositions]);
 
   const onConnectStart = useCallback<OnConnectStart>((_event, params) => {
     logger.debug(`[Connect] drag start nodeId=${params.nodeId ?? 'none'} handleId=${params.handleId ?? 'none'} handleType=${params.handleType ?? 'none'}`);
