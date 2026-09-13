@@ -20,8 +20,11 @@ export interface UISettingsSlice {
   readonly contextMenuData: ContextMenuProps | null;
   readonly modalOpen: boolean;
   readonly modalData: ModalData | null;
-  readonly currentSidebarTab: SidebarTab;
+  readonly currentSidebarTab: SidebarTab | null;
+  readonly prevSidebarTab: SidebarTab | null;
   readonly sidebarOpen: boolean;
+  readonly currentSidebarWidth: number;
+  readonly prevSidebarWidth: number;
   toggleSnap: () => void;
   toggleDetailed: () => void;
   setEdgeType: (t: EdgeType) => void;
@@ -32,6 +35,16 @@ export interface UISettingsSlice {
   togglePackEditor: () => void;
   toggleContextMenu: (data: ContextMenuProps | null) => void;
   toggleModal: (data: ModalData | null) => void;
-  setSidebarTab: (s: SidebarTab) => void;
+  setSidebarTab: (s: SidebarTab | null) => void;
   setSidebarVisibility: (v: boolean) => void;
+  setSidebarWidth: (w: number) => void;
+  /**
+   * Opens a provided sidebar tab at the previous width.
+   *
+   * Unlike with setSidebarTab, passing `null` sets the current tab to the last opened tab, as opening to a null tab
+   * should not be possible.
+   *
+   *  modifies `prevSidebarTab`, `currentSidebarTab`, `sidebarOpen`, `currentSidebarWidth`
+   */
+  openSidebar: (s: SidebarTab | null) => void;
 }

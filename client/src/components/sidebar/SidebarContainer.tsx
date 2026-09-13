@@ -1,5 +1,5 @@
 import "./sidebarContainer.css";
-import { useRef, type FC, useState } from "react";
+import { useRef, type FC } from "react";
 import type { MouseEvent } from "react";
 import SidebarTabs from "./SidebarTabs.tsx";
 import { useProcessrStore } from "../../state/store.ts";
@@ -8,46 +8,40 @@ import NodesTab from "./NodesTab.tsx";
 import RecipesTab from "./RecipesTab.tsx";
 import ItemsTab from "./ItemsTab.tsx";
 
+const COLLAPSED_WIDTH = 30;
+const DEFAULT_WIDTH = 231;
+
 const SidebarContainer: FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [prevWidth, setPrevWidth] = useState(231);
 
   const currentTab = useProcessrStore.use.currentSidebarTab();
   const sidebarOpen = useProcessrStore.use.sidebarOpen();
   const setSidebarVisibility = useProcessrStore.use.setSidebarVisibility();
+  const setTab = useProcessrStore.use.setSidebarTab();
+  const prevTab = useProcessrStore.use.prevSidebarTab();
+  const currentWidth = useProcessrStore.use.currentSidebarWidth();
+  const setSidebarWidth = useProcessrStore.use.setSidebarWidth();
 
   const onResizerMouseDown = (e: MouseEvent) => {
     e.preventDefault();
-    const container = containerRef.current;
-    if (!container) return;
-    if (!sidebarOpen) {
-      setSidebarVisibility(true);
-    }
+
     const startX = e.clientX;
-    const startWidth = container.getBoundingClientRect().width;
+    const startWidth = containerRef.current?.getBoundingClientRect().width ?? currentWidth;
 
     const onMove = (ev: globalThis.MouseEvent) => {
-      const calculatedWidth = Math.min(Math.max(startWidth + (ev.clientX - startX), 30), 500);
-
-
-      const newWidthInPx =  `${calculatedWidth.toString()}px`;
-        // eslint-disable-next-line functional/immutable-data
-      container.style.width = newWidthInPx;
-      if (calculatedWidth >= 150) {
-        setPrevWidth(calculatedWidth);
+      const calculatedWidth = Math.min(Math.max(startWidth + (ev.clientX - startX), COLLAPSED_WIDTH), 500);
+      setSidebarWidth(calculatedWidth);
+      if (!sidebarOpen) {
+        setSidebarVisibility(true);
+        setTab(prevTab);
       }
     };
 
     const onUp = () => {
-      const container = containerRef.current;
-      if (container && container.getBoundingClientRect().width < 100) {
-         setSidebarVisibility(false);
-         if (prevWidth < 100) {
-          setPrevWidth(231);
-         }
-        // eslint-disable-next-line functional/immutable-data
-         container.style.width = '30px';
-
+      if (currentWidth < 100 && sidebarOpen) {
+        setTab(null);
+        setSidebarVisibility(false);
+        setSidebarWidth(DEFAULT_WIDTH);
       }
 
       document.removeEventListener("mousemove", onMove);
@@ -64,27 +58,25 @@ const SidebarContainer: FC = () => {
     case "Recipe": { return (<RecipesTab/>); }
     case "Node": { return (<NodesTab/>); }
     case "Item": { return (<ItemsTab/>); }
+    case null: { return null; }
     }
   };
 
   const onResizerDoubleClick = () => {
-    const container = containerRef.current;
-    if (!container) return;
     if (sidebarOpen) {
-      setPrevWidth(container.getBoundingClientRect().width);
-      // eslint-disable-next-line functional/immutable-data
-      container.style.width = `30px`;
+      setTab(null);
+      setSidebarVisibility(false);
     } else {
-      // eslint-disable-next-line functional/immutable-data
-      container.style.width = prevWidth.toString() + "px";
+      setSidebarVisibility(true);
+      setTab(prevTab);
     }
-    setSidebarVisibility(!sidebarOpen);
   };
 
 return (
     <div
       className="sidebar-container"
       ref={containerRef}
+      style={{ width: sidebarOpen ? `${currentWidth.toString()}px` : `${COLLAPSED_WIDTH.toString()}px` }}
     >
       <SidebarTabs/>
       {sidebarOpen &&

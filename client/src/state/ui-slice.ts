@@ -2,7 +2,7 @@ import { type StateCreator } from 'zustand';
 import type { UISettingsSlice } from "../models";
 import { loadUISettings, saveUISettings } from "../utils/persistence.ts";
 import type { ModalData } from "../models/modal.ts";
-import type { EdgeType, InvalidEdgeBehavior, SidebarTab, ToolMode } from "../models/state/ui-state.ts";
+import type { EdgeType, InvalidEdgeBehavior, ToolMode } from "../models/state/ui-state.ts";
 
 
 
@@ -23,7 +23,10 @@ export const createUISlice: StateCreator<UISettingsSlice> = (set) => ({
   modalOpen: false,
   modalData: null,
   currentSidebarTab: "Node",
+  prevSidebarTab: null,
   sidebarOpen: true,
+  prevSidebarWidth: 231,
+  currentSidebarWidth: 231,
   /** Toggles snap-to-grid for node dragging. */
   toggleSnap: () => {
     set((state) => {
@@ -86,12 +89,33 @@ export const createUISlice: StateCreator<UISettingsSlice> = (set) => ({
     set(() => ({ modalOpen: data !== null, modalData: data }));
   },
 
-  setSidebarTab: (tab: SidebarTab) => {
-    set(() => ({ currentSidebarTab: tab }));
+  setSidebarTab: (s) => {
+    set((state) => ({ prevSidebarTab:state.currentSidebarTab, currentSidebarTab: s }));
   },
 
   setSidebarVisibility: (visible) => {
     set(() => ({ sidebarOpen: visible }));
+  },
+
+  setSidebarWidth: (w: number) => {
+    set((state) => ({ prevSidebarWidth:state.currentSidebarWidth,  currentSidebarWidth: w }));
+  },
+
+  /**
+   * Opens a provided sidebar tab at the previous width.
+   *
+   * Unlike with setSidebarTab, passing `null` sets the current tab to the last opened tab, as opening to a null tab
+   * should not be possible.
+   *
+   *  modifies `prevSidebarTab`, `currentSidebarTab`, `sidebarOpen`, `currentSidebarWidth`
+   */
+  openSidebar: (s) => {
+    // set visibility to true, set width to prev
+    if (s === null) {
+      set((state) => ({ prevSidebarTab:null, currentSidebarTab: state.prevSidebarTab, sidebarOpen: true, currentSidebarWidth: state.prevSidebarWidth }));
+    } else {
+      set((state) => ({ prevSidebarTab:state.currentSidebarTab, currentSidebarTab: s, sidebarOpen: true, currentSidebarWidth: state.prevSidebarWidth }));
+    }
   }
 
 });
