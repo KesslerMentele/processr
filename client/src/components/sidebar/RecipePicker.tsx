@@ -23,9 +23,9 @@ const RecipePicker = () => {
         const template = packIndex.nodeTemplatesById.get(templateId as NodeTemplateId);
         const recipes = packIndex.recipesByNodeType.get(templateId as NodeTemplateId) ?? [];
         return (
-          <>
+          <div key={templateId} >
             <hr/>
-            <div key={templateId} className="sidebar-recipe-group">
+            <div className="sidebar-recipe-group">
               <div className="sidebar-recipe-group-header">{template?.name ?? templateId}</div>
               {recipes.map(recipe => {
                 const allActive = nodes.every(n => n.recipeId === recipe.id);
@@ -42,7 +42,7 @@ const RecipePicker = () => {
                 );
               })}
             </div>
-          </>
+          </div>
         );
       })}
     </div>
