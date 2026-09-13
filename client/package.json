@@ -24,7 +24,8 @@
     "react-icons": "^5.6.0",
     "react-keyhub": "^1.1.6",
     "vitest": "^4.1.4",
-    "zustand": "^5.0.12"
+    "zustand": "^5.0.12",
+    "@react-buddy/ide-toolbox": "^2.5.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",

@@ -1,10 +1,10 @@
 import { type StateCreator } from 'zustand';
 import type { UISettingsSlice } from "../models";
 import { loadUISettings, saveUISettings } from "../utils/persistence.ts";
+import type { ModalData } from "../models/modal.ts";
+import type { EdgeType, InvalidEdgeBehavior, SidebarTab, ToolMode } from "../models/state/ui-state.ts";
 
-export type EdgeType = 'default' | 'straight' | 'step' | 'smoothstep';
-export type ToolMode = 'pan' | 'select';
-export type InvalidEdgeBehavior = 'delete' | 'highlight';
+
 
 const saved = loadUISettings();
 
@@ -20,7 +20,9 @@ export const createUISlice: StateCreator<UISettingsSlice> = (set) => ({
   packEditorOpen: false,
   contextMenuOpen: false,
   contextMenuData: null,
-
+  modalOpen: false,
+  modalData: null,
+  currentSidebarTab: "Node",
   /** Toggles snap-to-grid for node dragging. */
   toggleSnap: () => {
     set((state) => {
@@ -78,6 +80,15 @@ export const createUISlice: StateCreator<UISettingsSlice> = (set) => ({
   toggleContextMenu: (data) => {
     set(() => ({ contextMenuOpen: data !== null, contextMenuData: data }));
   },
+
+  toggleModal: (data: ModalData | null) => {
+    set(() => ({ modalOpen: data !== null, modalData: data }));
+  },
+
+  setSidebarTab: (tab: SidebarTab) => {
+    set(() => ({ currentSidebarTab: tab }));
+  }
+
 });
 
 /** Persists the subset of UI settings that should survive a reload. */

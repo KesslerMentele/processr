@@ -1,9 +1,22 @@
 
-export type ContextMenuTarget = 'Sidebar' | 'Canvas' | 'CanvasNode'
 
-export interface ContextMenuData {
-  target: ContextMenuTarget
+interface ContextMenuSidebar {
+  target: "Sidebar"
 }
+
+interface ContextMenuCanvas {
+  target: "Canvas"
+}
+
+interface ContextMenuSidebarNode {
+  target: "SidebarNode"
+}
+
+interface ContextMenuCanvasNode {
+  target: "CanvasNode"
+}
+
+export type ContextMenuData = ContextMenuSidebar | ContextMenuCanvas | ContextMenuCanvasNode | ContextMenuSidebarNode
 
 /** A single clickable row in a context menu. */
 // eslint-disable-next-line functional/no-mixed-types

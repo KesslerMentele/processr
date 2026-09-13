@@ -4,7 +4,7 @@ import { useShallow } from "zustand/react/shallow";
 
 
 export const useContextMenu = () => useBoundStore(useShallow(state => ({
-  isOpen: state.contextMenuOpen,
+  isContextMenuOpen: state.contextMenuOpen,
   toggleContextMenu: state.toggleContextMenu,
   contextMenuData: state.contextMenuData,
 })));

@@ -1,6 +1,10 @@
-import type { EdgeType, InvalidEdgeBehavior, ToolMode } from "../../state/ui-slice.ts";
 import type { ContextMenuProps } from "../contextMenu.ts";
+import type { ModalData } from "../modal.ts";
 
+export type EdgeType = 'default' | 'straight' | 'step' | 'smoothstep';
+export type ToolMode = 'pan' | 'select';
+export type InvalidEdgeBehavior = 'delete' | 'highlight';
+export type SidebarTab = "Recipe" | "Node" | "Item";
 
 // eslint-disable-next-line functional/no-mixed-types
 export interface UISettingsSlice {
@@ -14,6 +18,9 @@ export interface UISettingsSlice {
   readonly packEditorOpen: boolean;
   readonly contextMenuOpen: boolean;
   readonly contextMenuData: ContextMenuProps | null;
+  readonly modalOpen: boolean;
+  readonly modalData: ModalData | null;
+  readonly currentSidebarTab: SidebarTab;
   toggleSnap: () => void;
   toggleDetailed: () => void;
   setEdgeType: (t: EdgeType) => void;
@@ -23,4 +30,6 @@ export interface UISettingsSlice {
   toggleSettingsPanel: () => void;
   togglePackEditor: () => void;
   toggleContextMenu: (data: ContextMenuProps | null) => void;
+  toggleModal: (data: ModalData | null) => void;
+  setSidebarTab: (s: SidebarTab) => void;
 }

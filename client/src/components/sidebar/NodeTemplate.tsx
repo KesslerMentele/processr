@@ -1,10 +1,12 @@
 import type { NodeTemplate } from "../../models";
-import { type FC, type RefObject, useCallback, useRef, useState } from "react";
+import { type FC, type MouseEvent, type RefObject, useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useDraggable } from "@neodrag/react";
 import { createProcessrNode } from "../../utils/graph-factory.ts";
 import { useProcessrStore } from "../../state/store.ts";
 import { useReactFlow, type XYPosition } from "@xyflow/react";
+import { useModal } from "../../hooks/useModal.ts";
+import { useContextMenu } from "../../hooks/useContextMenu.ts";
 
 
 export const DraggableNodeTemplate: FC<{template:NodeTemplate}> = ({ template }) => {
@@ -13,6 +15,8 @@ export const DraggableNodeTemplate: FC<{template:NodeTemplate}> = ({ template })
   const setSelectedNodeId = useProcessrStore.use.setSelectedNodeIds();
   const atlasIndex = useProcessrStore.use.atlasIndex();
   const { screenToFlowPosition } = useReactFlow();
+  const { toggleModal } = useModal();
+  const { toggleContextMenu } = useContextMenu();
 
   const startRectRef = useRef<DOMRect | null>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -67,12 +71,12 @@ export const DraggableNodeTemplate: FC<{template:NodeTemplate}> = ({ template })
 
   return (
     <>
-      <div ref={draggableRef} className="node-template" style={{ opacity: ghostPos ? 0 : 1 }}>
+      <div ref={draggableRef} className="sidebar-btn node-template" style={{ opacity: ghostPos ? 0 : 1 }}>
         {template.name}
       </div>
       {ghostPos && createPortal(
         <div
-          className="node-template node-template--drag-ghost"
+          className="sidebar-btn node-template node-template--drag-ghost"
           style={{
             position: 'fixed',
             left: ghostPos.x,
@@ -81,6 +85,17 @@ export const DraggableNodeTemplate: FC<{template:NodeTemplate}> = ({ template })
             pointerEvents: 'none',
             zIndex: 9999,
             opacity: 0.9,
+          }}
+          onContextMenu={(e: MouseEvent) => {
+            e.preventDefault();
+            toggleContextMenu({
+              x: e.clientX,
+              y: e.clientY,
+              data: { target: "Sidebar" },
+              items: [
+                { label: 'Create New Node', onClick: () => { toggleModal({ type:"NewNode" }); } },
+              ],
+            });
           }}
         >
           {template.name}

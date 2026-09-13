@@ -9,6 +9,7 @@ import AtlasText from "./AtlasText.tsx";
 import { parseAtlasText } from '../atlas-api.ts';
 import { EditorState, type Atlas } from '../../../models';
 import { useProcessrStore } from '../../../state/store.ts';
+import type { MouseEvent } from "react";
 
 const DEBOUNCE_MS = 600;
 
@@ -56,7 +57,11 @@ const AtlasEditor: FC = () => {
 
 
   return (
-    <div className={`pack-editor${editorCollapsed ? ' pack-editor-collapsed' : ''}`} style={{ transform: `translate(${editorPosition.x.toString()}px, ${editorPosition.y.toString()}px)` }}>
+    <div
+      className={`pack-editor${editorCollapsed ? ' pack-editor-collapsed' : ''}`}
+      style={{ transform: `translate(${editorPosition.x.toString()}px, ${editorPosition.y.toString()}px)` }}
+      onContextMenu={(e: MouseEvent) => {e.stopPropagation();}}
+    >
       <AtlasEditorHeader view={atlasEditorView} onApply={onApply} />
       <AtlasTabs view={atlasEditorView} />
       <AtlasText view={atlasEditorView} />
