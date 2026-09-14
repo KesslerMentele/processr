@@ -1,12 +1,12 @@
+import { useState, type MouseEvent } from "react";
 import { useContextMenu } from "../../hooks/useContextMenu.ts";
-import { useModal } from "../../hooks/useModal.ts";
-import type { MouseEvent } from "react";
 import ItemList from "./ItemList.tsx";
+import AddItemForm from "./AddItemForm.tsx";
 
 const ItemsTab = () => {
 
   const { toggleContextMenu } = useContextMenu();
-  const { toggleModal } = useModal();
+  const [isAddingItem, setIsAddingItem] = useState(false);
 
   const onContextMenu = (e: MouseEvent) => {
     e.preventDefault();
@@ -15,18 +15,18 @@ const ItemsTab = () => {
       y: e.clientY,
       data: { target: "Sidebar" },
       items: [
-        { label: `Create New Item`, onClick: () => {toggleModal({ type:"NewItem" });} }
+        { label: `Create New Item`, onClick: () => { setIsAddingItem(true); } }
       ],
     });
   };
 
+
   return (
-    <>
-      <div className="sidebar-list-container" onContextMenu={onContextMenu}>
-        <h1>Items</h1>
-        <ItemList/>
-      </div>
-    </>
+    <div className="sidebar-list-container" onContextMenu={onContextMenu}>
+      <h1>Items</h1>
+      <ItemList/>
+      {isAddingItem && <AddItemForm onClose={() => { setIsAddingItem(false); }} />}
+    </div>
   );
 };
 

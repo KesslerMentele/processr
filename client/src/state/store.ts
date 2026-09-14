@@ -10,7 +10,7 @@ import type {
 import createGraphSlice from "./graph-slice.ts";
 import createGraphActions from "./graph-actions-slice.ts";
 import { createUISlice } from "./ui-slice.ts";
-import { createAtlasSlice } from "./atlas-slice.ts";
+import { createAtlasEditorSlice } from "./atlas-editor-slice.ts";
 
 
 export const useBoundStore = create<
@@ -22,7 +22,7 @@ export const useBoundStore = create<
   ...createGraphSlice(setState, getState, store),
   ...createGraphActions(setState, getState, store),
   ...createUISlice(setState, getState, store),
-  ...createAtlasSlice(setState, getState, store),
+  ...createAtlasEditorSlice(setState, getState, store),
 }));
 
 /**

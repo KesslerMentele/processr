@@ -98,6 +98,8 @@
     min-height: 0;
     flex-direction: column;
     gap: 6px;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 /* ── sidebar node picker ────────────────────────────── */
@@ -166,6 +168,76 @@
     border-left-color: var(--accent);
     color: var(--accent);
     background: var(--accent-dim);
+}
+
+/* ── sidebar add-item form ─────────────────────────────── */
+
+.sidebar-add-form {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sidebar-form-input {
+    width: 100%;
+    padding: 6px 8px;
+    background: var(--surface-card);
+    border: 1px solid var(--border-default);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 12px;
+    box-sizing: border-box;
+}
+
+.sidebar-form-input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.sidebar-form-icon-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar-form-icon-preview {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    background: var(--surface-card);
+    border: 1px solid var(--border-default);
+    border-radius: 4px;
+}
+
+.sidebar-icon-picker-btn {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.sidebar-icon-picker-btn:hover {
+    color: var(--accent);
+}
+
+.sidebar-file-input-hidden {
+    display: none;
+}
+
+.sidebar-form-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.sidebar-form-actions .sidebar-btn {
+    flex: 1;
+    text-align: center;
 }
 
 /* ── sidebar item list ─────────────────────────────────── */

@@ -1,28 +1,24 @@
 import type {
-  Atlas,
-  Category,
-  CategoryId,
-  DisplayInfo,
-  Item,
-  ItemForm,
-  ItemId,
-  NodeTemplate,
-  NodeTemplateId,
-  PortId,
-  PortTemplate,
-  Recipe,
-  RecipeId,
-  RecipeItemStack,
-  TimeUnit,
+  Atlas, Category, CategoryId,
+  DisplayInfo, Item, ItemId,
+  NodeTemplate, NodeTemplateId, PortId,
+  PortTemplate, Recipe, RecipeId,
 } from "../../models";
 import { categoryId, itemId, nodeTemplateId, portId, recipeId, PortDirection } from "../../models";
+import type {
+  AddCategoryInput,
+  AddItemInput,
+  AddNodeTemplateInput,
+  AddNodeTemplatePortInput,
+  AddRecipeInput
+} from "./atlas-types.ts";
 
 /**
  * Slugifies a label into an identifier matching the atlas grammar
  * (`[a-zA-Z][a-zA-Z0-9]*(-[a-zA-Z0-9]+)*`), then dedupes it against
  * `existingIds` by appending `-2`, `-3`, ... on collision.
  */
-export function slugifyId(label: string, existingIds: ReadonlySet<string>): string {
+export const slugifyId = (label: string, existingIds: ReadonlySet<string>): string => {
   const base = label
     .trim()
     .toLowerCase()
@@ -34,7 +30,7 @@ export function slugifyId(label: string, existingIds: ReadonlySet<string>): stri
   const suffixed = Array.from({ length: existingIds.size + 1 }, (_, i) => withSuffix(i + 2))
     .find((id) => !existingIds.has(id));
   return suffixed ?? withSuffix(existingIds.size + 2);
-}
+};
 
 const display = (name: string, color?: string, icon?: string, description?: string): DisplayInfo => ({
   label: name,
@@ -45,16 +41,9 @@ const display = (name: string, color?: string, icon?: string, description?: stri
 
 // ---- Items ----
 
-export interface AddItemInput {
-  readonly name: string;
-  readonly categoryId?: CategoryId;
-  readonly form?: ItemForm;
-  readonly color?: string;
-  readonly icon?: string;
-  readonly description?: string;
-}
 
-export function addItem(atlas: Atlas, input: AddItemInput): Atlas {
+
+export const addItem = (atlas: Atlas, input: AddItemInput): Atlas => {
   const id: ItemId = itemId(slugifyId(input.name, new Set(atlas.items.map((i) => i.id))));
   const item: Item = {
     id,
@@ -65,19 +54,13 @@ export function addItem(atlas: Atlas, input: AddItemInput): Atlas {
     metadata: {},
   };
   return { ...atlas, items: [...atlas.items, item] };
-}
+};
 
 // ---- Categories ----
 
-export interface AddCategoryInput {
-  readonly name: string;
-  readonly color?: string;
-  readonly icon?: string;
-  readonly sortOrder?: number;
-  readonly parentId?: CategoryId;
-}
 
-export function addCategory(atlas: Atlas, input: AddCategoryInput): Atlas {
+
+export const addCategory = (atlas: Atlas, input: AddCategoryInput): Atlas => {
   const id: CategoryId = categoryId(slugifyId(input.name, new Set(atlas.categories.map((c) => c.id))));
   const category: Category = {
     id,
@@ -87,34 +70,18 @@ export function addCategory(atlas: Atlas, input: AddCategoryInput): Atlas {
     ...(input.parentId !== undefined && { parentId: input.parentId }),
   };
   return { ...atlas, categories: [...atlas.categories, category] };
-}
+};
 
 // ---- Node templates ----
 
-export interface AddNodeTemplatePortInput {
-  readonly name: string;
-  readonly direction: PortDirection;
-  readonly position?: number;
-}
 
-export interface AddNodeTemplateInput {
-  readonly name: string;
-  readonly categoryId?: CategoryId;
-  readonly color?: string;
-  readonly icon?: string;
-  readonly speedMultiplier?: number;
-  readonly powerConsumption?: number;
-  readonly moduleSlots?: number;
-  readonly ports?: readonly AddNodeTemplatePortInput[];
-  readonly tags?: readonly string[];
-}
 
 const DEFAULT_NODE_PORTS: readonly AddNodeTemplatePortInput[] = [
   { name: "Input", direction: PortDirection.Input },
   { name: "Output", direction: PortDirection.Output },
 ];
 
-function buildPorts(inputs: readonly AddNodeTemplatePortInput[]): readonly PortTemplate[] {
+const buildPorts = (inputs: readonly AddNodeTemplatePortInput[]): readonly PortTemplate[] => {
   return inputs.reduce<readonly PortTemplate[]>((ports, input) => {
     const id: PortId = portId(slugifyId(input.name, new Set(ports.map((p) => p.id))));
     const port: PortTemplate = {
@@ -126,9 +93,9 @@ function buildPorts(inputs: readonly AddNodeTemplatePortInput[]): readonly PortT
     };
     return [...ports, port];
   }, []);
-}
+};
 
-export function addNodeTemplate(atlas: Atlas, input: AddNodeTemplateInput): Atlas {
+export const addNodeTemplate = (atlas: Atlas, input: AddNodeTemplateInput): Atlas => {
   const id: NodeTemplateId = nodeTemplateId(slugifyId(input.name, new Set(atlas.nodeTemplates.map((n) => n.id))));
   const nodeTemplate: NodeTemplate = {
     id,
@@ -146,23 +113,11 @@ export function addNodeTemplate(atlas: Atlas, input: AddNodeTemplateInput): Atla
     tags: input.tags ?? [],
   };
   return { ...atlas, nodeTemplates: [...atlas.nodeTemplates, nodeTemplate] };
-}
+};
 
 // ---- Recipes ----
 
-export interface AddRecipeInput {
-  readonly name: string;
-  readonly duration: number;
-  readonly durationUnit?: TimeUnit;
-  readonly categoryId?: CategoryId;
-  readonly icon?: string;
-  readonly inputs?: readonly RecipeItemStack[];
-  readonly outputs?: readonly RecipeItemStack[];
-  readonly compatibleNodeTypes?: readonly NodeTemplateId[];
-  readonly compatibleNodeTags?: readonly string[];
-}
-
-export function addRecipe(atlas: Atlas, input: AddRecipeInput): Atlas {
+export const addRecipe = (atlas: Atlas, input: AddRecipeInput): Atlas => {
   const id: RecipeId = recipeId(slugifyId(input.name, new Set(atlas.recipes.map((r) => r.id))));
   const recipe: Recipe = {
     id,
@@ -178,4 +133,4 @@ export function addRecipe(atlas: Atlas, input: AddRecipeInput): Atlas {
     metadata: {},
   };
   return { ...atlas, recipes: [...atlas.recipes, recipe] };
-}
+};
