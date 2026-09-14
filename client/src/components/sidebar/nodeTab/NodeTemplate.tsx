@@ -1,12 +1,12 @@
-import type { NodeTemplate } from "../../models";
+import type { NodeTemplate } from "../../../models";
 import { type FC, type MouseEvent, type RefObject, useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useDraggable } from "@neodrag/react";
-import { createProcessrNode } from "../../utils/graph-factory.ts";
-import { useProcessrStore } from "../../state/store.ts";
+import { createProcessrNode } from "../../../utils/graph-factory.ts";
+import { useProcessrStore } from "../../../state/store.ts";
 import { useReactFlow, type XYPosition } from "@xyflow/react";
-import { useModal } from "../../hooks/useModal.ts";
-import { useContextMenu } from "../../hooks/useContextMenu.ts";
+import { useModal } from "../../../hooks/useModal.ts";
+import { useContextMenu } from "../../../hooks/useContextMenu.ts";
 
 
 export const DraggableNodeTemplate: FC<{template:NodeTemplate}> = ({ template }) => {

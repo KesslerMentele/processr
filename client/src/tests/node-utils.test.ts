@@ -10,7 +10,7 @@ import {
   type NodeTemplate,
   type Recipe,
 } from "../models";
-import { buildAtlasIndex } from "../features/atlas/atlas-index.ts";
+import { buildAtlasIndex } from "../features/atlas-editor/atlas-index.ts";
 import { createProcessrNode } from "../utils/graph-factory.ts";
 import { getRates } from "../utils/node-utils.ts";
 

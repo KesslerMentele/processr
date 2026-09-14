@@ -3,6 +3,7 @@
 .canvas-container {
     flex: 1;
     height: 100%;
+    caret-color: transparent;
 }
 
 .canvas-controls {

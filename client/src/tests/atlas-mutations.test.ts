@@ -5,7 +5,7 @@ import {
   addCategory,
   addNodeTemplate,
   addRecipe,
-} from "../features/atlas/atlas-mutations.ts";
+} from "../features/atlas-editor/atlas-mutations.ts";
 import {
   gamePackId,
   itemId,

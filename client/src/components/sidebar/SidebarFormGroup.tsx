@@ -1,14 +1,16 @@
-import type { FC, ReactNode } from "react";
+import type { FC, PropsWithChildren, SubmitEvent } from "react";
 
-interface SidebarFormGroupProps {
+interface SidebarFormGroupProps extends PropsWithChildren {
   title: string;
-  children: ReactNode;
+  onSubmit: (e:SubmitEvent) => void;
 }
 
-const SidebarFormGroup: FC<SidebarFormGroupProps> = ({ title, children }) => (
-  <div className="sidebar-recipe-group">
-    <div className="sidebar-recipe-group-header">{title}</div>
-    {children}
+const SidebarFormGroup: FC<SidebarFormGroupProps> = ({ title, onSubmit, children }) => (
+  <div className="sidebar-group" onSubmit={onSubmit}>
+    <div className="sidebar-group-header">{title}</div>
+    <form className="sidebar-add-form" >
+      {children}
+    </form>
   </div>
 );
 

@@ -1,9 +1,9 @@
 import { useState, type MouseEvent } from "react";
-import { useContextMenu } from "../../hooks/useContextMenu.ts";
+import { useContextMenu } from "../../../hooks/useContextMenu.ts";
 import ItemList from "./ItemList.tsx";
 import AddItemForm from "./AddItemForm.tsx";
 
-const ItemsTab = () => {
+const ItemTab = () => {
 
   const { toggleContextMenu } = useContextMenu();
   const [isAddingItem, setIsAddingItem] = useState(false);
@@ -24,10 +24,10 @@ const ItemsTab = () => {
   return (
     <div className="sidebar-list-container" onContextMenu={onContextMenu}>
       <h1>Items</h1>
-      <ItemList/>
       {isAddingItem && <AddItemForm onClose={() => { setIsAddingItem(false); }} />}
+      <ItemList/>
     </div>
   );
 };
 
-export default ItemsTab;
+export default ItemTab;

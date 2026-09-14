@@ -1,11 +1,11 @@
 import NodeList from "./NodeList.tsx";
-import { useSidebarState } from "../../hooks/useSidebarState.ts";
+import { useSidebarState } from "../../../hooks/useSidebarState.ts";
 import RecipeSelector from "./RecipeSelector.tsx";
-import { useContextMenu } from "../../hooks/useContextMenu.ts";
-import { useModal } from "../../hooks/useModal.ts";
+import { useContextMenu } from "../../../hooks/useContextMenu.ts";
+import { useModal } from "../../../hooks/useModal.ts";
 import type { MouseEvent } from "react";
 
-const NodesTab = () => {
+const NodeTab = () => {
   const { selectedNodeIds } = useSidebarState();
   const { toggleContextMenu } = useContextMenu();
   const { toggleModal } = useModal();
@@ -33,4 +33,4 @@ const NodesTab = () => {
   );
 };
 
-export default NodesTab;
+export default NodeTab;

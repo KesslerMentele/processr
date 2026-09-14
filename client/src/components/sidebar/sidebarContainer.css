@@ -28,10 +28,10 @@
 .sidebar hr {
     border: none;
     border-top: 1px solid var(--border-subtle);
-    margin: auto 0 4px;
+    margin: 6px 0 4px;
 }
 
-.sidebar .sidebar-btn {
+.sidebar-btn {
     width: 100%;
     height: fit-content;
     padding: 8px 10px;
@@ -43,6 +43,10 @@
     color: var(--text-primary);
     display: flex;
     position: relative;
+    font-size: 14px;
+    font-weight: inherit ;
+    margin-top: 3px;
+    caret-color: transparent;
 }
 
 .sidebar .sidebar-btn:hover {
@@ -60,6 +64,32 @@
     cursor: col-resize;
 }
 
+.sidebar-group {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    margin-top: 6px;
+}
+
+.sidebar-group-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    padding: 2px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    caret-color: transparent;
+}
+
+.sidebar-group-header:hover {
+    color: var(--text-primary);
+}
 
 /* ── sidebar editor  ────────────────────────────── */
 
@@ -93,11 +123,8 @@
 }
 
 .sidebar-list-container {
-    display: flex;
     flex: 1;
     min-height: 0;
-    flex-direction: column;
-    gap: 6px;
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -121,32 +148,6 @@
 
 /* ── sidebar recipe buttons ────────────────────────────── */
 
-
-.sidebar-recipe-group {
-    gap: 6px;
-    display: flex;
-    min-height: 0;
-    flex-direction: column;
-}
-
-.sidebar-recipe-group-header {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    width: 100%;
-    padding: 2px;
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    font-size: 12px;
-    font-weight: 600;
-    text-align: left;
-    cursor: pointer;
-}
-
-.sidebar-recipe-group-header:hover {
-    color: var(--text-primary);
-}
 
 .sidebar-list-container .sidebar-recipe-picker {
     flex: none;

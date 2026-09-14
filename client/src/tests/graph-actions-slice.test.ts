@@ -10,7 +10,7 @@ import {
   type GraphSlice,
   type UISettingsSlice,
 } from "../models";
-import { buildAtlasIndex } from "../features/atlas/atlas-index.ts";
+import { buildAtlasIndex } from "../features/atlas-editor/atlas-index.ts";
 import { createGraph, createProcessrNode } from "../utils/graph-factory.ts";
 import { createEdge } from "../utils/edge-factory.ts";
 import createGraphActions from "../state/graph-actions-slice.ts";

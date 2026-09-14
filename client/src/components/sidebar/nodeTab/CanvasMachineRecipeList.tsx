@@ -1,7 +1,7 @@
-import type { NodeTemplateId, ProcessrNode, ProcessrNodeId, RecipeId } from "../../models";
-import { useSidebarState } from "../../hooks/useSidebarState.ts";
+import type { NodeTemplateId, ProcessrNode, ProcessrNodeId, RecipeId } from "../../../models";
+import { useSidebarState } from "../../../hooks/useSidebarState.ts";
 import type { FC } from "react";
-import SidebarRecipeGroup from "./SidebarRecipeGroup.tsx";
+import SidebarGroup from "../SidebarGroup.tsx";
 
 interface MachineRecipeListProps {
   templateId: string;
@@ -21,7 +21,7 @@ const CanvasMachineRecipeList: FC<MachineRecipeListProps> = ({ templateId, nodes
     return (
       <div key={templateId} >
         <hr/>
-        <SidebarRecipeGroup title={template?.name ?? templateId}>
+        <SidebarGroup title={template?.name ?? templateId}>
           {recipes.map(recipe => {
             const allActive = nodes.every(n => n.recipeId === recipe.id);
             return (
@@ -36,7 +36,7 @@ const CanvasMachineRecipeList: FC<MachineRecipeListProps> = ({ templateId, nodes
               </button>
             );
           })}
-        </SidebarRecipeGroup>
+        </SidebarGroup>
       </div>
     );
 

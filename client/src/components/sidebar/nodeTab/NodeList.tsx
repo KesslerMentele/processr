@@ -1,5 +1,5 @@
 import { DraggableNodeTemplate } from "./NodeTemplate.tsx";
-import { useProcessrStore } from "../../state/store.ts";
+import { useProcessrStore } from "../../../state/store.ts";
 
 
 const NodeList =  () => {

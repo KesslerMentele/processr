@@ -1,5 +1,5 @@
-import type { NodeTemplateId, ProcessrNode } from "../../models";
-import { useSidebarState } from "../../hooks/useSidebarState.ts";
+import type { NodeTemplateId, ProcessrNode } from "../../../models";
+import { useSidebarState } from "../../../hooks/useSidebarState.ts";
 import CanvasMachineRecipeList from "./CanvasMachineRecipeList.tsx";
 
 

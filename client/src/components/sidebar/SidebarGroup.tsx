@@ -6,7 +6,7 @@ interface SidebarRecipeGroupProps {
   children: ReactNode;
 }
 
-const SidebarRecipeGroup: FC<SidebarRecipeGroupProps> = ({ title, children }) => {
+const SidebarGroup: FC<SidebarRecipeGroupProps> = ({ title, children }) => {
   const [collapsed, setCollapsed] = useState(false);
 
   const toggleCollapsed = () => {
@@ -14,8 +14,8 @@ const SidebarRecipeGroup: FC<SidebarRecipeGroupProps> = ({ title, children }) =>
   };
 
   return (
-    <div className="sidebar-recipe-group">
-      <button className="sidebar-recipe-group-header" onClick={toggleCollapsed}>
+    <div className="sidebar-group">
+      <button className="sidebar-group-header" onClick={toggleCollapsed}>
         {collapsed ? <LuChevronRight/> : <LuChevronDown/>}
         {title}
       </button>
@@ -24,4 +24,4 @@ const SidebarRecipeGroup: FC<SidebarRecipeGroupProps> = ({ title, children }) =>
   );
 };
 
-export default SidebarRecipeGroup;
+export default SidebarGroup;

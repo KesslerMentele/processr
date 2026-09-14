@@ -4,9 +4,9 @@ import type { MouseEvent } from "react";
 import SidebarTabs from "./SidebarTabs.tsx";
 import { useProcessrStore } from "../../state/store.ts";
 import DevTools from "./DevTools.tsx";
-import NodesTab from "./NodesTab.tsx";
-import RecipesTab from "./RecipesTab.tsx";
-import ItemsTab from "./ItemsTab.tsx";
+import NodeTab from "./nodeTab/NodeTab.tsx";
+import RecipeTab from "./recipeTab/RecipeTab.tsx";
+import ItemTab from "./itemTab/ItemTab.tsx";
 
 const COLLAPSED_WIDTH = 30;
 const DEFAULT_WIDTH = 231;
@@ -69,9 +69,9 @@ const SidebarContainer: FC = () => {
 
   const getSidebarContent = () => {
     switch (currentTab) {
-    case "Recipe": { return (<RecipesTab/>); }
-    case "Node": { return (<NodesTab/>); }
-    case "Item": { return (<ItemsTab/>); }
+    case "Recipe": { return (<RecipeTab/>); }
+    case "Node": { return (<NodeTab/>); }
+    case "Item": { return (<ItemTab/>); }
     case null: { return null; }
     }
   };

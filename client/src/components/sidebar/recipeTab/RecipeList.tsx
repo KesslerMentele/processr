@@ -1,6 +1,6 @@
-import { useProcessrStore } from "../../state/store.ts";
-import type { NodeTemplateId, Recipe } from "../../models";
-import SidebarRecipeGroup from "./SidebarRecipeGroup.tsx";
+import { useProcessrStore } from "../../../state/store.ts";
+import type { NodeTemplateId, Recipe } from "../../../models";
+import SidebarGroup from "../SidebarGroup.tsx";
 
 const UNCATEGORIZED_LABEL = "Uncategorized";
 
@@ -26,18 +26,18 @@ const RecipeList = () => {
     if (recipes.length === 0) return null;
     const template = nodeTemplatesById.get(machineId);
     return (
-      <SidebarRecipeGroup key={machineId} title={template?.name ?? machineId}>
+      <SidebarGroup key={machineId} title={template?.name ?? machineId}>
         {recipes.map(renderRecipeButton)}
-      </SidebarRecipeGroup>
+      </SidebarGroup>
     );
   };
 
   const renderUncategorizedGroup = () => {
     if (uncategorizedRecipes.length === 0) return null;
     return (
-      <SidebarRecipeGroup title={UNCATEGORIZED_LABEL}>
+      <SidebarGroup title={UNCATEGORIZED_LABEL}>
         {uncategorizedRecipes.map(renderRecipeButton)}
-      </SidebarRecipeGroup>
+      </SidebarGroup>
     );
   };
 
