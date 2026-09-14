@@ -9,6 +9,7 @@
     position: relative;
     overflow: hidden;
     display: flex;
+    scrollbar-gutter: stable;
 }
 
 .sidebar {
@@ -69,6 +70,7 @@
     min-height: 0;
     flex-direction: column;
     margin-top: 6px;
+    margin-left: 4px;
 }
 
 .sidebar-group-header {
@@ -90,6 +92,11 @@
 .sidebar-group-header:hover {
     color: var(--text-primary);
 }
+
+.sidebar-group-header ~ * {
+    margin-left: 14px;
+}
+
 
 /* ── sidebar editor  ────────────────────────────── */
 
@@ -177,10 +184,13 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
+    background: var(--surface-card);
+    border-radius: 4px;
+    padding: 6px;
+    margin: 1px 8px 8px 1px;
 }
 
 .sidebar-form-input {
-    width: 100%;
     padding: 6px 8px;
     background: var(--surface-card);
     border: 1px solid var(--border-default);
@@ -239,6 +249,132 @@
 .sidebar-form-actions .sidebar-btn {
     flex: 1;
     text-align: center;
+}
+
+/* ── sidebar recipe form: resources ────────────────────── */
+
+.sidebar-resource-search-results {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 4px;
+    padding: 4px;
+    background: var(--surface-card);
+    border: 1px solid var(--border-default);
+    border-radius: 4px;
+}
+
+.sidebar-resource-search-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.sidebar-resource-search-name {
+    flex: 1;
+    font-size: 12px;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sidebar-resource-add-btn {
+    width: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    font-size: 11px;
+    margin-top: 0;
+}
+
+.sidebar-resource-columns {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.sidebar-resource-column {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sidebar-resource-column-header {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.sidebar-resource-stack-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 6px;
+    background: var(--surface-card);
+    border: 1px solid var(--border-default);
+    border-radius: 4px;
+}
+
+.sidebar-resource-stack-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sidebar-resource-amount-input {
+    width: 48px;
+    flex: none;
+    padding: 2px 4px;
+}
+
+.sidebar-icon-btn {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.sidebar-icon-btn:hover {
+    color: var(--status-error);
+}
+
+/* ── sidebar recipe form: made in ──────────────────────── */
+
+.sidebar-mode-toggle {
+    display: flex;
+    gap: 6px;
+}
+
+.sidebar-toggle-btn {
+    flex: 1;
+    text-align: center;
+    margin-top: 0;
+    font-size: 12px;
+}
+
+.sidebar-toggle-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+}
+
+.sidebar-form-select-multiple {
+    height: 96px;
+    margin-top: 6px;
 }
 
 /* ── sidebar item list ─────────────────────────────────── */

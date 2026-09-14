@@ -1,21 +1,26 @@
-import { useState, type FC, type ReactNode } from "react";
+import { useState, type FC, type PropsWithChildren, type MouseEvent } from "react";
 import { LuChevronDown, LuChevronRight } from "react-icons/lu";
 
-interface SidebarRecipeGroupProps {
+interface SidebarRecipeGroupProps extends PropsWithChildren{
   title: string;
-  children: ReactNode;
+  onContextMenu?: (e: MouseEvent) => void;
+  startCollapsed?: boolean;
 }
 
-const SidebarGroup: FC<SidebarRecipeGroupProps> = ({ title, children }) => {
-  const [collapsed, setCollapsed] = useState(false);
+const SidebarGroup: FC<SidebarRecipeGroupProps> = ({ title, onContextMenu, startCollapsed, children }) => {
+  const [collapsed, setCollapsed] = useState(startCollapsed ?? false);
 
-  const toggleCollapsed = () => {
+  const toggleCollapsed = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setCollapsed(!collapsed);
   };
 
   return (
     <div className="sidebar-group">
-      <button className="sidebar-group-header" onClick={toggleCollapsed}>
+      <button className="sidebar-group-header" onClick={toggleCollapsed} onContextMenu={(e) => {
+        if (onContextMenu) onContextMenu(e);
+      }}>
         {collapsed ? <LuChevronRight/> : <LuChevronDown/>}
         {title}
       </button>

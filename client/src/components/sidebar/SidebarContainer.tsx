@@ -11,6 +11,7 @@ import ItemTab from "./itemTab/ItemTab.tsx";
 const COLLAPSED_WIDTH = 30;
 const DEFAULT_WIDTH = 231;
 const COLLAPSE_THRESHOLD = 100;
+const MAX_WIDTH = 1000;
 
 const SidebarContainer: FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -43,7 +44,7 @@ const SidebarContainer: FC = () => {
     const startWidth = containerRef.current?.getBoundingClientRect().width ?? currentWidth;
 
     const onMove = (ev: globalThis.MouseEvent) => {
-      const calculatedWidth = Math.min(Math.max(startWidth + (ev.clientX - startX), COLLAPSED_WIDTH), 500);
+      const calculatedWidth = Math.min(Math.max(startWidth + (ev.clientX - startX), COLLAPSED_WIDTH), MAX_WIDTH);
       setSidebarWidth(calculatedWidth);
       if (!sidebarOpenRef.current) {
         setSidebarVisibility(true);
