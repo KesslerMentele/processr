@@ -1,9 +1,10 @@
 import type { NodeTemplateId, ProcessrNode } from "../../models";
 import { useSidebarState } from "../../hooks/useSidebarState.ts";
+import RecipeGroup from "./RecipeGroup.tsx";
 
 
 const RecipePicker = () => {
-  const { packIndex, selectedNodes, setNodeRecipes } = useSidebarState();
+  const { selectedNodes } = useSidebarState();
 
   if (selectedNodes.length === 0) return <div className="sidebar-recipes" />;
 
@@ -13,29 +14,13 @@ const RecipePicker = () => {
     [n.templateId]: [...(acc[n.templateId] ?? []), n],
   }), {});
 
+
+
   return (
     <div className="sidebar-recipes">
-      {Object.entries(groupsObj).map(([templateId, nodes]) => {
-        const template = packIndex.nodeTemplatesById.get(templateId as NodeTemplateId);
-        const recipes = packIndex.recipesByNodeType.get(templateId as NodeTemplateId) ?? [];
-        return (
-          <div key={templateId} className="sidebar-recipe-group">
-            <div className="sidebar-recipe-group-header">{template?.name ?? templateId}</div>
-            {recipes.map(recipe => {
-              const allActive = nodes.every(n => n.recipeId === recipe.id);
-              return (
-                <button
-                  key={recipe.id}
-                  className={`sidebar-recipe-btn ${allActive ? "active" : ""}`}
-                  onClick={() => { setNodeRecipes(nodes.map(n => ({ nodeId: n.id, recipeId: recipe.id }))); }}
-                >
-                  {recipe.name}
-                </button>
-              );
-            })}
-          </div>
-        );
-      })}
+      {Object.entries(groupsObj).map(([templateId, nodes]) =>
+        <RecipeGroup templateId={templateId as NodeTemplateId} nodes={nodes} />)
+      };
     </div>
   );
 };

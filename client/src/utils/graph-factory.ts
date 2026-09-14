@@ -9,6 +9,7 @@ import type {
 import { newGraphId, newProcessrNodeId } from "./id.ts";
 import { portInstanceId } from "../models/ids.ts";
 import { logger } from "./logger.ts";
+import {applyRecipeToPorts} from "./node-utils.ts";
 
 const newViewport = () => ({ x: 0, y: 0, zoom: 1 });
 
@@ -31,7 +32,8 @@ export const createProcessrNode = (
     count: options?.count ?? 1,
     metadata: template.metadata
   };
-  logger.debug(`[createProcessrNode] id=${id} template=${template.id} pos=(${position.x},${position.y})`);
+  applyRecipeToPorts
+  logger.debug(`[createProcessrNode] id=${id} template=${template.id} pos=(${String(position.x)},${String(position.y)})`);
   return node;
 };
 

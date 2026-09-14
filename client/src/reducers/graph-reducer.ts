@@ -1,5 +1,5 @@
 import type {
-  Edge, Graph, GraphAction, GraphChange, ReversibleAction
+  Edge, EdgeId, Graph, GraphAction, GraphChange, ProcessrNodeId, ReversibleAction
 } from "../models";
 import {
   addChangeToHistory,
@@ -8,6 +8,7 @@ import {
   omitNodeEdges,
   pickNodeEdges
 } from "../utils/graph-utils.ts";
+import { logger } from "../utils/logger.ts";
 
 /**
  * Takes an action and applies it to the graph. **Does not** apply the action to the history
@@ -18,6 +19,7 @@ const applyActionToGraph = (graph: Graph, action: GraphAction<ReversibleAction>)
   const { type, payload } = action;
   switch (type) {
     case "ADD_NODE": {
+      logger.debug(`[applyActionToGraph] ADD_NODE: ${JSON.stringify(payload)}`);
       const { node } = payload;
       return { ...graph, nodes: { ...graph.nodes, [node.id]: node } };
     }
@@ -30,15 +32,18 @@ const applyActionToGraph = (graph: Graph, action: GraphAction<ReversibleAction>)
       };
     }
     case "SET_NODE_POSITIONS": {
+      logger.debug(`[applyActionToGraph] SET_NODE_POSITIONS: ${JSON.stringify(payload)}`);
       const { positions } = payload;
       const updates = Object.fromEntries(
         Object.entries(positions)
           .filter(([id]) => Object.hasOwn(graph.nodes, id))
-          .map(([id, position]) => [id, { ...graph.nodes[id], position }])
+          .map(([id, position]) => [id, { ...graph.nodes[id as ProcessrNodeId], position }])
       );
       return { ...graph, nodes: { ...graph.nodes, ...updates } };
     }
     case "SET_NODE_RECIPE": {
+      logger.debug(`[applyActionToGraph] SET_NODE_RECIPE: ${JSON.stringify(payload)}`);
+
       const { nodeId, recipeId, ports, invalidEdges, behavior } = payload;
 
       if (!Object.hasOwn(graph.nodes, nodeId)) return graph;
@@ -56,14 +61,20 @@ const applyActionToGraph = (graph: Graph, action: GraphAction<ReversibleAction>)
       })) };
     }
     case "ADD_EDGE": {
+      logger.debug(`[applyActionToGraph] ADD_EDGE: ${JSON.stringify(payload)}`);
+
       const { edge } = payload;
       return { ...graph, edges: { ...graph.edges, [edge.id]: edge } };
     }
     case "REMOVE_EDGE": {
+      logger.debug(`[applyActionToGraph] REMOVE_EDGE: ${JSON.stringify(payload)}`);
+
       const { edgeId } = payload;
       return { ...graph, edges: omitKey(graph.edges, edgeId) };
     }
     case "SET_MULTI_NODE_RECIPES": {
+      logger.debug(`[applyActionToGraph] SET_MULTI_NODE_RECIPES: ${JSON.stringify(payload)}`);
+
       const { updates, behavior } = payload;
       return updates.reduce((g, { nodeId, recipeId, ports, invalidEdges }) => {
         if (!Object.hasOwn(g.nodes, nodeId)) return g;
@@ -78,13 +89,15 @@ const applyActionToGraph = (graph: Graph, action: GraphAction<ReversibleAction>)
       }, graph);
     }
     case "STACK_NODES": {
+      logger.debug(`[applyActionToGraph] STACK_NODES: ${JSON.stringify(payload)}`);
+
       const { survivorId, removedIds, newCount } = payload;
       const removedSet = new Set<string>(removedIds);
 
       const filteredNodes = Object.fromEntries(Object.entries(graph.nodes).filter(([id]) => !removedSet.has(id)));
       const nodes = { ...filteredNodes, [survivorId]: { ...filteredNodes[survivorId], count: newCount } };
 
-      const edges = Object.entries(graph.edges).reduce<Record<string, typeof graph.edges[string]>>((acc, [id, edge]) => {
+      const edges = Object.entries(graph.edges).reduce<Record<EdgeId, typeof graph.edges[EdgeId]>>((acc, [id, edge]) => {
         const srcRemoved = removedSet.has(edge.sourceNodeId);
         const tgtRemoved = removedSet.has(edge.targetNodeId);
         if (!srcRemoved && !tgtRemoved) { return { ...acc, [id]: edge }; }
@@ -109,6 +122,8 @@ const applyActionToGraph = (graph: Graph, action: GraphAction<ReversibleAction>)
       return { ...graph, nodes, edges };
     }
     case "UNSTACK_NODE": {
+      logger.debug(`[applyActionToGraph] UNSTACK_NODE: ${JSON.stringify(payload)}`);
+
       const { nodeId, newNodes, newEdges } = payload;
       const nodes = {
         ...graph.nodes,
@@ -118,6 +133,8 @@ const applyActionToGraph = (graph: Graph, action: GraphAction<ReversibleAction>)
       return { ...graph, nodes, edges: { ...graph.edges, ...newEdges } };
     }
     case "SET_STACK_SIZE": {
+      logger.debug(`[applyActionToGraph] SET_STACK_SIZE: ${JSON.stringify(payload)}`);
+
       const { nodeId, newStackSize } = payload;
       return { ...graph, nodes: { ...omitKey(graph.nodes, nodeId), [nodeId]:{ ...graph.nodes[nodeId], count: newStackSize } } };
     }
@@ -132,8 +149,14 @@ const applyActionToGraph = (graph: Graph, action: GraphAction<ReversibleAction>)
 const undoAction = (graph: Graph, change: GraphChange): Graph => {
   const { type, action } = change;
   switch (type) {
-    case "ADD_NODE": return { ...graph, nodes: omitKey(graph.nodes, action.payload.node.id) };
+    case "ADD_NODE": {
+      logger.debug(`[undoAction] ADD_NODE: ${JSON.stringify(action)}`);
+
+      return { ...graph, nodes: omitKey(graph.nodes, action.payload.node.id) };
+    }
     case "REMOVE_NODE": {
+      logger.debug(`[undoAction] REMOVE_NODE: ${JSON.stringify(action)}`);
+
       const { removedNode, removedEdges } = change.payload;
 
       return {
@@ -143,17 +166,21 @@ const undoAction = (graph: Graph, change: GraphChange): Graph => {
       };
     }
     case "SET_NODE_POSITIONS": {
+      logger.debug(`[undoAction] SET_NODE_POSITIONS: ${JSON.stringify(action)}`);
+
       const { previousPositions } =change.payload;
 
       const restores = Object.fromEntries(
         Object.entries(previousPositions)
           .filter(([id]) => Object.hasOwn(graph.nodes, id))
-          .map(([id, position]) => [id, { ...graph.nodes[id], position }])
+          .map(([id, position]) => [id, { ...graph.nodes[id as ProcessrNodeId], position }])
       );
 
       return { ...graph, nodes: { ...graph.nodes, ...restores } };
     }
     case "SET_NODE_RECIPE": {
+      logger.debug(`[undoAction] SET_NODE_RECIPE: ${JSON.stringify(action)}`);
+
       const { previousRecipeId, previousPorts, changedEdges } = change.payload;
       const { nodeId } = action.payload;
 
@@ -162,24 +189,32 @@ const undoAction = (graph: Graph, change: GraphChange): Graph => {
       return { ...restored, edges: { ...restored.edges, ...changedEdges } };
     }
     case "ADD_EDGE": {
+      logger.debug(`[undoAction] ADD_EDGE: ${JSON.stringify(action)}`);
+
       const { edge } = action.payload;
 
       return { ...graph, edges: omitKey(graph.edges, edge.id) };
     }
     case "REMOVE_EDGE": {
+      logger.debug(`[undoAction] REMOVE_EDGE: ${JSON.stringify(action)}`);
+
       const { removedEdge } = change.payload;
 
       return { ...graph, edges: { ...graph.edges, [removedEdge.id]: removedEdge } };
     }
     case "SET_MULTI_NODE_RECIPES": {
+      logger.debug(`[undoAction] SET_MULTI_NODE_RECIPES: ${JSON.stringify(action)}`);
+
       const { previousRecipes, previousPorts, changedEdges } = change.payload;
       const restoredNodes = Object.entries(previousRecipes).reduce((g, [nodeId, recipeId]) => {
         if (!Object.hasOwn(g.nodes, nodeId)) return g;
-        return applySingleNodeUpdate(g, nodeId, { recipeId, ports: previousPorts[nodeId] });
+        return applySingleNodeUpdate(g, nodeId as ProcessrNodeId, { recipeId, ports: previousPorts[nodeId as ProcessrNodeId] });
       }, graph);
       return { ...restoredNodes, edges: { ...restoredNodes.edges, ...changedEdges } };
     }
     case "STACK_NODES": {
+      logger.debug(`[undoAction] STACK_NODES: ${JSON.stringify(action)}`);
+
       const { originalSurvivorCount, removedNodes, edgeSnapshot } = change.payload;
       const { survivorId } = action.payload;
       const nodes = {
@@ -190,6 +225,8 @@ const undoAction = (graph: Graph, change: GraphChange): Graph => {
       return { ...graph, nodes, edges: edgeSnapshot };
     }
     case "UNSTACK_NODE": {
+      logger.debug(`[undoAction] UNSTACK_NODE: ${JSON.stringify(action)}`);
+
       const { newNodeIds, newEdgeIds, originalCount } = change.payload;
       const { nodeId } = action.payload;
       const excludeSet = new Set<string>(newNodeIds);
@@ -198,11 +235,14 @@ const undoAction = (graph: Graph, change: GraphChange): Graph => {
       );
       const nodes = { ...filteredNodes, [nodeId]: { ...filteredNodes[nodeId], count: originalCount } };
       const edges = Object.fromEntries(
-        Object.entries(graph.edges).filter(([id]) => !newEdgeIds.includes(id))
+        Object.entries(graph.edges).filter(([id]) => !newEdgeIds.includes(id as EdgeId))
       );
       return { ...graph, nodes, edges };
     }
-    case "SET_STACK_SIZE": return applySingleNodeUpdate(graph, action.payload.nodeId, { count: change.payload.previousStackSize });
+    case "SET_STACK_SIZE": {
+      logger.debug(`[undoAction] SET_STACK_SIZE: ${JSON.stringify(action)}`);
+      return applySingleNodeUpdate(graph, action.payload.nodeId, { count: change.payload.previousStackSize });
+    }
   }
 };
 
@@ -230,7 +270,7 @@ const createGraphChangeForHistory = (graph: Graph, action:GraphAction<Reversible
       const previousPositions = Object.fromEntries(
         Object.entries(positions)
         .filter(([id]) => Object.hasOwn(graph.nodes, id))
-        .map(([id]) => [id, graph.nodes[id].position])
+        .map(([id]) => [id, graph.nodes[id as ProcessrNodeId].position])
       );
 
       return { type, action, payload: { previousPositions } };
@@ -266,7 +306,7 @@ const createGraphChangeForHistory = (graph: Graph, action:GraphAction<Reversible
       const { newNodes, newEdges, nodeId } = action.payload;
       return { type, action, payload: {
         newNodeIds: newNodes.map(n => n.id),
-        newEdgeIds: Object.keys(newEdges),
+        newEdgeIds: Object.keys(newEdges) as EdgeId[],
         originalCount: graph.nodes[nodeId].count,
       } };
     }

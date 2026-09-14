@@ -38,13 +38,13 @@ export type ActionType = ReversibleAction | TransientAction;
 interface GraphActionPayloadMap {
   [ReversibleAction.AddNode]: { readonly node: ProcessrNode };
   [ReversibleAction.RemoveNode]: { readonly nodeId: ProcessrNodeId };
-  [ReversibleAction.SetNodePositions]: { readonly positions: Readonly<Record<string, Position>> };
-  [ReversibleAction.SetNodeRecipe]: { readonly nodeId: ProcessrNodeId; readonly recipeId: RecipeId | null; readonly ports: readonly PortInstance[]; readonly invalidEdges: Readonly<Record<string, Edge>>; readonly behavior: 'delete' | 'highlight' };
-  [ReversibleAction.SetMultiNodeRecipes]: { readonly updates: readonly { nodeId: ProcessrNodeId; recipeId: RecipeId | null; ports: readonly PortInstance[]; invalidEdges: Readonly<Record<string, Edge>> }[]; readonly behavior: 'delete' | 'highlight' };
+  [ReversibleAction.SetNodePositions]: { readonly positions: Readonly<Record<ProcessrNodeId, Position>> };
+  [ReversibleAction.SetNodeRecipe]: { readonly nodeId: ProcessrNodeId; readonly recipeId: RecipeId | null; readonly ports: readonly PortInstance[]; readonly invalidEdges: Readonly<Record<EdgeId, Edge>>; readonly behavior: 'delete' | 'highlight' };
+  [ReversibleAction.SetMultiNodeRecipes]: { readonly updates: readonly { nodeId: ProcessrNodeId; recipeId: RecipeId | null; ports: readonly PortInstance[]; invalidEdges: Readonly<Record<EdgeId, Edge>> }[]; readonly behavior: 'delete' | 'highlight' };
   [ReversibleAction.AddEdge]: { readonly edge: Edge };
   [ReversibleAction.RemoveEdge]: { readonly edgeId: EdgeId };
   [ReversibleAction.StackNodes]: { readonly survivorId: ProcessrNodeId; readonly removedIds: readonly ProcessrNodeId[]; readonly newCount: number };
-  [ReversibleAction.UnstackNode]: { readonly nodeId: ProcessrNodeId; readonly newNodes: readonly ProcessrNode[]; readonly newEdges: Readonly<Record<string, Edge>> };
+  [ReversibleAction.UnstackNode]: { readonly nodeId: ProcessrNodeId; readonly newNodes: readonly ProcessrNode[]; readonly newEdges: Readonly<Record<EdgeId, Edge>> };
   [ReversibleAction.SetStackSize]: {readonly nodeId: ProcessrNodeId, readonly newStackSize: number};
   [TransientAction.SetViewport]: { readonly viewport: Viewport };
   [TransientAction.Undo]: undefined;
@@ -59,14 +59,14 @@ export type GraphAction<T extends ActionType = ActionType> = {
 
 interface GraphChangePayloadMap {
   [ReversibleAction.AddNode]: undefined;
-  [ReversibleAction.RemoveNode]: { readonly removedNode: ProcessrNode; readonly removedEdges: Readonly<Record<string, Edge>> };
-  [ReversibleAction.SetNodePositions]: { readonly previousPositions: Readonly<Record<string, Position>> };
-  [ReversibleAction.SetNodeRecipe]: { readonly previousRecipeId: RecipeId | null; readonly previousPorts: readonly PortInstance[]; readonly changedEdges: Readonly<Record<string, Edge>> };
-  [ReversibleAction.SetMultiNodeRecipes]: { readonly previousRecipes: Readonly<Record<string, RecipeId | null>>; readonly previousPorts: Readonly<Record<string, readonly PortInstance[]>>; readonly changedEdges: Readonly<Record<string, Edge>> };
+  [ReversibleAction.RemoveNode]: { readonly removedNode: ProcessrNode; readonly removedEdges: Readonly<Record<EdgeId, Edge>> };
+  [ReversibleAction.SetNodePositions]: { readonly previousPositions: Readonly<Record<ProcessrNodeId, Position>> };
+  [ReversibleAction.SetNodeRecipe]: { readonly previousRecipeId: RecipeId | null; readonly previousPorts: readonly PortInstance[]; readonly changedEdges: Readonly<Record<EdgeId, Edge>> };
+  [ReversibleAction.SetMultiNodeRecipes]: { readonly previousRecipes: Readonly<Record<ProcessrNodeId, RecipeId | null>>; readonly previousPorts: Readonly<Record<ProcessrNodeId, readonly PortInstance[]>>; readonly changedEdges: Readonly<Record<EdgeId, Edge>> };
   [ReversibleAction.AddEdge]: undefined;
   [ReversibleAction.RemoveEdge]: { readonly removedEdge: Edge };
-  [ReversibleAction.StackNodes]: { readonly originalSurvivorCount: number; readonly removedNodes: readonly ProcessrNode[]; readonly edgeSnapshot: Readonly<Record<string, Edge>> };
-  [ReversibleAction.UnstackNode]: { readonly newNodeIds: readonly ProcessrNodeId[]; readonly newEdgeIds: readonly string[]; readonly originalCount: number };
+  [ReversibleAction.StackNodes]: { readonly originalSurvivorCount: number; readonly removedNodes: readonly ProcessrNode[]; readonly edgeSnapshot: Readonly<Record<EdgeId, Edge>> };
+  [ReversibleAction.UnstackNode]: { readonly newNodeIds: readonly ProcessrNodeId[]; readonly newEdgeIds: readonly EdgeId[]; readonly originalCount: number };
   [ReversibleAction.SetStackSize]: {readonly previousStackSize: number}
 }
 

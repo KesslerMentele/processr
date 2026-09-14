@@ -31,7 +31,6 @@ export const applyRecipeToPorts = (node: ProcessrNode, recipeId: RecipeId | null
   const stackByPortId = new Map(
     [...inputPorts.map((p, i) => [p.id, recipe.inputs[i]] as const),
      ...outputPorts.map((p, i) => [p.id, recipe.outputs[i]] as const)]
-      .filter(([, stack]) => stack !== undefined)
   );
   return node.ports.map(p => {
     const stack = stackByPortId.get(p.id);
