@@ -6,6 +6,14 @@ interface ErrorProps {
   data: ProcessrNodeData;
 }
 
+
+/**
+ * This node should be rendered when a node exists in the graph, but cannot be found in the atlas.
+ *
+ * @param selected
+ * @param data
+ * @constructor
+ */
 const ProcessrNodeError: FC<ErrorProps> = ({ selected, data }) => {
   return (
     <div className={`processr-node processr-node-error ${selected ? 'selected' : ''}`}>

@@ -3,24 +3,42 @@ import { PortDirection, type PortInstance, type ProcessrNode } from "../models";
 import type { PortInstanceId } from "../models/ids.ts";
 import { logger } from "./logger.ts";
 
+/**
+ * An interface containing an itemId and a rate in items/second.
+ */
 interface RateStats {
   itemId: ItemId;
   rate: number;
 }
 
+
+/**
+ * A map connecting a PortInstance to an item and its rate of production/consumption per second.
+ */
 type PortStats = Record<PortInstanceId, RateStats>
 type ItemStats = Record<ItemId, number>
 
+/**
+ * An interface containing the stats for all input and output ports for a given ProcessrNode instance.
+ */
 interface InstanceRateStats {
   input: PortStats,
   output: PortStats
 }
 
+/**
+ * An interface containing the sum of all floating (not connected to an edge) input/output rates, in items per second
+ */
 interface GraphRateStats {
   input: ItemStats,
   output: ItemStats
 }
 
+/**
+ *  A sort function to organize ports in the order they will be displayed.
+ * @param a
+ * @param b
+ */
 const byPosition = (a: PortInstance, b: PortInstance) => (a.template.position ?? 0.5) - (b.template.position ?? 0.5);
 
 export const applyRecipeToPorts = (node: ProcessrNode, recipeId: RecipeId | null, atlas: AtlasIndex): readonly PortInstance[] => {
@@ -31,7 +49,6 @@ export const applyRecipeToPorts = (node: ProcessrNode, recipeId: RecipeId | null
   const stackByPortId = new Map(
     [...inputPorts.map((p, i) => [p.id, recipe.inputs[i]] as const),
      ...outputPorts.map((p, i) => [p.id, recipe.outputs[i]] as const)]
-      .filter(([, stack]) => stack !== undefined)
   );
   return node.ports.map(p => {
     const stack = stackByPortId.get(p.id);
@@ -39,9 +56,17 @@ export const applyRecipeToPorts = (node: ProcessrNode, recipeId: RecipeId | null
   });
 };
 
+/**
+ * Returns the input ports of a given ProcessrNode component, sorted by position.
+ * @param instance
+ */
 export const getInputPorts = (instance: ProcessrNode): PortInstance[] =>
    [...instance.ports.filter(p => p.template.direction === PortDirection.Input)].sort(byPosition);
 
+/**
+ * Returns the output ports of a given ProcessrNode component, sorted by position.
+ * @param instance
+ */
 export const getOutputPorts = (instance: ProcessrNode): PortInstance[] =>
   [...instance.ports.filter(p => p.template.direction === PortDirection.Output)].sort(byPosition);
 
@@ -51,9 +76,6 @@ const constructRate = (ports: PortInstance[], speed: number): PortStats =>
     p.stack ? [[p.id, { itemId: p.stack.itemId, rate: p.stack.amount * speed }]] : []
   )) as PortStats;
 
-/*
-All ratios are calculated in items/second.
- */
 export const getRates = (atlas: AtlasIndex, instance: ProcessrNode): InstanceRateStats | undefined => {
   const nodeTemplate = atlas.nodeTemplatesById.get(instance.templateId);
 
@@ -75,6 +97,17 @@ export const getRates = (atlas: AtlasIndex, instance: ProcessrNode): InstanceRat
   return { output, input };
 };
 
+/**
+ *  Calculates the item rates of all ports that have no connected edges on a given node instance.
+ *
+ *  **!!**
+ *  This does not account for the actual production/consumption of items at the other end of the connections,
+ *  solely ports with *no* connections
+ *  **!!**
+ * @param atlas - The atlas being used for the graph
+ * @param graph - The graph being displayed
+ * @param instance - The node being processed
+ */
 export const getFloatingRates = (atlas:AtlasIndex, graph:Graph, instance: ProcessrNode): InstanceRateStats | undefined => {
     const floatingInputs = new Set(getFloatingInputPorts(graph.edges, graph.nodes).map(p => p.id));
     const floatingOutputs = new Set(getFloatingOutputPorts(graph.edges, graph.nodes).map(p => p.id));
@@ -89,6 +122,11 @@ export const getFloatingRates = (atlas:AtlasIndex, graph:Graph, instance: Proces
     };
 };
 
+/**
+ * Merges a given ports values into a passed itemStats, if applicable.
+ * @param outerAcc - The ItemStats to add to.
+ * @param portStats - The Port being checked.
+ */
 const mergeItemRates = (outerAcc:ItemStats, portStats:PortStats): ItemStats => {
   return Object.values(portStats).reduce((innerAcc, { itemId, rate }) => {
     return {
@@ -98,11 +136,24 @@ const mergeItemRates = (outerAcc:ItemStats, portStats:PortStats): ItemStats => {
   },outerAcc);
 };
 
+/**
+ *  Calculates the item rates of all ports that have no connected edges on a given graph.
+ *
+ *  **!!**
+ *  This does not account for the actual production/consumption of items at the other end of the connections,
+ *  solely ports with *no* connections
+ *  **!!**
+ *
+ * @param atlas - The atlas being used for the graph
+ * @param graph - The graph being displayed
+ */
 export const getAllFloatingRates = (atlas:AtlasIndex, graph:Graph): GraphRateStats => {
   const nodeCount = Object.keys(graph.nodes).length;
   logger.debug(`[getAllFloatingRates] computing over ${String(nodeCount)} nodes`);
   const stats = Object.entries(graph.nodes).flatMap(([,node]) => getFloatingRates(atlas, graph, node) ?? []);
-  const result = stats.reduce((acc,cur) => ({
+
+  // Merge every nodes stats into a full graph stats object.
+  const result: GraphRateStats = stats.reduce((acc:Readonly<GraphRateStats>, cur) => ({
     input: mergeItemRates(acc.input, cur.input),
     output: mergeItemRates(acc.output, cur.output),
   }), { input:{},output:{} });
