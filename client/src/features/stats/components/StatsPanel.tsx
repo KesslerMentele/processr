@@ -5,7 +5,7 @@ import useStats, { type ResolvedItemRate } from "../useStats.ts";
 
 const RateRow: FC<ResolvedItemRate> = ({ name, rate }) => (
   <div className="stats-row">
-    <span className="stats-item-name">{name}</span>
+    <span className="stats-item-name">{name + ": "}</span>
     <span className="stats-item-rate">{rate.toFixed(2)}/s</span>
   </div>
 );

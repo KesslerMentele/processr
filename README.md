@@ -9,10 +9,6 @@ A game-agnostic factory production planner. Build and visualize production graph
 - **ESLint 9** — functional-style linting (no `let`, no classes, no loops)
 
 
-## How it works
-
-TBD
-
 ## Data model
 
 Two layers separate static game definitions from mutable user state.
@@ -35,3 +31,11 @@ Two layers separate static game definitions from mutable user state.
 - Multi-document support
 - Community data packs for popular factory games
 - Layout / blueprint designer
+
+
+## TODO
+- [ ] Make power consumption show in the stats window
+- [ ] Apply modifiers to detailed mode
+- [ ] Detailed mode shows per second I/O on each port
+- [ ] Add Power inputs on nodes
+- [ ] Organize Machines by tag

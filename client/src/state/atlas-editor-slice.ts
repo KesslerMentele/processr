@@ -8,7 +8,7 @@ import { EditorState } from "../models";
 
 
 
-export const createAtlasSlice: StateCreator<AtlasEditorSlice> = (set): AtlasEditorSlice => {
+export const createAtlasEditorSlice: StateCreator<AtlasEditorSlice> = (set): AtlasEditorSlice => {
   return {
     aiMode: false,
     editorCollapsed: false,

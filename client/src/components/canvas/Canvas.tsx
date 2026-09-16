@@ -1,4 +1,4 @@
-import { type FC, useCallback, useEffect } from "react";
+import { type FC, type MouseEvent, useCallback, useEffect } from "react";
 import {
   Background, Controls,
   type Node as RFNode,
@@ -13,11 +13,13 @@ import { type ProcessrNodeData, processrNodeId } from "../../models";
 import ProcessrNodeComponent from "../node/ProcessrNodeComponent.tsx";
 import { useShortcut } from "react-keyhub";
 import CanvasToolbar from "./CanvasToolbar.tsx";
-import AtlasEditor from "../../features/atlas/components/AtlasEditor.tsx";
+import AtlasEditor from "../../features/atlas-editor/components/AtlasEditor.tsx";
 import { useCanvasHandlers } from "../../hooks/useCanvasHandlers.ts";
 import { useCanvasState } from "../../hooks/useCanvasState.ts";
 import "./canvas.css";
 import StatsPanel from "../../features/stats/components/StatsPanel.tsx";
+import { useContextMenu } from "../../hooks/useContextMenu.ts";
+import { logger } from "../../utils/logger.ts";
 
 const nodeTypes = { processor: ProcessrNodeComponent };
 const initialNodes: RFNode<ProcessrNodeData>[] = [];
@@ -25,15 +27,11 @@ const initialEdges: RFEdge[] = [];
 
 const Canvas: FC = () => {
 
-  const {
-    graph, selectedNodeIds, toolMode,
-    snapToGrid, edgeType, packEditorOpen,
-    updateNodePositions, undo, redo
-  } = useCanvasState();
-
+  const { graph, selectedNodeIds, toolMode, snapToGrid, edgeType, packEditorOpen, updateNodePositions, undo, redo } = useCanvasState();
 
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState(initialNodes);
   const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const { toggleContextMenu } = useContextMenu();
 
   /* Handle all settled changes.
   A settled change is a change to the position of a node,
@@ -55,12 +53,12 @@ const Canvas: FC = () => {
   }, [onNodesChange, updateNodePositions]);
 
 
-  // Effect to reset ReactFlow Nodes array when graph.nodes or selection changes.
+  // Forces ReactFlow's nodes to match our store every time either changes.
   useEffect(() => {
     const idSet = new Set(selectedNodeIds);
     setRfNodes(Object.values(graph.nodes).map(n => (
-      { ...toRFNode(n), selected: idSet.has(n.id) })
-    ));
+      { ...toRFNode(n), selected: idSet.has(n.id) }
+    )));
   }, [setRfNodes, graph.nodes, selectedNodeIds]);
 
 
@@ -77,7 +75,22 @@ const Canvas: FC = () => {
   useShortcut('redo', redo);
 
   return (
-    <div className="canvas-container" >
+    <div
+      className="canvas-container"
+      onContextMenu={(e: MouseEvent) => {
+        e.preventDefault();
+        logger.info('[Canvas] Context Menu toggled');
+        toggleContextMenu({
+          x: e.clientX,
+          y: e.clientY,
+          data: { target: "Canvas" },
+          items: [
+            { label: 'Add Node', onClick: () => { logger.debug('[Canvas] Add Node clicked — not wired yet'); } },
+          ],
+        });
+      }}
+    >
+
       {packEditorOpen && <AtlasEditor />}
       <ReactFlow
         nodes={rfNodes}
@@ -93,6 +106,8 @@ const Canvas: FC = () => {
         panOnDrag={toolMode === 'select' ? [1, 2] : true}
         multiSelectionKeyCode="Shift"
         selectionMode={SelectionMode.Partial}
+        nodeClickDistance={10}
+        deleteKeyCode={['Backspace', 'Delete']}
         {...useCanvasHandlers()}
       >
         <Background/>
