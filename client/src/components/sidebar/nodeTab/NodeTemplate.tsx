@@ -9,7 +9,7 @@ import { useModal } from "../../../hooks/useModal.ts";
 import { useContextMenu } from "../../../hooks/useContextMenu.ts";
 
 
-export const DraggableNodeTemplate: FC<{template:NodeTemplate}> = ({ template }) => {
+export const DraggableNodeTemplate: FC<{template: NodeTemplate; onEdit: () => void}> = ({ template, onEdit }) => {
   const draggableRef = useRef<HTMLDivElement>(null);
   const addNode = useProcessrStore.use.addNode();
   const setSelectedNodeId = useProcessrStore.use.setSelectedNodeIds();
@@ -71,7 +71,23 @@ export const DraggableNodeTemplate: FC<{template:NodeTemplate}> = ({ template })
 
   return (
     <>
-      <div ref={draggableRef} className="sidebar-btn node-template" style={{ opacity: ghostPos ? 0 : 1 }}>
+      <div
+        ref={draggableRef}
+        className="sidebar-btn node-template"
+        style={{ opacity: ghostPos ? 0 : 1 }}
+        onContextMenu={(e: MouseEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleContextMenu({
+            x: e.clientX,
+            y: e.clientY,
+            data: { target: "Sidebar" },
+            items: [
+              { label: 'Edit Node', onClick: onEdit },
+            ],
+          });
+        }}
+      >
         {template.name}
       </div>
       {ghostPos && createPortal(

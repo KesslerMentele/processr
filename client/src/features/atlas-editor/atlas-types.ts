@@ -33,6 +33,10 @@ export type AtlasParseResult = AtlasParseSuccess | AtlasParseError;
 
 // ---- Mutation Types ----
 
+export type FormMode<Id, Input> =
+  | { readonly mode: "add"; readonly initialValues?: Partial<Input> }
+  | { readonly mode: "edit"; readonly id: Id; readonly initialValues: Input };
+
 export interface AddItemInput {
   readonly name: string;
   readonly categoryId?: CategoryId;

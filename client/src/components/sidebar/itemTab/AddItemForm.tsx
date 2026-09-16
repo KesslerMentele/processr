@@ -1,63 +1,61 @@
-import { useRef, useState, type ChangeEvent, type FC, type SubmitEvent } from "react";
-import { FaCirclePlus } from "react-icons/fa6";
+import { useState, type FC, type SubmitEvent } from "react";
 import { useProcessrStore } from "../../../state/store.ts";
-import { addItem } from "../../../features/atlas-editor/atlas-mutations.ts";
-import { ItemForm, type CategoryId } from "../../../models";
+import { addItem, updateItem } from "../../../features/atlas-editor/atlas-mutations.ts";
+import { ItemForm, type CategoryId, type ItemId } from "../../../models";
 import SidebarFormGroup from "../SidebarFormGroup.tsx";
+import IconPicker from "../IconPicker.tsx";
+import type { AddItemInput, FormMode } from "../../../features/atlas-editor/atlas-types.ts";
 import { getColorSync } from "colorthief";
 // import { logger } from "../../utils/logger.ts";
 
 
 interface AddItemFormProps {
   onClose: () => void;
+  formMode: FormMode<ItemId, AddItemInput>;
 }
 
-const AddItemForm: FC<AddItemFormProps> = ({ onClose }) => {
+const AddItemForm: FC<AddItemFormProps> = ({ onClose, formMode }) => {
   const atlasIndex = useProcessrStore.use.atlasIndex();
   const loadAtlas = useProcessrStore.use.loadAtlas();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const initialValues = formMode.initialValues;
 
-  const [name, setName] = useState("");
-  const [icon, setIcon] = useState("");
-  const [color, setColor] = useState("");
-  const [description, setDescription] = useState("");
-  const [categoryId, setCategoryId] = useState<CategoryId | "">("");
-  const [form, setForm] = useState<ItemForm | "">("");
+  const [name, setName] = useState(initialValues?.name ?? "");
+  const [icon, setIcon] = useState(initialValues?.icon ?? "");
+  const [color, setColor] = useState(initialValues?.color ?? "");
+  const [description, setDescription] = useState(initialValues?.description ?? "");
+  const [categoryId, setCategoryId] = useState<CategoryId | "">(initialValues?.categoryId ?? "");
+  const [form, setForm] = useState<ItemForm | "">(initialValues?.form ?? "");
 
   const handleSubmit = (e: SubmitEvent) => {
     e.preventDefault();
     if (name.trim() === "") return;
 
-    const newAtlas = addItem(atlasIndex.atlas, {
+    const input: AddItemInput = {
       name: name.trim(),
       ...(icon.trim() !== "" && { icon: icon.trim() }),
       ...(color.trim() !== "" && { color: color.trim() }),
       ...(description.trim() !== "" && { description: description.trim() }),
       ...(categoryId !== "" && { categoryId }),
       ...(form !== "" && { form }),
-    });
+    };
+    const newAtlas = formMode.mode === "edit"
+      ? updateItem(atlasIndex.atlas, formMode.id, input)
+      : addItem(atlasIndex.atlas, input);
     loadAtlas(newAtlas);
     onClose();
   };
 
-  const handleIconFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
+  const handleIconChange = (dataUrl: string) => {
+    setIcon(dataUrl);
+    const image = new Image();
     // eslint-disable-next-line functional/immutable-data
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        setIcon(reader.result);
-        const image = new Image();
-        // eslint-disable-next-line functional/immutable-data
-        image.src = reader.result;
-        const color = getColorSync(image);
-        if (color) {
-          setColor(color.toString());
-        }
+    image.src = dataUrl;
+    image.addEventListener("load", () => {
+      const color = getColorSync(image);
+      if (color) {
+        setColor(color.toString());
       }
-    };
-    reader.readAsDataURL(file);
+    });
   };
 
   const renderCategoryOptions = () => (
@@ -79,7 +77,7 @@ const AddItemForm: FC<AddItemFormProps> = ({ onClose }) => {
   );
 
   return (
-    <SidebarFormGroup title="New Item" onSubmit={handleSubmit}>
+    <SidebarFormGroup title={formMode.mode === "edit" ? "Edit Item" : "New Item"} onSubmit={handleSubmit}>
       <input
         className="sidebar-form-input"
         type="text"
@@ -89,28 +87,11 @@ const AddItemForm: FC<AddItemFormProps> = ({ onClose }) => {
         autoFocus
       />
       <div className="sidebar-form-icon-row">
-        {icon !== "" &&
-            <img src={icon} alt="" className="sidebar-form-icon-preview" />
-        }
-        <button
-          type="button"
-          className="sidebar-icon-picker-btn"
-          onClick={() => { fileInputRef.current?.click(); }}
-          title="Choose icon image"
-        >
-          <FaCirclePlus/>
-        </button>
-        <input
-          ref={fileInputRef}
-          className="sidebar-file-input-hidden"
-          type="file"
-          accept="image/*"
-          onChange={handleIconFileChange}
-        />
+        <IconPicker icon={icon} onIconChange={handleIconChange} />
         <input
           className="sidebar-form-input"
           type="text"
-          placeholder="Color"
+          placeholder="Item Color"
           value={color}
           onChange={(e) => { setColor(e.target.value); }}
         />
@@ -138,7 +119,7 @@ const AddItemForm: FC<AddItemFormProps> = ({ onClose }) => {
         {renderFormOptions()}
       </select>
       <div className="sidebar-form-actions">
-        <button type="submit" className="sidebar-btn">Add</button>
+        <button type="submit" className="sidebar-btn">{formMode.mode === "edit" ? "Save" : "Add"}</button>
         <button type="button" className="sidebar-btn" onClick={onClose}>Cancel</button>
       </div>
     </SidebarFormGroup>

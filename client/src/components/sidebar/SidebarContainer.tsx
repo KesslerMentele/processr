@@ -10,7 +10,7 @@ import ItemTab from "./itemTab/ItemTab.tsx";
 
 const COLLAPSED_WIDTH = 30;
 const DEFAULT_WIDTH = 231;
-const COLLAPSE_THRESHOLD = 100;
+const COLLAPSE_THRESHOLD = 140;
 const MAX_WIDTH = 1000;
 
 const SidebarContainer: FC = () => {

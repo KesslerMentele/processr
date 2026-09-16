@@ -39,6 +39,7 @@ Two layers separate static game definitions from mutable user state.
 - [ ] Detailed mode shows per second I/O on each port
 - [ ] Add Power inputs on nodes
 - [ ] Organize Machines by tag
+- [ ] Make the stats panel toggleable
 - [ ] Make the statistics show over/underflow values
   - This means if a machine produces 2/s , and the sum of all connected edges leads to a consumption of 1/s, then add the difference to the total output of the system.
 - [ ] Add option to highlight bottlenecks/backups.

@@ -1,62 +1,47 @@
-import { useMemo, useRef, useState, type ChangeEvent, type FC, type SubmitEvent } from "react";
-import { FaCirclePlus } from "react-icons/fa6";
-import { LuX } from "react-icons/lu";
+import { useMemo, useState, type FC, type SubmitEvent } from "react";
+import { LuChevronDown, LuChevronUp, LuX } from "react-icons/lu";
 import { useProcessrStore } from "../../../state/store.ts";
-import { addRecipe } from "../../../features/atlas-editor/atlas-mutations.ts";
-import { TimeUnit, type CategoryId, type ItemId, type NodeTemplateId, type RecipeItemStack } from "../../../models";
+import { addRecipe, updateRecipe } from "../../../features/atlas-editor/atlas-mutations.ts";
+import {
+  TimeUnit, type CategoryId, type ItemId, type NodeTemplateId, type RecipeId, type RecipeItemStack,
+  type Atlas
+} from "../../../models";
 import SidebarFormGroup from "../SidebarFormGroup.tsx";
 import SidebarGroup from "../SidebarGroup.tsx";
-import type { AddRecipeInput } from "../../../features/atlas-editor/atlas-types.ts";
+import IconPicker from "../IconPicker.tsx";
+import type { AddRecipeInput, FormMode } from "../../../features/atlas-editor/atlas-types.ts";
+import ResourceStackRow from "./ResourceStackRow.tsx";
+import ResourceSearchRow from "./ResourceSearchRow.tsx";
 
 
 interface AddRecipeFormProps {
   onClose: () => void;
+  formMode: FormMode<RecipeId, AddRecipeInput>;
 }
 
 type ResourceSetter = (updater: (prev: readonly RecipeItemStack[]) => readonly RecipeItemStack[]) => void;
 type MadeInMode = "name" | "tag";
 
-interface ResourceStackRowProps {
-  itemName: string;
-  amount: number;
-  onAmountChange: (amount: number) => void;
-  onRemove: () => void;
-}
 
-const ResourceStackRow: FC<ResourceStackRowProps> = ({ itemName, amount, onAmountChange, onRemove }) => (
-  <div className="sidebar-resource-stack-row">
-    <span className="sidebar-resource-stack-name">{itemName}</span>
-    <input
-      className="sidebar-form-input sidebar-resource-amount-input"
-      type="number"
-      min={0}
-      value={amount}
-      onChange={(e) => { onAmountChange(Number(e.target.value)); }}
-    />
-    <button type="button" className="sidebar-icon-btn" onClick={onRemove} title="Remove">
-      <LuX/>
-    </button>
-  </div>
-);
 
-const AddRecipeForm: FC<AddRecipeFormProps> = ({ onClose }) => {
+const AddRecipeForm: FC<AddRecipeFormProps> = ({ onClose, formMode }) => {
   const atlasIndex = useProcessrStore.use.atlasIndex();
   const loadAtlas = useProcessrStore.use.loadAtlas();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const initialValues = formMode.initialValues;
 
-  const [name, setName] = useState("");
-  const [icon, setIcon] = useState("");
-  const [categoryId, setCategoryId] = useState<CategoryId | "">("");
-  const [duration, setDuration] = useState("1");
-  const [durationUnit, setDurationUnit] = useState<TimeUnit>(TimeUnit.Second);
+  const [name, setName] = useState(initialValues?.name ?? "");
+  const [icon, setIcon] = useState(initialValues?.icon ?? "");
+  const [categoryId, setCategoryId] = useState<CategoryId | "">(initialValues?.categoryId ?? "");
+  const [duration, setDuration] = useState(initialValues?.duration === undefined ? "1" : String(initialValues.duration));
+  const [durationUnit, setDurationUnit] = useState<TimeUnit>(initialValues?.durationUnit ?? TimeUnit.Second);
 
   const [search, setSearch] = useState("");
-  const [inputs, setInputs] = useState<readonly RecipeItemStack[]>([]);
-  const [outputs, setOutputs] = useState<readonly RecipeItemStack[]>([]);
+  const [inputs, setInputs] = useState(initialValues?.inputs ?? []);
+  const [outputs, setOutputs] = useState(initialValues?.outputs ?? []);
 
   const [madeInMode, setMadeInMode] = useState<MadeInMode>("name");
-  const [compatibleNodeTypes, setCompatibleNodeTypes] = useState<readonly NodeTemplateId[]>([]);
-  const [compatibleNodeTags, setCompatibleNodeTags] = useState<readonly string[]>([]);
+  const [compatibleNodeTypes, setCompatibleNodeTypes] = useState(initialValues?.compatibleNodeTypes ?? []);
+  const [compatibleNodeTags, setCompatibleNodeTags] = useState(initialValues?.compatibleNodeTags ?? []);
 
   const searchResults = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -85,22 +70,11 @@ const AddRecipeForm: FC<AddRecipeFormProps> = ({ onClose }) => {
       compatibleNodeTypes,
       compatibleNodeTags,
     };
-    const newAtlas = addRecipe(atlasIndex.atlas, newRecipe);
+    const newAtlas: Atlas = formMode.mode === "edit"
+      ? updateRecipe(atlasIndex.atlas, formMode.id, newRecipe)
+      : addRecipe(atlasIndex.atlas, newRecipe);
     loadAtlas(newAtlas);
     onClose();
-  };
-
-  const handleIconFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    // eslint-disable-next-line functional/immutable-data
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        setIcon(reader.result);
-      }
-    };
-    reader.readAsDataURL(file);
   };
 
   const addToStack = (setStack: ResourceSetter, itemId: ItemId) => {
@@ -117,6 +91,10 @@ const AddRecipeForm: FC<AddRecipeFormProps> = ({ onClose }) => {
 
   const removeFromStack = (setStack: ResourceSetter, itemId: ItemId) => {
     setStack((prev) => prev.filter((stack) => stack.itemId !== itemId));
+  };
+
+  const adjustDuration = (delta: number) => {
+    setDuration((prev) => String(Math.max(0, (Number(prev) || 0) + delta)));
   };
 
   const renderStackColumn = (title: string, stacks: readonly RecipeItemStack[], setStack: ResourceSetter) => (
@@ -144,7 +122,7 @@ const AddRecipeForm: FC<AddRecipeFormProps> = ({ onClose }) => {
   );
 
   return (
-    <SidebarFormGroup title="New Recipe" onSubmit={handleSubmit}>
+    <SidebarFormGroup title={formMode.mode === "edit" ? "Edit Recipe" : "New Recipe"} onSubmit={handleSubmit}>
       <input
         className="sidebar-form-input"
         type="text"
@@ -154,33 +132,34 @@ const AddRecipeForm: FC<AddRecipeFormProps> = ({ onClose }) => {
         autoFocus
       />
       <SidebarGroup title="Resources" startCollapsed={true}>
-        <input
-          className="sidebar-form-input"
-          type="text"
-          placeholder="Search items..."
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); }}
-        />
+        <div className="sidebar-search-input-wrapper">
+          <input
+            className="sidebar-form-input sidebar-search-input"
+            type="text"
+            placeholder="Search items..."
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); }}
+          />
+          {search !== "" &&
+            <button
+              type="button"
+              className="sidebar-icon-btn sidebar-search-clear-btn"
+              onClick={() => { setSearch(""); }}
+              title="Clear search"
+            >
+              <LuX/>
+            </button>
+          }
+        </div>
         {searchResults.length > 0 &&
           <div className="sidebar-resource-search-results">
             {searchResults.map((item) => (
-              <div key={item.id} className="sidebar-resource-search-row">
-                <span className="sidebar-resource-search-name">{item.name}</span>
-                <button
-                  type="button"
-                  className="sidebar-btn sidebar-resource-add-btn"
-                  onClick={() => { addToStack(setInputs as ResourceSetter, item.id); }}
-                >
-                  <FaCirclePlus/> In
-                </button>
-                <button
-                  type="button"
-                  className="sidebar-btn sidebar-resource-add-btn"
-                  onClick={() => { addToStack(setOutputs as ResourceSetter, item.id); }}
-                >
-                  <FaCirclePlus/> Out
-                </button>
-              </div>
+              <ResourceSearchRow
+                key={item.id}
+                item={item}
+                onAddInput={() => { addToStack(setInputs as ResourceSetter, item.id); }}
+                onAddOutput={() => { addToStack(setOutputs as ResourceSetter, item.id); }}
+              />
             ))}
           </div>
         }
@@ -241,24 +220,7 @@ const AddRecipeForm: FC<AddRecipeFormProps> = ({ onClose }) => {
 
       <SidebarGroup title="Details" startCollapsed={true}>
         <div className="sidebar-form-icon-row">
-          {icon !== "" &&
-            <img src={icon} alt="" className="sidebar-form-icon-preview" />
-          }
-          <button
-            type="button"
-            className="sidebar-icon-picker-btn"
-            onClick={() => { fileInputRef.current?.click(); }}
-            title="Choose icon image"
-          >
-            <FaCirclePlus/>
-          </button>
-          <input
-            ref={fileInputRef}
-            className="sidebar-file-input-hidden"
-            type="file"
-            accept="image/*"
-            onChange={handleIconFileChange}
-          />
+          <IconPicker icon={icon} onIconChange={setIcon} onRemove={() => { setIcon(""); }} />
         </div>
         <select
           className="sidebar-form-input"
@@ -268,15 +230,35 @@ const AddRecipeForm: FC<AddRecipeFormProps> = ({ onClose }) => {
           {renderCategoryOptions()}
         </select>
         <div className="sidebar-form-icon-row">
-          <input
-            className="sidebar-form-input"
-            type="number"
-            min={0}
-            step={0.0001}
-            placeholder="Duration"
-            value={duration}
-            onChange={(e) => { setDuration(e.target.value); }}
-          />
+          <div className="sidebar-number-stepper">
+            <input
+              className="sidebar-form-input sidebar-number-stepper-input"
+              type="number"
+              min={0}
+              step={0.0001}
+              placeholder="Duration"
+              value={duration}
+              onChange={(e) => { setDuration(e.target.value); }}
+            />
+            <div className="sidebar-number-stepper-buttons">
+              <button
+                type="button"
+                className="sidebar-number-stepper-btn"
+                onClick={() => { adjustDuration(1); }}
+                title="Increment"
+              >
+                <LuChevronUp/>
+              </button>
+              <button
+                type="button"
+                className="sidebar-number-stepper-btn"
+                onClick={() => { adjustDuration(-1); }}
+                title="Decrement"
+              >
+                <LuChevronDown/>
+              </button>
+            </div>
+          </div>
           <select
             className="sidebar-form-input"
             value={durationUnit}
@@ -290,7 +272,7 @@ const AddRecipeForm: FC<AddRecipeFormProps> = ({ onClose }) => {
       </SidebarGroup>
 
       <div className="sidebar-form-actions">
-        <button type="submit" className="sidebar-btn">Add</button>
+        <button type="submit" className="sidebar-btn">{formMode.mode === "edit" ? "Save" : "Add"}</button>
         <button type="button" className="sidebar-btn" onClick={onClose}>Cancel</button>
       </div>
     </SidebarFormGroup>

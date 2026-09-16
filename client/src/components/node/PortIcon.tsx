@@ -1,12 +1,9 @@
 import type { FC } from "react";
 import type { Item } from "../../models";
+import ItemIcon from "../ItemIcon.tsx";
 
-const PortIcon: FC<Item> = (item) => {
-  return (
-    item.display.icon
-    ? <img src={item.display.icon} alt="" className="port-icon" title={item.name} />
-    : <span className="port-icon port-icon--color" style={{ background: item.display.color ?? "#888" }} title={item.name} />
-  );
-};
+const PortIcon: FC<Item> = (item) => (
+  <ItemIcon item={item} className="port-icon" title={item.name} />
+);
 
 export default PortIcon;

@@ -97,6 +97,10 @@
     margin-left: 14px;
 }
 
+.sidebar-group-header ~ .sidebar-btn {
+    width: calc(100% - 14px);
+}
+
 
 /* ── sidebar editor  ────────────────────────────── */
 
@@ -207,7 +211,6 @@
 
 .sidebar-form-icon-row {
     display: flex;
-    align-items: center;
     gap: 8px;
 }
 
@@ -220,8 +223,27 @@
     border-radius: 4px;
 }
 
+.sidebar-form-icon-preview-wrapper {
+    position: relative;
+}
+
+.sidebar-form-icon-remove-btn {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    padding: 1px;
+    background: var(--surface-card);
+    border: 1px solid var(--border-default);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.1s;
+}
+
+.sidebar-form-icon-preview-wrapper:hover .sidebar-form-icon-remove-btn {
+    opacity: 1;
+}
+
 .sidebar-icon-picker-btn {
-    margin-left: auto;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -239,6 +261,72 @@
 
 .sidebar-file-input-hidden {
     display: none;
+}
+
+.sidebar-number-stepper {
+    position: relative;
+    display: flex;
+    flex: 1;
+}
+
+.sidebar-number-stepper-input {
+    flex: 1;
+    width: 100%;
+    padding-right: 20px;
+    -moz-appearance: textfield;
+}
+
+.sidebar-number-stepper-input::-webkit-inner-spin-button,
+.sidebar-number-stepper-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.sidebar-number-stepper-buttons {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    bottom: 2px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.sidebar-number-stepper-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 10px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.sidebar-number-stepper-btn:hover {
+    color: var(--accent);
+}
+
+.sidebar-search-input-wrapper {
+    position: relative;
+    display: flex;
+}
+
+.sidebar-search-input {
+    flex: 1;
+    width: 100%;
+    padding-right: 24px;
+}
+
+.sidebar-search-clear-btn {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 4px;
 }
 
 .sidebar-form-actions {
@@ -268,6 +356,17 @@
     display: flex;
     align-items: center;
     gap: 4px;
+}
+
+.sidebar-resource-search-icon {
+    flex: none;
+    width: 1.2em;
+    height: 1.2em;
+    object-fit: contain;
+}
+
+.sidebar-resource-search-icon--color {
+    border-radius: 3px;
 }
 
 .sidebar-resource-search-name {
@@ -383,6 +482,10 @@
     height: 1.5em;
     width: auto;
     margin-left: auto
+}
+
+.item-icon--color {
+    border-radius: 3px;
 }
 
 /* ── sidebar dev tools ─────────────────────────────────── */

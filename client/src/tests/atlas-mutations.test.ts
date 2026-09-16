@@ -5,11 +5,19 @@ import {
   addCategory,
   addNodeTemplate,
   addRecipe,
+  updateItem,
+  updateRecipe,
+  updateNodeTemplate,
+  itemToInput,
+  recipeToInput,
+  nodeTemplateToInput,
 } from "../features/atlas-editor/atlas-mutations.ts";
 import {
   gamePackId,
   itemId,
   categoryId,
+  nodeTemplateId,
+  recipeId,
   PortDirection,
   type Atlas,
 } from "../models";
@@ -210,5 +218,105 @@ describe('addRecipe', () => {
     const atlas = addRecipe(emptyPack, { name: 'Pump Water', duration: 1 });
     expect(atlas.recipes[0]).not.toHaveProperty('durationUnit');
     expect(atlas.recipes[0]).not.toHaveProperty('compatibleNodeTags');
+  });
+});
+
+describe('updateItem', () => {
+  it('replaces the matching item in place, keeping its id', () => {
+    const withItem = addItem(emptyPack, { name: 'Iron Plate' });
+    const updated = updateItem(withItem, itemId('iron-plate'), { name: 'Iron Plate', color: '#ff0000' });
+    expect(updated.items).toHaveLength(1);
+    expect(updated.items[0].id).toBe(itemId('iron-plate'));
+    expect(updated.items[0].display.color).toBe('#ff0000');
+  });
+
+  it('preserves existing metadata across an update', () => {
+    const withItem = addItem(emptyPack, { name: 'Iron Plate' });
+    const withMetadata = { ...withItem, items: [{ ...withItem.items[0], metadata: { note: 'hand-placed' } }] };
+    const updated = updateItem(withMetadata, itemId('iron-plate'), { name: 'Iron Plate' });
+    expect(updated.items[0].metadata).toEqual({ note: 'hand-placed' });
+  });
+
+  it('is a no-op when the id does not exist', () => {
+    const updated = updateItem(emptyPack, itemId('missing'), { name: 'Ghost' });
+    expect(updated.items).toEqual(emptyPack.items);
+  });
+});
+
+describe('itemToInput', () => {
+  it('round-trips an item back into an AddItemInput', () => {
+    const withItem = addItem(emptyPack, {
+      name: 'Iron Plate',
+      color: '#ff0000',
+      icon: '/icons/iron-plate.png',
+      description: 'A smelted plate',
+      categoryId: categoryId('intermediates'),
+    });
+    expect(itemToInput(withItem.items[0])).toEqual({
+      name: 'Iron Plate',
+      categoryId: categoryId('intermediates'),
+      color: '#ff0000',
+      icon: '/icons/iron-plate.png',
+      description: 'A smelted plate',
+    });
+  });
+});
+
+describe('updateRecipe', () => {
+  it('replaces the matching recipe in place, keeping its id', () => {
+    const withRecipe = addRecipe(emptyPack, { name: 'Smelt Iron Plate', duration: 3.2 });
+    const updated = updateRecipe(withRecipe, recipeId('smelt-iron-plate'), { name: 'Smelt Iron Plate', duration: 5 });
+    expect(updated.recipes).toHaveLength(1);
+    expect(updated.recipes[0].id).toBe('smelt-iron-plate');
+    expect(updated.recipes[0].duration).toBe(5);
+  });
+});
+
+describe('recipeToInput', () => {
+  it('round-trips a recipe back into an AddRecipeInput', () => {
+    const stack = { itemId: itemId('iron-ore'), amount: 1 };
+    const withRecipe = addRecipe(emptyPack, {
+      name: 'Smelt Iron Plate',
+      duration: 3.2,
+      inputs: [stack],
+      compatibleNodeTypes: [nodeTemplateId('stone-furnace')],
+    });
+    expect(recipeToInput(withRecipe.recipes[0])).toEqual({
+      name: 'Smelt Iron Plate',
+      duration: 3.2,
+      inputs: [stack],
+      outputs: [],
+      compatibleNodeTypes: [nodeTemplateId('stone-furnace')],
+    });
+  });
+});
+
+describe('updateNodeTemplate', () => {
+  it('replaces the matching node template in place, keeping its id', () => {
+    const withTemplate = addNodeTemplate(emptyPack, { name: 'Stone Furnace' });
+    const updated = updateNodeTemplate(withTemplate, nodeTemplateId('stone-furnace'), {
+      name: 'Stone Furnace',
+      speedMultiplier: 2,
+    });
+    expect(updated.nodeTemplates).toHaveLength(1);
+    expect(updated.nodeTemplates[0].id).toBe('stone-furnace');
+    expect(updated.nodeTemplates[0].stats.speedMultiplier).toBe(2);
+  });
+});
+
+describe('nodeTemplateToInput', () => {
+  it('round-trips a node template back into an AddNodeTemplateInput', () => {
+    const withTemplate = addNodeTemplate(emptyPack, {
+      name: 'Assembling Machine',
+      speedMultiplier: 1.5,
+      ports: [{ name: 'Input', direction: PortDirection.Input }],
+      tags: ['crafting'],
+    });
+    expect(nodeTemplateToInput(withTemplate.nodeTemplates[0])).toEqual({
+      name: 'Assembling Machine',
+      speedMultiplier: 1.5,
+      ports: [{ name: 'Input', direction: PortDirection.Input }],
+      tags: ['crafting'],
+    });
   });
 });
