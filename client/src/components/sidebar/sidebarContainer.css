@@ -195,6 +195,7 @@
 }
 
 .sidebar-form-input {
+    width: auto;
     padding: 6px 8px;
     background: var(--surface-card);
     border: 1px solid var(--border-default);
@@ -210,8 +211,14 @@
 }
 
 .sidebar-form-icon-row {
+    min-width: 30px;
     display: flex;
     gap: 8px;
+}
+
+.sidebar-form-icon-row > .sidebar-form-input {
+    flex: 1;
+    min-width: 0;
 }
 
 .sidebar-form-icon-preview {

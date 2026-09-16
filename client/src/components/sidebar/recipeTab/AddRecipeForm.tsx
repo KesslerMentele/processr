@@ -1,5 +1,5 @@
 import { useMemo, useState, type FC, type SubmitEvent } from "react";
-import { LuChevronDown, LuChevronUp, LuX } from "react-icons/lu";
+import { LuX } from "react-icons/lu";
 import { useProcessrStore } from "../../../state/store.ts";
 import { addRecipe, updateRecipe } from "../../../features/atlas-editor/atlas-mutations.ts";
 import {
@@ -12,6 +12,7 @@ import IconPicker from "../IconPicker.tsx";
 import type { AddRecipeInput, FormMode } from "../../../features/atlas-editor/atlas-types.ts";
 import ResourceStackRow from "./ResourceStackRow.tsx";
 import ResourceSearchRow from "./ResourceSearchRow.tsx";
+import NumberStepperInput from "../NumberStepperInput.tsx";
 
 
 interface AddRecipeFormProps {
@@ -230,35 +231,16 @@ const AddRecipeForm: FC<AddRecipeFormProps> = ({ onClose, formMode }) => {
           {renderCategoryOptions()}
         </select>
         <div className="sidebar-form-icon-row">
-          <div className="sidebar-number-stepper">
-            <input
-              className="sidebar-form-input sidebar-number-stepper-input"
-              type="number"
-              min={0}
-              step={0.0001}
-              placeholder="Duration"
-              value={duration}
-              onChange={(e) => { setDuration(e.target.value); }}
-            />
-            <div className="sidebar-number-stepper-buttons">
-              <button
-                type="button"
-                className="sidebar-number-stepper-btn"
-                onClick={() => { adjustDuration(1); }}
-                title="Increment"
-              >
-                <LuChevronUp/>
-              </button>
-              <button
-                type="button"
-                className="sidebar-number-stepper-btn"
-                onClick={() => { adjustDuration(-1); }}
-                title="Decrement"
-              >
-                <LuChevronDown/>
-              </button>
-            </div>
-          </div>
+          <NumberStepperInput
+            placeholder={"Duration"}
+            onChange={(v) => {
+              setDuration(v.toString());
+            }}
+            value={Number(duration)}
+            step={0.0001}
+            onIncrement={adjustDuration}
+            onDecrement={adjustDuration}
+          />
           <select
             className="sidebar-form-input"
             value={durationUnit}

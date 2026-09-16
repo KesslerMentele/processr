@@ -7,6 +7,7 @@ import { PortDirection, type CategoryId, type NodeTemplateId } from "../../../mo
 import SidebarFormGroup from "../SidebarFormGroup.tsx";
 import IconPicker from "../IconPicker.tsx";
 import type { AddNodeTemplateInput, AddNodeTemplatePortInput, FormMode } from "../../../features/atlas-editor/atlas-types.ts";
+import NumberStepperInput from "../NumberStepperInput.tsx";
 
 interface AddNodeFormProps {
   onClose: () => void;
@@ -43,6 +44,18 @@ const AddNodeForm: FC<AddNodeFormProps> = ({ onClose, formMode }) => {
 
   const [newPortName, setNewPortName] = useState("");
   const [newPortDirection, setNewPortDirection] = useState<PortDirection>(PortDirection.Input);
+
+  const adjustSpeedMultiplier = (delta: number) => {
+    setSpeedMultiplier((prev) => String(Math.max(0, (Number(prev) || 0) + delta)));
+  };
+
+  const adjustPowerConsumption = (delta: number) => {
+    setPowerConsumption((prev) => String(Math.max(0, (Number(prev) || 0) + delta)));
+  };
+
+  const adjustModuleSlots = (delta: number) => {
+    setModuleSlots((prev) => String(Math.max(0, (Number(prev) || 0) + delta)));
+  };
 
   const handleAddPort = () => {
     if (newPortName.trim() === "") return;
@@ -106,30 +119,35 @@ const AddNodeForm: FC<AddNodeFormProps> = ({ onClose, formMode }) => {
         {renderCategoryOptions()}
       </select>
       <div className="sidebar-form-icon-row">
-        <input
-          className="sidebar-form-input"
-          type="number"
-          min={0}
+        <NumberStepperInput
+          placeholder={"Speed Multiplier"}
+          value={Number(speedMultiplier)}
           step={0.01}
-          placeholder="Speed Multiplier"
-          value={speedMultiplier}
-          onChange={(e) => { setSpeedMultiplier(e.target.value); }}
+          onChange={(v) => {
+            setSpeedMultiplier(v.toString());
+          }}
+          onIncrement={adjustSpeedMultiplier}
+          onDecrement={adjustSpeedMultiplier}
         />
-        <input
-          className="sidebar-form-input"
-          type="number"
-          min={0}
-          placeholder="Power Consumption"
-          value={powerConsumption}
-          onChange={(e) => { setPowerConsumption(e.target.value); }}
+        <NumberStepperInput
+          placeholder={"Power Consumption"}
+          value={Number(powerConsumption)}
+          step={1}
+          onChange={(v) => {
+            setPowerConsumption(v.toString());
+          }}
+          onIncrement={adjustPowerConsumption}
+          onDecrement={adjustPowerConsumption}
         />
-        <input
-          className="sidebar-form-input"
-          type="number"
-          min={0}
-          placeholder="Module Slots"
-          value={moduleSlots}
-          onChange={(e) => { setModuleSlots(e.target.value); }}
+        <NumberStepperInput
+          placeholder={"Module Slots"}
+          value={Number(moduleSlots)}
+          step={1}
+          onChange={(v) => {
+            setModuleSlots(v.toString());
+          }}
+          onIncrement={adjustModuleSlots}
+          onDecrement={adjustModuleSlots}
         />
       </div>
       <input
