@@ -23,10 +23,12 @@ const SidebarContainer: FC = () => {
   const prevTab = useProcessrStore.use.prevSidebarTab();
   const currentWidth = useProcessrStore.use.currentSidebarWidth();
   const setSidebarWidth = useProcessrStore.use.setSidebarWidth();
+  const sidebarFormMinWidth = useProcessrStore.use.sidebarFormMinWidth();
 
   const sidebarOpenRef = useRef(sidebarOpen);
   const currentWidthRef = useRef(currentWidth);
   const prevTabRef = useRef(prevTab);
+  const formMinWidthRef = useRef(sidebarFormMinWidth);
 
   useEffect(() => {
     // eslint-disable-next-line functional/immutable-data
@@ -35,6 +37,8 @@ const SidebarContainer: FC = () => {
     currentWidthRef.current = currentWidth;
     // eslint-disable-next-line functional/immutable-data
     prevTabRef.current = prevTab;
+    // eslint-disable-next-line functional/immutable-data
+    formMinWidthRef.current = sidebarFormMinWidth;
   });
 
   const onResizerMouseDown = (e: MouseEvent) => {
@@ -44,7 +48,8 @@ const SidebarContainer: FC = () => {
     const startWidth = containerRef.current?.getBoundingClientRect().width ?? currentWidth;
 
     const onMove = (ev: globalThis.MouseEvent) => {
-      const calculatedWidth = Math.min(Math.max(startWidth + (ev.clientX - startX), COLLAPSED_WIDTH), MAX_WIDTH);
+      const minWidth = Math.max(COLLAPSED_WIDTH, formMinWidthRef.current ?? COLLAPSED_WIDTH);
+      const calculatedWidth = Math.min(Math.max(startWidth + (ev.clientX - startX), minWidth), MAX_WIDTH);
       setSidebarWidth(calculatedWidth);
       if (!sidebarOpenRef.current) {
         setSidebarVisibility(true);

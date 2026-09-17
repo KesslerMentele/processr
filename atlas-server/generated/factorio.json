@@ -1,0 +1,167 @@
+{
+  "id": "my-pack",
+  "name": "My Pack",
+  "gameName": "Factorio",
+  "version": "1.0.0",
+  "author": "KesslerMentele",
+  "categories": [
+    {
+      "id": "raw-materials",
+      "name": "Raw Materials",
+      "display": {
+        "label": "Raw Materials",
+        "color": "#8B4513"
+      },
+      "metadata": {}
+    },
+    {
+      "id": "intermediates",
+      "name": "Intermediates",
+      "display": {
+        "label": "Intermediates",
+        "color": "#4169E1"
+      },
+      "metadata": {}
+    }
+  ],
+  "items": [
+    {
+      "id": "iron-ore",
+      "name": "Iron Ore",
+      "display": {
+        "label": "Iron Ore"
+      },
+      "categoryId": "raw-materials",
+      "form": "solid",
+      "metadata": {}
+    },
+    {
+      "id": "iron-plate",
+      "name": "Iron Plate",
+      "display": {
+        "label": "Iron Plate"
+      },
+      "categoryId": "intermediates",
+      "form": "solid",
+      "metadata": {}
+    },
+    {
+      "id": "iron-gear-wheel",
+      "name": "Iron Gear Wheel",
+      "display": {
+        "label": "Iron Gear Wheel"
+      },
+      "categoryId": "intermediates",
+      "form": "solid",
+      "metadata": {}
+    }
+  ],
+  "recipes": [
+    {
+      "id": "smelt-iron",
+      "name": "Smelt Iron",
+      "display": {
+        "label": "Smelt Iron"
+      },
+      "inputs": [
+        {
+          "itemId": "iron-ore",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "itemId": "iron-plate",
+          "amount": 1
+        }
+      ],
+      "duration": 3.2,
+      "durationUnit": "second",
+      "compatibleNodeTypes": [
+        "electric-furnace"
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "iron-gear-wheel",
+      "name": "Iron Gear Wheel",
+      "display": {
+        "label": "Iron Gear Wheel"
+      },
+      "inputs": [
+        {
+          "itemId": "iron-plate",
+          "amount": 2
+        }
+      ],
+      "outputs": [
+        {
+          "itemId": "iron-gear-wheel",
+          "amount": 1
+        }
+      ],
+      "duration": 0.5,
+      "durationUnit": "second",
+      "compatibleNodeTypes": [
+        "assembling-machine"
+      ],
+      "metadata": {}
+    }
+  ],
+  "nodeTemplates": [
+    {
+      "id": "electric-furnace",
+      "name": "Electric Furnace",
+      "display": {
+        "label": "Electric Furnace"
+      },
+      "ports": [
+        {
+          "id": "electric-furnace-ore-in",
+          "direction": "input",
+          "label": "Ore In"
+        },
+        {
+          "id": "electric-furnace-plate-out",
+          "direction": "output",
+          "label": "Plate Out"
+        }
+      ],
+      "stats": {
+        "speed": 2
+      },
+      "tags": [
+        "smelting"
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "assembling-machine",
+      "name": "Assembling Machine",
+      "display": {
+        "label": "Assembling Machine"
+      },
+      "ports": [
+        {
+          "id": "assembling-machine-ingredients-in",
+          "direction": "input",
+          "label": "Ingredients In"
+        },
+        {
+          "id": "assembling-machine-products-out",
+          "direction": "output",
+          "label": "Products Out"
+        }
+      ],
+      "stats": {
+        "speed": 0.75,
+        "moduleSlots": 2
+      },
+      "tags": [
+        "crafting"
+      ],
+      "metadata": {}
+    }
+  ],
+  "metadata": {}
+}

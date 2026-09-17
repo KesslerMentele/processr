@@ -25,6 +25,8 @@ export interface UISettingsSlice {
   readonly sidebarOpen: boolean;
   readonly currentSidebarWidth: number;
   readonly prevSidebarWidth: number;
+  /** Minimum sidebar width needed so the currently open sidebar form isn't clipped, or null when no form is open. */
+  readonly sidebarFormMinWidth: number | null;
   toggleSnap: () => void;
   toggleDetailed: () => void;
   setEdgeType: (t: EdgeType) => void;
@@ -38,6 +40,7 @@ export interface UISettingsSlice {
   setSidebarTab: (s: SidebarTab | null) => void;
   setSidebarVisibility: (v: boolean) => void;
   setSidebarWidth: (w: number) => void;
+  setSidebarFormMinWidth: (w: number | null) => void;
   /**
    * Opens a provided sidebar tab at the previous width.
    *

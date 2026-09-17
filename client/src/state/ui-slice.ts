@@ -27,6 +27,7 @@ export const createUISlice: StateCreator<UISettingsSlice> = (set) => ({
   sidebarOpen: true,
   prevSidebarWidth: 231,
   currentSidebarWidth: 231,
+  sidebarFormMinWidth: null,
   /** Toggles snap-to-grid for node dragging. */
   toggleSnap: () => {
     set((state) => {
@@ -99,6 +100,10 @@ export const createUISlice: StateCreator<UISettingsSlice> = (set) => ({
 
   setSidebarWidth: (w: number) => {
     set((state) => ({ prevSidebarWidth:state.currentSidebarWidth,  currentSidebarWidth: w }));
+  },
+
+  setSidebarFormMinWidth: (w: number | null) => {
+    set(() => ({ sidebarFormMinWidth: w }));
   },
 
   /**

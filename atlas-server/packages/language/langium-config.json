@@ -1,0 +1,16 @@
+{
+    "projectName": "Atlas",
+    "languages": [
+        {
+            "id": "atlas",
+            "grammar": "src/atlas.langium",
+            "fileExtensions": [
+                "prat"
+            ],
+            "textMate": {
+                "out": "syntaxes/atlas.tmLanguage.json"
+            }
+        }
+    ],
+    "out": "src/generated"
+}

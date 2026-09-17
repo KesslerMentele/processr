@@ -1,13 +1,18 @@
 import express from 'express';
 import cors from 'cors';
 import atlasRouter from './routes/atlas.js';
+import iconsRouter from './routes/icons.js';
+import { initIconStore } from './icons/icon-store.js';
 
 const app = express();
 const PORT = 3001;
 
+initIconStore();
+
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use('/api/atlas', atlasRouter);
+app.use('/api/icons', iconsRouter);
 
 app.listen(PORT, () => {
     console.log(`Processr server running on http://localhost:${PORT}`);

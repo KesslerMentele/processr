@@ -1,0 +1,20 @@
+{                                                                                                                                                                                                                                                       
+    "name": "atlas-language-support",
+    "displayName": "Atlas (.prat)",  
+    "version": "0.0.1",            
+    "engines": { "vscode": "^1.67.0" },                                                                                                                                                                                                                     
+    "categories": ["Programming Languages"],
+    "contributes": {                                                                                                                                                                                                                                        
+      "languages": [{                                                                                                                                                                                                                                     
+        "id": "atlas",                                                                                                                                                                                                                                      
+        "aliases": ["Atlas", "prat"],                                                                                                                                                                                                                     
+        "extensions": [".prat"],     
+        "configuration": "./language-configuration.json"                                                                                                                                                                                                    
+      }],                                               
+      "grammars": [{                                                                                                                                                                                                                                        
+        "language": "atlas",                                                                                                                                                                                                                              
+        "scopeName": "source.atlas",                                                                                                                                                                                                                        
+        "path": "../../language/syntaxes/atlas.tmLanguage.json"                                                                                                                                                                                           
+      }]
+    }                                                                                                                                                                                                                                                       
+  }

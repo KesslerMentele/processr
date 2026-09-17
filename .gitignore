@@ -29,4 +29,4 @@ dist-ssr
 /server/out/
 /server/src/ai/knowledge-input
 /server/src/ai/knowledge
-
+/server/data/

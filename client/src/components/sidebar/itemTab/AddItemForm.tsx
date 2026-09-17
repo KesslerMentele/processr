@@ -45,11 +45,13 @@ const AddItemForm: FC<AddItemFormProps> = ({ onClose, formMode }) => {
     onClose();
   };
 
-  const handleIconChange = (dataUrl: string) => {
-    setIcon(dataUrl);
+  const handleIconChange = (iconUrl: string) => {
+    setIcon(iconUrl);
     const image = new Image();
     // eslint-disable-next-line functional/immutable-data
-    image.src = dataUrl;
+    image.crossOrigin = "anonymous";
+    // eslint-disable-next-line functional/immutable-data
+    image.src = iconUrl;
     image.addEventListener("load", () => {
       const color = getColorSync(image);
       if (color) {
