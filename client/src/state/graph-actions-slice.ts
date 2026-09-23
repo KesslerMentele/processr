@@ -2,7 +2,7 @@ import type {
   Edge, EdgeId,
   Atlas, AtlasIndex, GraphActionSlice, GraphSlice,
   NodeTemplateId,
-  PortId, Position, ProcessrNode, ProcessrNodeId,
+  PortId, PortInstance, Position, ProcessrNode, ProcessrNodeId,
   RecipeId,
   Viewport
 } from "../models";
@@ -14,10 +14,10 @@ import { buildAtlasIndex } from "../features/atlas-editor/atlas-index.ts";
 import { cloneNode, createGraph } from "../utils/graph-factory.ts";
 import { saveAtlas } from "../utils/persistence.ts";
 import type { SetGraphData } from "../models/state/graph-state.ts";
-import { findInvalidEdges, pickNodeEdges } from "../utils/graph-utils.ts";
+import { applyPortInstances, applySingleNodeUpdate, findInvalidEdges, pickKeys, pickNodeEdges } from "../utils/graph-utils.ts";
 import { applyRecipeToPorts } from "../utils/node-utils.ts";
 import { newEdgeId } from "../utils/id.ts";
-import { portInstanceId } from "../models/ids.ts";
+import { portInstanceId, type PortInstanceId } from "../models/ids.ts";
 
 /**
  * For each template present in both indices, builds a map from old port ID
@@ -56,6 +56,7 @@ const remapEdge = (
   edgeId: string,
   edge: Edge,
   nodes: NodeRecord,
+  portInstances: Readonly<Record<PortInstanceId, PortInstance>>,
   packIndex: AtlasIndex,
   portRemapping: PortRemapping,
 ): [string, Edge] | null => {
@@ -66,9 +67,9 @@ const remapEdge = (
 
   // Edge port IDs are per-instance (node ID + template port ID); resolve back
   // to the template-level port ID before consulting the (template-keyed) remapping.
-  const sourcePortInstance = sourceNode.ports.find(p => p.id === edge.sourcePortId);
-  const targetPortInstance = targetNode.ports.find(p => p.id === edge.targetPortId);
-  if (!sourcePortInstance || !targetPortInstance) return null;
+  if (!sourceNode.ports.includes(edge.sourcePortId) || !targetNode.ports.includes(edge.targetPortId)) return null;
+  const sourcePortInstance = portInstances[edge.sourcePortId];
+  const targetPortInstance = portInstances[edge.targetPortId];
 
   const newSourcePortId = portRemapping.get(sourceNode.templateId)?.get(sourcePortInstance.template.id) ?? sourcePortInstance.template.id;
   const newTargetPortId = portRemapping.get(targetNode.templateId)?.get(targetPortInstance.template.id) ?? targetPortInstance.template.id;
@@ -85,12 +86,55 @@ const remapEdge = (
   }];
 };
 
+/**
+ * Recomputes a node's `ports` (and the PortInstance records they reference) against
+ * its template as it exists in `packIndex` — the counterpart to `remapEdge`, but for
+ * the node's own port list rather than an edge's endpoints.
+ *
+ * A port that maps 1:1 from the old template (per `portRemapping`) keeps its `stack`/
+ * `item`, reassigned to the new port-instance id. A port newly added to the template
+ * gets a fresh, unstacked PortInstance. A port dropped from the template — and its
+ * PortInstance — simply isn't carried over. If the template itself no longer exists
+ * in the pack, the node's ports are left untouched (same as `ProcessrNodeComponent`'s
+ * "template not found" fallback).
+ */
+const resyncNodePorts = (
+  node: ProcessrNode,
+  portInstances: Readonly<Record<PortInstanceId, PortInstance>>,
+  packIndex: AtlasIndex,
+  portRemapping: PortRemapping,
+): { node: ProcessrNode; portInstances: Readonly<Record<PortInstanceId, PortInstance>> } => {
+  const newTemplate = packIndex.nodeTemplatesById.get(node.templateId);
+  if (!newTemplate) return { node, portInstances: pickKeys(portInstances, node.ports) };
+
+  const remap = portRemapping.get(node.templateId);
+  const oldByTemplatePortId = new Map(
+    node.ports.map(id => [portInstances[id].template.id, portInstances[id]] as const)
+  );
+
+  const resyncedPorts: PortInstance[] = newTemplate.ports.map((newPort): PortInstance => {
+    const oldPortId = remap && [...remap.entries()].find(([, mapped]) => mapped === newPort.id)?.[0];
+    const oldInstance = oldPortId ? oldByTemplatePortId.get(oldPortId) : undefined;
+    return {
+      id: portInstanceId(node.id + newPort.id),
+      template: newPort,
+      stack: oldInstance?.stack,
+      item: oldInstance?.item,
+    };
+  });
+
+  return {
+    node: { ...node, ports: resyncedPorts.map(p => p.id) },
+    portInstances: Object.fromEntries(resyncedPorts.map(p => [p.id, p] as const)),
+  };
+};
+
 /** Zustand action creators for mutating the graph — all dispatch through `graphReducer` for undo/redo support. */
 const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISettingsSlice, [], [], GraphActionSlice> =
   (set) => ({
-    addNode: (node: ProcessrNode) =>
+    addNode: ({ node, portInstances }) =>
     {set((state) =>
-      ({ graph: graphReducer(state.graph, { type: "ADD_NODE", payload: { node } }) }));
+      ({ graph: graphReducer(state.graph, { type: "ADD_NODE", payload: { node, portInstances } }) }));
     },
 
     removeNode: (nodeId: ProcessrNodeId) =>
@@ -110,10 +154,10 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISetting
      */
     setNodeRecipe: (nodeId: ProcessrNodeId, recipeId: RecipeId | null) =>
     {set((state) => {
-      const ports = applyRecipeToPorts(state.graph.nodes[nodeId], recipeId, state.atlasIndex);
+      const ports = applyRecipeToPorts(state.graph.nodes[nodeId], recipeId, state.atlasIndex, state.graph.portInstances);
       // Compute invalid edges against the graph with the new recipe already applied,
       // so we detect incompatibilities introduced by the change (not the old state).
-      const tempGraph = { ...state.graph, nodes: { ...state.graph.nodes, [nodeId]: { ...state.graph.nodes[nodeId], recipeId, ports } } };
+      const tempGraph = applyPortInstances(applySingleNodeUpdate(state.graph, nodeId, { recipeId }), ports);
       const invalidEdges = findInvalidEdges(nodeId, tempGraph, state.atlasIndex);
 
       return ({ graph: graphReducer(state.graph, { type: "SET_NODE_RECIPE", payload: { nodeId, recipeId, ports, invalidEdges, behavior: state.invalidEdgeBehavior } }) });
@@ -126,8 +170,8 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISetting
       const behavior = state.invalidEdgeBehavior;
       const fullUpdates = updates.reduce<{ tempGraph: typeof state.graph; acc: { nodeId: ProcessrNodeId; recipeId: RecipeId | null; ports: ReturnType<typeof applyRecipeToPorts>; invalidEdges: Readonly<Record<string, Edge>> }[] }>(
         ({ tempGraph, acc }, { nodeId, recipeId }) => {
-          const ports = applyRecipeToPorts(tempGraph.nodes[nodeId], recipeId, state.atlasIndex);
-          const updatedGraph = { ...tempGraph, nodes: { ...tempGraph.nodes, [nodeId]: { ...tempGraph.nodes[nodeId], recipeId, ports } } };
+          const ports = applyRecipeToPorts(tempGraph.nodes[nodeId], recipeId, state.atlasIndex, tempGraph.portInstances);
+          const updatedGraph = applyPortInstances(applySingleNodeUpdate(tempGraph, nodeId, { recipeId }), ports);
           const invalidEdges = findInvalidEdges(nodeId, updatedGraph, state.atlasIndex);
           return { tempGraph: updatedGraph, acc: [...acc, { nodeId, recipeId, ports, invalidEdges }] };
         },
@@ -190,8 +234,12 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISetting
       if (!template) return state;
 
       const count = source.count;
-      const newNodes = Array.from({ length: count - 1 }, (_, i) =>
+      const clones = Array.from({ length: count - 1 }, (_, i) =>
         cloneNode(source, template, { x: source.position.x, y: source.position.y + (i + 1) * 160 }, state.atlasIndex)
+      );
+      const newNodes = clones.map(c => c.node);
+      const newPortInstances: Readonly<Record<PortInstanceId, PortInstance>> = Object.fromEntries(
+        clones.flatMap(c => Object.entries(c.portInstances))
       );
 
       const sourceEdges = Object.values(pickNodeEdges(state.graph.edges, nodeId));
@@ -212,7 +260,7 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISetting
       return {
         graph: graphReducer(state.graph, {
           type: "UNSTACK_NODE",
-          payload: { nodeId, newNodes, newEdges },
+          payload: { nodeId, newNodes, newPortInstances, newEdges },
         }),
       };
     });
@@ -262,14 +310,25 @@ const createGraphActions: StateCreator<GraphSlice & GraphActionSlice & UISetting
       const packIndex = buildAtlasIndex(pack);
       const portRemapping = buildPortRemapping(state.atlasIndex, packIndex);
 
+      // Edges are remapped against the *old* nodes/portInstances (their sourcePortId/
+      // targetPortId still reference the pre-edit port ids); the resync below computes
+      // the very same new port-instance ids independently, so the two line back up.
       const remappedEdges = Object.fromEntries(
         Object.entries(state.graph.edges)
-          .map(([id, edge]) => remapEdge(id, edge, state.graph.nodes, packIndex, portRemapping))
+          .map(([id, edge]) => remapEdge(id, edge, state.graph.nodes, state.graph.portInstances, packIndex, portRemapping))
           .filter((entry): entry is [string, Edge] => entry !== null)
       );
 
+      const resyncedNodes = Object.values(state.graph.nodes).map(node =>
+        resyncNodePorts(node, state.graph.portInstances, packIndex, portRemapping)
+      );
+      const nodes = Object.fromEntries(resyncedNodes.map(r => [r.node.id, r.node]));
+      const portInstances: Readonly<Record<PortInstanceId, PortInstance>> = Object.fromEntries(
+        resyncedNodes.flatMap(r => Object.entries(r.portInstances))
+      );
+
       saveAtlas(pack);
-      const graph = { ...state.graph, edges: remappedEdges };
+      const graph = { ...state.graph, nodes, portInstances, edges: remappedEdges };
       return { ...state, atlasIndex: packIndex, graph };
     });
     },

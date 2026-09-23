@@ -103,11 +103,14 @@ const DEFAULT_NODE_PORTS: readonly AddNodeTemplatePortInput[] = [
 const buildPorts = (inputs: readonly AddNodeTemplatePortInput[]): readonly PortTemplate[] => {
   return inputs.reduce<readonly PortTemplate[]>((ports, input) => {
     const id: PortId = portId(slugifyId(input.name, new Set(ports.map((p) => p.id))));
+    // Order is per-direction: the Nth input gets order N-1, independent of
+    // however many outputs (or other inputs) come before/after it.
+    const order = ports.filter((p) => p.direction === input.direction).length;
     const port: PortTemplate = {
       id,
       name: input.name,
       direction: input.direction,
-      ...(input.position !== undefined && { position: input.position }),
+      order,
       metadata: {},
     };
     return [...ports, port];
@@ -151,7 +154,6 @@ export const nodeTemplateToInput = (template: NodeTemplate): AddNodeTemplateInpu
   ports: template.ports.map((port) => ({
     name: port.name,
     direction: port.direction,
-    ...(port.position !== undefined && { position: port.position }),
   })),
   tags: template.tags,
 });

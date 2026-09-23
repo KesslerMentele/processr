@@ -9,6 +9,7 @@ export type {
   EdgeId,
   GraphId,
   PortId,
+  PortInstanceId,
 } from "./ids.ts";
 
 export {
@@ -21,6 +22,7 @@ export {
   edgeId,
   graphId,
   portId,
+  portInstanceId,
 } from "./ids.ts";
 
 // ---- Common types ----
@@ -40,6 +42,7 @@ export type {
   ProcessrNode,
   PortInstance,
   NodeStatsOverride,
+  NodeWithPorts,
 } from "./graph/processr-node.ts";
 export type { Edge } from "./graph/edge.ts";
 export type { Graph, Viewport, GraphAction, ActionType, GraphHistory, GraphChange, ReversibleAction } from "./graph/graph.ts";

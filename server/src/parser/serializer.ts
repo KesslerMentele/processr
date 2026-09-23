@@ -37,7 +37,7 @@ export interface PortJson {
     id: string;
     name: string;
     direction: string;
-    position: number;
+    order: number;
 }
 
 export interface NodeTemplateJson {

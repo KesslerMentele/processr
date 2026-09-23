@@ -11,8 +11,8 @@ const template: NodeTemplate = {
   name: 'Assembler',
   display: { label: 'Assembler' },
   ports: [
-    { id: portId('p-in'), name: 'Input', direction: PortDirection.Input, metadata: {} },
-    { id: portId('p-out'), name: 'Output', direction: PortDirection.Output, metadata: {} },
+    { id: portId('p-in'), name: 'Input', direction: PortDirection.Input, order: 0, metadata: {} },
+    { id: portId('p-out'), name: 'Output', direction: PortDirection.Output, order: 0, metadata: {} },
   ],
   stats: { speedMultiplier: 1, metadata: {} },
   tags: [],
@@ -27,22 +27,22 @@ const ports = { sourcePortId: portA, targetPortId: portB };
 
 describe('toRFNode', () => {
   it('sets type to "processor"', () => {
-    const node = createProcessrNode(template, { x: 0, y: 0 });
+    const { node } = createProcessrNode(template, { x: 0, y: 0 });
     expect(toRFNode(node).type).toBe('processor');
   });
 
   it('uses the node id', () => {
-    const node = createProcessrNode(template, { x: 0, y: 0 });
+    const { node } = createProcessrNode(template, { x: 0, y: 0 });
     expect(toRFNode(node).id).toBe(node.id);
   });
 
   it('passes through the position', () => {
-    const node = createProcessrNode(template, { x: 42, y: 99 });
+    const { node } = createProcessrNode(template, { x: 42, y: 99 });
     expect(toRFNode(node).position).toEqual({ x: 42, y: 99 });
   });
 
   it('embeds the full node as data', () => {
-    const node = createProcessrNode(template, { x: 0, y: 0 });
+    const { node } = createProcessrNode(template, { x: 0, y: 0 });
     expect(toRFNode(node).data).toEqual(node);
   });
 });

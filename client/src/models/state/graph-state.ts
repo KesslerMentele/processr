@@ -1,4 +1,4 @@
-import type { ProcessrNode } from "../graph/processr-node.ts";
+import type { NodeWithPorts } from "../graph/processr-node.ts";
 import type { EdgeId, NodeTemplateId, ProcessrNodeId, RecipeId } from "../ids.ts";
 import type { Position } from "../common.ts";
 import type { Edge } from "../graph/edge.ts";
@@ -11,7 +11,7 @@ export interface SetGraphData {
 }
 
 export interface GraphActionSlice {
-  addNode: (node: ProcessrNode) => void;
+  addNode: (nodeWithPorts: NodeWithPorts) => void;
   removeNode: (node: ProcessrNodeId) => void;
   updateNodePositions: (positions: Readonly<Record<string, Position>>) => void;
   setNodeRecipe: (nodeId: ProcessrNodeId, recipeId: RecipeId | null) => void;

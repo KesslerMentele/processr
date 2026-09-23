@@ -3,9 +3,12 @@ import type {
 } from "../models";
 import {
   addChangeToHistory,
+  applyPortInstances,
   applySingleNodeUpdate, now,
   omitKey,
+  omitKeys,
   omitNodeEdges,
+  pickKeys,
   pickNodeEdges
 } from "../utils/graph-utils.ts";
 
@@ -18,15 +21,17 @@ const applyActionToGraph = (graph: Graph, action: GraphAction<ReversibleAction>)
   const { type, payload } = action;
   switch (type) {
     case "ADD_NODE": {
-      const { node } = payload;
-      return { ...graph, nodes: { ...graph.nodes, [node.id]: node } };
+      const { node, portInstances } = payload;
+      return { ...graph, nodes: { ...graph.nodes, [node.id]: node }, portInstances: { ...graph.portInstances, ...portInstances } };
     }
     case "REMOVE_NODE": {
       const { nodeId } = payload;
+      if (!Object.hasOwn(graph.nodes, nodeId)) return graph;
       return {
         ...graph,
         nodes: omitKey(graph.nodes, nodeId),
         edges: omitNodeEdges(graph.edges, nodeId),
+        portInstances: omitKeys(graph.portInstances, graph.nodes[nodeId].ports),
       };
     }
     case "SET_NODE_POSITIONS": {
@@ -42,7 +47,7 @@ const applyActionToGraph = (graph: Graph, action: GraphAction<ReversibleAction>)
       const { nodeId, recipeId, ports, invalidEdges, behavior } = payload;
 
       if (!Object.hasOwn(graph.nodes, nodeId)) return graph;
-      const graphWithNewRecipe = applySingleNodeUpdate(graph, nodeId, { recipeId, ports });
+      const graphWithNewRecipe = applyPortInstances(applySingleNodeUpdate(graph, nodeId, { recipeId }), ports);
 
       // if the behavior is 'delete', remove all edges that are invalid
       if (behavior === 'delete') {
@@ -67,7 +72,7 @@ const applyActionToGraph = (graph: Graph, action: GraphAction<ReversibleAction>)
       const { updates, behavior } = payload;
       return updates.reduce((g, { nodeId, recipeId, ports, invalidEdges }) => {
         if (!Object.hasOwn(g.nodes, nodeId)) return g;
-        const withRecipe = applySingleNodeUpdate(g, nodeId, { recipeId, ports });
+        const withRecipe = applyPortInstances(applySingleNodeUpdate(g, nodeId, { recipeId }), ports);
         if (behavior === 'delete') {
           return { ...withRecipe, edges: Object.fromEntries(Object.entries(withRecipe.edges).filter(([id]) => !Object.hasOwn(invalidEdges, id))) };
         }
@@ -83,6 +88,8 @@ const applyActionToGraph = (graph: Graph, action: GraphAction<ReversibleAction>)
 
       const filteredNodes = Object.fromEntries(Object.entries(graph.nodes).filter(([id]) => !removedSet.has(id)));
       const nodes = { ...filteredNodes, [survivorId]: { ...filteredNodes[survivorId], count: newCount } };
+      const removedPortIds = removedIds.filter(id => Object.hasOwn(graph.nodes, id)).flatMap(id => graph.nodes[id].ports);
+      const portInstances = omitKeys(graph.portInstances, removedPortIds);
 
       const edges = Object.entries(graph.edges).reduce<Record<string, typeof graph.edges[EdgeId]>>((acc, [id, edge]) => {
         const srcRemoved = removedSet.has(edge.sourceNodeId);
@@ -106,16 +113,16 @@ const applyActionToGraph = (graph: Graph, action: GraphAction<ReversibleAction>)
         return { ...acc, [id]: rerouted };
       }, {});
 
-      return { ...graph, nodes, edges };
+      return { ...graph, nodes, edges, portInstances };
     }
     case "UNSTACK_NODE": {
-      const { nodeId, newNodes, newEdges } = payload;
+      const { nodeId, newNodes, newPortInstances, newEdges } = payload;
       const nodes = {
         ...graph.nodes,
         [nodeId]: { ...graph.nodes[nodeId], count: 1 },
         ...Object.fromEntries(newNodes.map(n => [n.id, n])),
       };
-      return { ...graph, nodes, edges: { ...graph.edges, ...newEdges } };
+      return { ...graph, nodes, edges: { ...graph.edges, ...newEdges }, portInstances: { ...graph.portInstances, ...newPortInstances } };
     }
     case "SET_STACK_SIZE": {
       const { nodeId, newStackSize } = payload;
@@ -132,14 +139,18 @@ const applyActionToGraph = (graph: Graph, action: GraphAction<ReversibleAction>)
 const undoAction = (graph: Graph, change: GraphChange): Graph => {
   const { type, action } = change;
   switch (type) {
-    case "ADD_NODE": return { ...graph, nodes: omitKey(graph.nodes, action.payload.node.id) };
+    case "ADD_NODE": {
+      const { node, portInstances } = action.payload;
+      return { ...graph, nodes: omitKey(graph.nodes, node.id), portInstances: omitKeys(graph.portInstances, Object.keys(portInstances)) };
+    }
     case "REMOVE_NODE": {
-      const { removedNode, removedEdges } = change.payload;
+      const { removedNode, removedEdges, removedPortInstances } = change.payload;
 
       return {
         ...graph,
         nodes: { ...graph.nodes, [removedNode.id]: removedNode },
         edges: { ...graph.edges, ...removedEdges },
+        portInstances: { ...graph.portInstances, ...removedPortInstances },
       };
     }
     case "SET_NODE_POSITIONS": {
@@ -158,7 +169,7 @@ const undoAction = (graph: Graph, change: GraphChange): Graph => {
       const { nodeId } = action.payload;
 
       if (!Object.hasOwn(graph.nodes, nodeId)) return graph;
-      const restored = applySingleNodeUpdate(graph, nodeId, { recipeId: previousRecipeId, ports: previousPorts });
+      const restored = applyPortInstances(applySingleNodeUpdate(graph, nodeId, { recipeId: previousRecipeId }), previousPorts);
       return { ...restored, edges: { ...restored.edges, ...changedEdges } };
     }
     case "ADD_EDGE": {
@@ -175,23 +186,23 @@ const undoAction = (graph: Graph, change: GraphChange): Graph => {
       const { previousRecipes, previousPorts, changedEdges } = change.payload;
       const restoredNodes = Object.entries(previousRecipes).reduce((g, [nodeId, recipeId]) => {
         if (!Object.hasOwn(g.nodes, nodeId)) return g;
-        return applySingleNodeUpdate(g, nodeId as ProcessrNodeId, { recipeId, ports: previousPorts[nodeId] });
+        return applyPortInstances(applySingleNodeUpdate(g, nodeId as ProcessrNodeId, { recipeId }), previousPorts[nodeId]);
       }, graph);
       return { ...restoredNodes, edges: { ...restoredNodes.edges, ...changedEdges } };
     }
     case "STACK_NODES": {
-      const { originalSurvivorCount, removedNodes, edgeSnapshot } = change.payload;
+      const { originalSurvivorCount, removedNodes, edgeSnapshot, removedPortInstances } = change.payload;
       const { survivorId } = action.payload;
       const nodes = {
         ...graph.nodes,
         [survivorId]: { ...graph.nodes[survivorId], count: originalSurvivorCount },
         ...Object.fromEntries(removedNodes.map(n => [n.id, n])),
       };
-      return { ...graph, nodes, edges: edgeSnapshot };
+      return { ...graph, nodes, edges: edgeSnapshot, portInstances: { ...graph.portInstances, ...removedPortInstances } };
     }
     case "UNSTACK_NODE": {
       const { newNodeIds, newEdgeIds, originalCount } = change.payload;
-      const { nodeId } = action.payload;
+      const { nodeId, newPortInstances } = action.payload;
       const excludeSet = new Set<string>(newNodeIds);
       const filteredNodes = Object.fromEntries(
         Object.entries(graph.nodes).filter(([id]) => !excludeSet.has(id))
@@ -200,7 +211,8 @@ const undoAction = (graph: Graph, change: GraphChange): Graph => {
       const edges = Object.fromEntries(
         Object.entries(graph.edges).filter(([id]) => !newEdgeIds.includes(id))
       );
-      return { ...graph, nodes, edges };
+      const portInstances = omitKeys(graph.portInstances, Object.keys(newPortInstances));
+      return { ...graph, nodes, edges, portInstances };
     }
     case "SET_STACK_SIZE": return applySingleNodeUpdate(graph, action.payload.nodeId, { count: change.payload.previousStackSize });
   }
@@ -221,8 +233,9 @@ const createGraphChangeForHistory = (graph: Graph, action:GraphAction<Reversible
       const { nodeId } = action.payload;
       const removedNode = graph.nodes[nodeId];
       const removedEdges = pickNodeEdges(graph.edges, nodeId);
+      const removedPortInstances = Object.hasOwn(graph.nodes, nodeId) ? pickKeys(graph.portInstances, removedNode.ports) : {};
 
-      return { type, action, payload: { removedNode, removedEdges } };
+      return { type, action, payload: { removedNode, removedEdges, removedPortInstances } };
     }
     case "SET_NODE_POSITIONS": {
       const { positions } = action.payload;
@@ -238,7 +251,7 @@ const createGraphChangeForHistory = (graph: Graph, action:GraphAction<Reversible
     case "SET_NODE_RECIPE": {
       const { nodeId, invalidEdges } = action.payload;
       const previousRecipeId = graph.nodes[nodeId].recipeId ?? null;
-      const previousPorts = graph.nodes[nodeId].ports;
+      const previousPorts = graph.nodes[nodeId].ports.map(id => graph.portInstances[id]);
       return { type, action, payload: { previousRecipeId, previousPorts, changedEdges: invalidEdges } };
     }
     case "REMOVE_EDGE": return {
@@ -249,17 +262,19 @@ const createGraphChangeForHistory = (graph: Graph, action:GraphAction<Reversible
         action.payload.updates.map(({ nodeId }) => [nodeId, graph.nodes[nodeId].recipeId])
       );
       const previousPorts = Object.fromEntries(
-        action.payload.updates.map(({ nodeId }) => [nodeId, graph.nodes[nodeId].ports])
+        action.payload.updates.map(({ nodeId }) => [nodeId, graph.nodes[nodeId].ports.map(id => graph.portInstances[id])])
       );
       const changedEdges = action.payload.updates.reduce<Record<string, Edge>>((acc, u) => ({ ...acc, ...u.invalidEdges }), {});
       return { type, action, payload: { previousRecipes, previousPorts, changedEdges } };
     }
     case "STACK_NODES": {
       const { survivorId, removedIds } = action.payload;
+      const removedNodes = removedIds.map(id => graph.nodes[id]).filter(Boolean);
       return { type, action, payload: {
         originalSurvivorCount: graph.nodes[survivorId].count,
-        removedNodes: removedIds.map(id => graph.nodes[id]).filter(Boolean),
+        removedNodes,
         edgeSnapshot: { ...graph.edges },
+        removedPortInstances: pickKeys(graph.portInstances, removedNodes.flatMap(n => n.ports)),
       } };
     }
     case "UNSTACK_NODE": {

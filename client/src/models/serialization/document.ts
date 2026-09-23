@@ -2,8 +2,16 @@ import type { GraphId, AtlasId } from "../ids.ts";
 import type { Graph } from "../graph/graph.ts";
 import type { Atlas } from "../atlas.ts";
 
-/** Increment when making breaking changes to the schema. */
-export const DOCUMENT_FORMAT_VERSION = 1;
+/**
+ * Increment when making breaking changes to the schema.
+ *
+ * v2: `ProcessrNode.ports` changed from embedded `PortInstance[]` to
+ * `PortInstanceId[]`, resolved against the new `Graph.portInstances` record.
+ * A v1 document has no `portInstances` key and embeds full port objects on
+ * each node — loading it as v2 would crash the canvas the moment a node
+ * tried to resolve its ports.
+ */
+export const DOCUMENT_FORMAT_VERSION = 2;
 
 /**
  * A complete serializable document. Saved to localStorage or exported

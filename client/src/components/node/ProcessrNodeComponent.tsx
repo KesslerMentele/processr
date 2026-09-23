@@ -1,7 +1,7 @@
 import { type CSSProperties, type FC } from "react";
 import type { ProcessrNodeData } from "../../models";
 import { type Node as RFNode, type NodeProps as RFNodeProps } from "@xyflow/react";
-import { getInputPorts, getOutputPorts } from "../../utils/node-utils.ts";
+import { getInputPorts, getOutputPorts, withRenderPositions } from "../../utils/node-utils.ts";
 import { useNodeComponentState } from "../../hooks/useNodeComponentState.ts";
 import type { PortInstance } from "../../models";
 import Port from "./Port.tsx";
@@ -17,6 +17,7 @@ type ProcessrNodeComponentProps = RFNodeProps<RFNode<ProcessrNodeData>>
 
 const ProcessrNodeComponent: FC<ProcessrNodeComponentProps> = ({ data, selected }) => {
   const { packIndex, detailedMode } = useNodeComponentState();
+  const graph  = useProcessrStore.use.graph();
   const { toggleContextMenu } = useContextMenu();
   const removeNode = useProcessrStore.use.removeNode();
   const template = packIndex.nodeTemplatesById.get(data.templateId);
@@ -27,17 +28,22 @@ const ProcessrNodeComponent: FC<ProcessrNodeComponentProps> = ({ data, selected 
     logger.warn(`[ProcessrNode] template not found: ${data.templateId} — Atlas may be missing this node type`);
   }
 
-  const inputs: PortInstance[] = getInputPorts(data).map((port, i): PortInstance  => ({
+  const inputs: PortInstance[] = getInputPorts(data, graph.portInstances).map((port, i): PortInstance  => ({
       ...port,
       stack: recipe?.inputs[i],
       item: recipe ? packIndex.itemsById.get(recipe.inputs[i]?.itemId) : undefined,
     }));
 
-  const outputs: PortInstance[] = getOutputPorts(data).map((port, i): PortInstance => ({
+  const outputs: PortInstance[] = getOutputPorts(data, graph.portInstances).map((port, i): PortInstance => ({
       ...port,
       stack: recipe?.outputs[i],
       item: recipe ? packIndex.itemsById.get(recipe.outputs[i]?.itemId) : undefined,
     }));
+
+  // Evenly space each direction group along the node's edge, independent of
+  // however many gaps or ties exist in the templates' raw `order` values.
+  const positionedInputs = withRenderPositions(inputs);
+  const positionedOutputs = withRenderPositions(outputs);
 
 
 
@@ -60,7 +66,7 @@ const ProcessrNodeComponent: FC<ProcessrNodeComponentProps> = ({ data, selected 
         });
       }}
     >
-      {inputs.map((p, i) => (<Port key={i} {...p} />))}
+      {positionedInputs.map((p, i) => (<Port key={i} {...p} />))}
       <div className="processr-node-label">
 
         <p>{data.label ?? template.name}</p>
@@ -74,7 +80,7 @@ const ProcessrNodeComponent: FC<ProcessrNodeComponentProps> = ({ data, selected 
 
       {detailedMode && recipe && <NodeDetails recipe={recipe} count={data.count} inputs={inputs} outputs={outputs} />}
 
-      {outputs.map((p, i) => (<Port key={i} {...p} />))}
+      {positionedOutputs.map((p, i) => (<Port key={i} {...p} />))}
     </div>
   );
 };

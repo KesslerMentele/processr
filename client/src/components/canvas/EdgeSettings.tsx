@@ -1,5 +1,5 @@
 import { useToolbarState } from "../../hooks/useToolbarState.ts";
-import type { EdgeType } from "../../state/ui-slice.ts";
+import type { EdgeType } from "../..//models/state/ui-state.ts";
 
 interface EdgeOption  { readonly value: EdgeType; readonly label: string }
 

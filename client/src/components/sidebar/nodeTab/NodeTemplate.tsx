@@ -37,9 +37,9 @@ export const DraggableNodeTemplate: FC<{template: NodeTemplate; onEdit: () => vo
         const position = screenToFlowPosition(screenPosition);
         const compatibleRecipes = atlasIndex.recipesByNodeType.get(template.id) ?? [];
         const autoRecipeId = compatibleRecipes.length === 1 ? compatibleRecipes[0].id : null;
-        const node = createProcessrNode(template, position, autoRecipeId ? { recipeId: autoRecipeId } : undefined, atlasIndex);
-        addNode(node);
-        setSelectedNodeId([node.id]);
+        const nodeWithPorts = createProcessrNode(template, position, autoRecipeId ? { recipeId: autoRecipeId } : undefined, atlasIndex);
+        addNode(nodeWithPorts);
+        setSelectedNodeId([nodeWithPorts.node.id]);
       }
     }, [addNode, atlasIndex, screenToFlowPosition, setSelectedNodeId, template],
   );

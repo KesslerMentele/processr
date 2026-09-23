@@ -19,7 +19,7 @@ const RecipeSelector = () => {
   return (
     <div className="sidebar-list-container sidebar-recipe-picker">
       {Object.entries(groupsObj).map(([templateId, nodes]) =>
-        <CanvasMachineRecipeList templateId={templateId} nodes={nodes} />
+        <CanvasMachineRecipeList templateId={templateId} nodes={nodes} key={templateId} />
       )}
     </div>
   );

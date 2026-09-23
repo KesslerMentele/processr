@@ -57,7 +57,6 @@ export interface AddCategoryInput {
 export interface AddNodeTemplatePortInput {
   readonly name: string;
   readonly direction: PortDirection;
-  readonly position?: number;
 }
 
 export interface AddNodeTemplateInput {

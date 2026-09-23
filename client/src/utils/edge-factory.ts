@@ -35,8 +35,8 @@ const resolvePortPair = (
     throw new Error(`createEdge: template not found for node`);
   }
 
-  const outputPorts = getOutputPorts(sourceNode);
-  const inputPorts = getInputPorts(targetNode);
+  const outputPorts = getOutputPorts(sourceNode, graph.portInstances);
+  const inputPorts = getInputPorts(targetNode, graph.portInstances);
   if (outputPorts.length === 0 || inputPorts.length === 0) {
     logger.error(`[resolvePortPair] no connectable ports — sourceOutputs=${outputPorts.length.toString()} targetInputs=${inputPorts.length.toString()}`);
     throw new Error(`createEdge: no connectable ports (source outputs=${String(outputPorts.length)}, target inputs=${String(inputPorts.length)})`);

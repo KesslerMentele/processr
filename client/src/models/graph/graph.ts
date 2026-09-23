@@ -1,4 +1,4 @@
-import type { GraphId, AtlasId, ProcessrNodeId, RecipeId, EdgeId } from "../ids.ts";
+import type { GraphId, AtlasId, ProcessrNodeId, RecipeId, EdgeId, PortInstanceId } from "../ids.ts";
 import type { Metadata, Position } from "../common.ts";
 import type { PortInstance, ProcessrNode } from "./processr-node.ts";
 import type { Edge } from "./edge.ts";
@@ -36,7 +36,7 @@ type TransientAction = (typeof TransientAction)[keyof typeof TransientAction];
 export type ActionType = ReversibleAction | TransientAction;
 
 interface GraphActionPayloadMap {
-  [ReversibleAction.AddNode]: { readonly node: ProcessrNode };
+  [ReversibleAction.AddNode]: { readonly node: ProcessrNode; readonly portInstances: Readonly<Record<PortInstanceId, PortInstance>> };
   [ReversibleAction.RemoveNode]: { readonly nodeId: ProcessrNodeId };
   [ReversibleAction.SetNodePositions]: { readonly positions: Readonly<Record<string, Position>> };
   [ReversibleAction.SetNodeRecipe]: { readonly nodeId: ProcessrNodeId; readonly recipeId: RecipeId | null; readonly ports: readonly PortInstance[]; readonly invalidEdges: Readonly<Record<string, Edge>>; readonly behavior: 'delete' | 'highlight' };
@@ -44,7 +44,7 @@ interface GraphActionPayloadMap {
   [ReversibleAction.AddEdge]: { readonly edge: Edge };
   [ReversibleAction.RemoveEdge]: { readonly edgeId: EdgeId };
   [ReversibleAction.StackNodes]: { readonly survivorId: ProcessrNodeId; readonly removedIds: readonly ProcessrNodeId[]; readonly newCount: number };
-  [ReversibleAction.UnstackNode]: { readonly nodeId: ProcessrNodeId; readonly newNodes: readonly ProcessrNode[]; readonly newEdges: Readonly<Record<string, Edge>> };
+  [ReversibleAction.UnstackNode]: { readonly nodeId: ProcessrNodeId; readonly newNodes: readonly ProcessrNode[]; readonly newPortInstances: Readonly<Record<PortInstanceId, PortInstance>>; readonly newEdges: Readonly<Record<string, Edge>> };
   [ReversibleAction.SetStackSize]: {readonly nodeId: ProcessrNodeId, readonly newStackSize: number};
   [TransientAction.SetViewport]: { readonly viewport: Viewport };
   [TransientAction.Undo]: undefined;
@@ -59,13 +59,13 @@ export type GraphAction<T extends ActionType = ActionType> = {
 
 interface GraphChangePayloadMap {
   [ReversibleAction.AddNode]: undefined;
-  [ReversibleAction.RemoveNode]: { readonly removedNode: ProcessrNode; readonly removedEdges: Readonly<Record<string, Edge>> };
+  [ReversibleAction.RemoveNode]: { readonly removedNode: ProcessrNode; readonly removedEdges: Readonly<Record<string, Edge>>; readonly removedPortInstances: Readonly<Record<PortInstanceId, PortInstance>> };
   [ReversibleAction.SetNodePositions]: { readonly previousPositions: Readonly<Record<string, Position>> };
   [ReversibleAction.SetNodeRecipe]: { readonly previousRecipeId: RecipeId | null; readonly previousPorts: readonly PortInstance[]; readonly changedEdges: Readonly<Record<string, Edge>> };
   [ReversibleAction.SetMultiNodeRecipes]: { readonly previousRecipes: Readonly<Record<string, RecipeId | null>>; readonly previousPorts: Readonly<Record<string, readonly PortInstance[]>>; readonly changedEdges: Readonly<Record<string, Edge>> };
   [ReversibleAction.AddEdge]: undefined;
   [ReversibleAction.RemoveEdge]: { readonly removedEdge: Edge };
-  [ReversibleAction.StackNodes]: { readonly originalSurvivorCount: number; readonly removedNodes: readonly ProcessrNode[]; readonly edgeSnapshot: Readonly<Record<string, Edge>> };
+  [ReversibleAction.StackNodes]: { readonly originalSurvivorCount: number; readonly removedNodes: readonly ProcessrNode[]; readonly edgeSnapshot: Readonly<Record<string, Edge>>; readonly removedPortInstances: Readonly<Record<PortInstanceId, PortInstance>> };
   [ReversibleAction.UnstackNode]: { readonly newNodeIds: readonly ProcessrNodeId[]; readonly newEdgeIds: readonly string[]; readonly originalCount: number };
   [ReversibleAction.SetStackSize]: {readonly previousStackSize: number}
 }
@@ -96,6 +96,7 @@ export interface Graph {
   readonly description?: string;
   readonly gamePackId: AtlasId;
   readonly nodes: Readonly<Record<ProcessrNodeId, ProcessrNode>>;
+  readonly portInstances: Readonly<Record<PortInstanceId, PortInstance>>;
   readonly edges: Readonly<Record<EdgeId, Edge>>;
   readonly viewport: Viewport;
   readonly history: GraphHistory;

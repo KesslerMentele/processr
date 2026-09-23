@@ -74,12 +74,14 @@ export function buildGamePackJson(gamepack: Gamepack): object {
                 const outputPorts = node.ports.filter(p => p.direction === 'output');
                 return node.ports.map(port => {
                     const group = port.direction === 'input' ? inputPorts : outputPorts;
-                    const position = (group.indexOf(port) + 1) / (group.length + 1);
+                    // 0-based order within the port's own direction group. Purely a sort
+                    // key — the client computes the actual on-node spacing itself.
+                    const order = group.indexOf(port);
                     return {
                         id: port.id,
                         direction: port.direction,
                         label: port.label ?? inferName(port.id),
-                        position,
+                        order,
                     };
                 });
             })(),

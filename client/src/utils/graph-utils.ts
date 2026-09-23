@@ -3,6 +3,7 @@ import type {
   Edge,
   Graph,
   GraphChange,
+  PortInstance,
   ProcessrNode,
   ProcessrNodeId,
 } from "../models";
@@ -25,8 +26,8 @@ export const areItemsCompatible = (connection: Readonly<ConnectionQuery>, graph:
   const targetRecipe = atlasIndex.recipesById.get(targetNode.recipeId);
   if (!sourceRecipe || !targetRecipe) { logger.debug('[areItemsCompatible] recipe lookup failed'); return true; }
 
-  const srcIdx = getOutputPorts(sourceNode).findIndex(p => p.id === connection.sourceHandle);
-  const tgtIdx = getInputPorts(targetNode).findIndex(p => p.id === connection.targetHandle);
+  const srcIdx = getOutputPorts(sourceNode, graph.portInstances).findIndex(p => p.id === connection.sourceHandle);
+  const tgtIdx = getInputPorts(targetNode, graph.portInstances).findIndex(p => p.id === connection.targetHandle);
   const srcItem = srcIdx >= 0 ? sourceRecipe.outputs[srcIdx]?.itemId : undefined;
   const tgtItem = tgtIdx >= 0 ? targetRecipe.inputs[tgtIdx]?.itemId : undefined;
   logger.debug(`[areItemsCompatible] item check srcIdx=${String(srcIdx)} srcItem=${srcItem ?? 'none'} tgtIdx=${String(tgtIdx)} tgtItem=${tgtItem ?? 'none'}`);
@@ -55,6 +56,24 @@ export const now = () => new Date().toISOString();
 export const omitKey = <T>(obj: Readonly<Record<string, T>>, key: string): Record<string, T> =>
   Object.fromEntries(Object.entries(obj).filter(([id]) => id !== key));
 
+/**
+ * Filters a record by removing several keys at once.
+ * @param obj
+ * @param keys
+ */
+export const omitKeys = <T>(obj: Readonly<Record<string, T>>, keys: readonly string[]): Record<string, T> => {
+  const keySet = new Set<string>(keys);
+  return Object.fromEntries(Object.entries(obj).filter(([id]) => !keySet.has(id)));
+};
+
+/**
+ * Returns a record containing only the given keys (keys absent from `obj` are skipped).
+ * @param obj
+ * @param keys
+ */
+export const pickKeys = <T>(obj: Readonly<Record<string, T>>, keys: readonly string[]): Record<string, T> =>
+  Object.fromEntries(keys.filter(k => Object.hasOwn(obj, k)).map(k => [k, obj[k]]));
+
 
 /**
  * Applies an update to a single node and returns the new state of the graph.
@@ -67,6 +86,18 @@ export const omitKey = <T>(obj: Readonly<Record<string, T>>, key: string): Recor
 export const applySingleNodeUpdate = (graph: Graph, nodeId: ProcessrNodeId, update: Partial<ProcessrNode>): Graph => ({
   ...graph,
   nodes: { ...graph.nodes, [nodeId]: { ...graph.nodes[nodeId], ...update } },
+});
+
+/**
+ * Merges a set of PortInstances into the graph's `portInstances` record, keyed by id.
+ * Used whenever a node's ports get new `stack`/`item` data (e.g. a recipe change)
+ * without the set of port ids themselves changing.
+ * @param graph
+ * @param ports
+ */
+export const applyPortInstances = (graph: Graph, ports: readonly PortInstance[]): Graph => ({
+  ...graph,
+  portInstances: { ...graph.portInstances, ...Object.fromEntries(ports.map(p => [p.id, p] as const)) },
 });
 
 /**

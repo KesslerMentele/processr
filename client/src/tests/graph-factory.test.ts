@@ -28,6 +28,9 @@ describe('createGraph', () => {
   it('is built with empty nodes', () => {
     expect(graph.nodes).toEqual({});
   });
+  it('is built with empty portInstances', () => {
+    expect(graph.portInstances).toEqual({});
+  });
   it('is built with empty edges', () => {
     expect(graph.edges).toEqual({});
   });
@@ -82,14 +85,14 @@ describe('createProcessrNode', () => {
     name: 'templateNode',
     display: { label: 'templateNode' },
     ports: [
-      { id: portId('port-in'), name: 'Input', direction: PortDirection.Input, metadata: {} }
+      { id: portId('port-in'), name: 'Input', direction: PortDirection.Input, order: 0, metadata: {} }
     ],
     stats: { speedMultiplier: 1, metadata: {} },
     tags: [],
     metadata: { foo: 'bar' },
   };
   const position: Position = { x: 0, y: 0 };
-  const minimalNode = createProcessrNode(template, position);
+  const { node: minimalNode, portInstances: minimalPortInstances } = createProcessrNode(template, position);
   // input NodeTemplate
   // input Position
   it('will take the templateId of the template passed', () => {
@@ -104,13 +107,13 @@ describe('createProcessrNode', () => {
   });
   it('will take the port configuration of the template', () => {
     expect(minimalNode.ports).toHaveLength(1);
-    expect(minimalNode.ports[0].template.id).toBe(template.ports[0].id);
+    expect(minimalPortInstances[minimalNode.ports[0]].template.id).toBe(template.ports[0].id);
   });
   it('will default to a count of 1 node', () => {
     expect(minimalNode.count).toBe(1);
   });
   it('will accept a count from the options', () => {
-    const nodeWithCount = createProcessrNode(template, position, { count: 4 });
+    const { node: nodeWithCount } = createProcessrNode(template, position, { count: 4 });
     expect(nodeWithCount.count).toBe(4);
   });
   it('takes the metadata from the template', () => {
@@ -125,8 +128,8 @@ describe('createProcessrNode', () => {
     const recipeTemplate: NodeTemplate = {
       ...template,
       ports: [
-        { id: portId('port-in'), name: 'Input', direction: PortDirection.Input, metadata: {} },
-        { id: portId('port-out'), name: 'Output', direction: PortDirection.Output, metadata: {} },
+        { id: portId('port-in'), name: 'Input', direction: PortDirection.Input, order: 0, metadata: {} },
+        { id: portId('port-out'), name: 'Output', direction: PortDirection.Output, order: 0, metadata: {} },
       ],
     };
     const testRecipeId = recipeId('smelt-iron');
@@ -147,15 +150,17 @@ describe('createProcessrNode', () => {
     const atlasIndex = buildAtlasIndex(atlas);
 
     it('populates port stacks immediately, not just on a later setNodeRecipe call', () => {
-      const node = createProcessrNode(recipeTemplate, position, { recipeId: testRecipeId }, atlasIndex);
-      const outputPort = node.ports.find(p => p.template.direction === PortDirection.Output);
+      const { node, portInstances } = createProcessrNode(recipeTemplate, position, { recipeId: testRecipeId }, atlasIndex);
+      const outputPort = Object.values(portInstances).find(p => p.template.direction === PortDirection.Output);
       expect(outputPort?.stack?.itemId).toBe(recipe.outputs[0].itemId);
+      // sanity check: the port instance actually belongs to the node
+      expect(node.ports).toContain(outputPort?.id);
     });
 
     it('carries stacks through to a clone as well', () => {
-      const source = createProcessrNode(recipeTemplate, position, { recipeId: testRecipeId }, atlasIndex);
-      const clone = cloneNode(source, recipeTemplate, { x: 10, y: 10 }, atlasIndex);
-      const outputPort = clone.ports.find(p => p.template.direction === PortDirection.Output);
+      const { node: source } = createProcessrNode(recipeTemplate, position, { recipeId: testRecipeId }, atlasIndex);
+      const { portInstances: clonePortInstances } = cloneNode(source, recipeTemplate, { x: 10, y: 10 }, atlasIndex);
+      const outputPort = Object.values(clonePortInstances).find(p => p.template.direction === PortDirection.Output);
       expect(outputPort?.stack?.itemId).toBe(recipe.outputs[0].itemId);
     });
   });

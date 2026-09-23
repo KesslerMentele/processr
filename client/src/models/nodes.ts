@@ -21,8 +21,14 @@ export interface PortTemplate {
   readonly id: PortId;
   readonly name: string;
   readonly direction: PortDirection;
-  /** Visual position hint (0.0 = top/left, 1.0 = bottom/right). */
-  readonly position?: number;
+  /**
+   * Author-assigned order among ports of the same direction on this template
+   * (lower sorts first; ties break arbitrarily). Purely a sort key — it does
+   * not itself place the port. The actual evenly-spaced on-node position is
+   * computed at render time from this ordering (see `getInputPorts`/
+   * `getOutputPorts` in node-utils.ts and `ProcessrNodeComponent`).
+   */
+  readonly order: number;
   readonly metadata: Metadata;
 }
 

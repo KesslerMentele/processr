@@ -37,7 +37,7 @@ export interface ProcessrNode {
   /** The Currently assigned recipe. Null if no recipe is set. */
   readonly recipeId: RecipeId | null;
   readonly statsOverride: NodeStatsOverride;
-  readonly ports: readonly PortInstance[];
+  readonly ports: readonly PortInstanceId[];
   /** How many of this machine run in parallel. Defaults to 1. */
   readonly count: number;
   readonly metadata: Metadata;
@@ -47,10 +47,21 @@ export interface ProcessrNode {
 /**
  * A port instance on a placed processor node.
  * Created from the template's PortDefinition when the node is instantiated.
+ * Lives in `Graph.portInstances`, keyed by id — a `ProcessrNode` only holds
+ * the ids of the instances that belong to it.
  */
 export interface PortInstance {
   readonly id: PortInstanceId;
   readonly template: PortTemplate;
   readonly item?: Item;
   readonly stack?: RecipeItemStack;
+}
+
+/**
+ * Bundles a freshly created/cloned ProcessrNode with the PortInstance records
+ * it references, so callers can merge both into the graph atomically.
+ */
+export interface NodeWithPorts {
+  readonly node: ProcessrNode;
+  readonly portInstances: Readonly<Record<PortInstanceId, PortInstance>>;
 }

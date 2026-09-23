@@ -7,6 +7,7 @@ import type { EditorState } from '@codemirror/state';
 const COLOR_PATTERN = /\bcolor\s+"(#[\da-fA-F]{3,8})"/g;
 
 /** A small colored square that opens the native color picker on click. */
+// eslint-disable-next-line functional/no-classes
 class ColorSwatchWidget extends WidgetType {
   hex: string; hexFrom: number; hexTo: number;
   constructor(hex: string, hexFrom: number, hexTo: number) {

@@ -167,6 +167,26 @@ describe('addNodeTemplate', () => {
     expect(ids).toEqual(['input', 'input-2', 'output']);
   });
 
+  // Regression: ports built here never got an `order` (nee `position`) assigned,
+  // so every port on a template rendered stacked on top of each other — a
+  // template with two inputs showed only one visible handle.
+  it('assigns each port a distinct order within its own direction group', () => {
+    const atlas = addNodeTemplate(emptyPack, {
+      name: 'Assembling Machine',
+      ports: [
+        { name: 'Input A', direction: PortDirection.Input },
+        { name: 'Input B', direction: PortDirection.Input },
+        { name: 'Output A', direction: PortDirection.Output },
+        { name: 'Output B', direction: PortDirection.Output },
+      ],
+    });
+    const ports = atlas.nodeTemplates[0].ports;
+    const inputOrders = ports.filter(p => p.direction === PortDirection.Input).map(p => p.order);
+    const outputOrders = ports.filter(p => p.direction === PortDirection.Output).map(p => p.order);
+    expect(inputOrders).toEqual([0, 1]);
+    expect(outputOrders).toEqual([0, 1]);
+  });
+
   it('defaults speedMultiplier to 1 and tags to an empty array', () => {
     const atlas = addNodeTemplate(emptyPack, { name: 'Stone Furnace' });
     const template = atlas.nodeTemplates[0];
