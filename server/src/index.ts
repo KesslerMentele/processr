@@ -2,12 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import atlasRouter from './routes/atlas.js';
 import iconsRouter from './routes/icons.js';
-import { initIconStore } from './icons/icon-store.js';
+import { initStore } from './db/store.js';
 
 const app = express();
 const PORT = 3001;
 
-initIconStore();
+initStore();
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));

@@ -5,9 +5,9 @@ import type {
   PortInstanceId,
 } from "../ids.ts";
 import type { Position, Metadata } from "../common.ts";
-import type { Item } from "../items.ts";
-import type { RecipeItemStack } from "../recipes.ts";
-import type { PortTemplate } from "../nodes.ts";
+import type { Item } from "../atlas/items.ts";
+import type { RecipeItemStack } from "../atlas/recipes.ts";
+import type { PortTemplate } from "../atlas/nodes.ts";
 
 
 
@@ -63,5 +63,5 @@ export interface PortInstance {
  */
 export interface NodeWithPorts {
   readonly node: ProcessrNode;
-  readonly portInstances: Readonly<Record<PortInstanceId, PortInstance>>;
+  readonly portInstances: ReadonlyMap<PortInstanceId, PortInstance>;
 }

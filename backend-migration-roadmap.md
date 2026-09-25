@@ -93,10 +93,115 @@ Suggested sequencing, roughly easiest/most-isolated first:
    surface; sync-on-checkpoint rather than sync-on-every-change.
 4. UI settings — lowest priority; arguably fine to stay local-only forever.
 
-## Keep it boring, for the Rust rewrite's sake
 
-Whatever gets built server-side between now and the rewrite should look like
-the icon store: plain REST verbs, SQLite, business logic expressed as pure
-functions over explicit inputs rather than closures over framework state.
-That's what ports cleanly to a different language later — cleverness in
-Express middleware or ORM magic doesn't.
+```mermaid
+---
+config:
+  theme: dark
+---
+erDiagram
+	direction TB
+	Atlas {
+		id id PK  
+		name string  ""  
+		gameName string  ""  
+		version string  ""  
+		gameVersion string  ""  
+		description string  ""  
+		author string  ""  
+		url string  ""  
+	}
+	Items {
+		id id  PK 
+		atlasId id  FK  
+		name string  ""  
+		label string  ""  
+		description string  ""  
+		iconId id  FK
+		color string  ""
+		form enum  ""  
+		metadata json  ""
+	}
+	Recipes {
+		id id PK
+		atlasId id FK
+		name string
+		label string  ""  
+		description string  ""  
+		iconId id  FK
+		color string  ""
+		duration number
+		durationUnit enum
+		compatibleCategoryId id  FK
+		metadata json  ""
+	}
+	Nodes {
+        id id PK
+        atlasId id FK
+        categoryId id  FK
+	    name string
+        label string  ""
+        description string  ""
+        iconId id  FK
+        color string  ""
+        speedMultiplier number
+        powerConsumption number
+        moduleSlots number
+        metadata json  ""
+    }
+    Categories {
+        id id PK
+        atlasId id FK
+        parentId id  FK
+        name string
+        label string  ""
+        description string  ""
+        iconId id  FK
+        color string  ""
+        sortOrder number  ""
+    }
+    Icons {
+        id id PK
+        label string  ""
+        mime string  ""
+        data blob  ""
+        createdAt string  ""
+    }
+	RecipeRequirements {
+        id id PK
+		recipeId id FK
+		type enum
+		itemId id FK
+		count number
+	}
+	NodeRecipes {
+        id id PK
+		recipeId id FK
+		nodeId id Fk
+	}
+	NodePorts {
+        id id PK
+	    nodeId id FK
+	    name string
+	    direction enum
+	    position number  ""
+	    metadata json  ""
+    }
+
+	Atlas      ||--o{ Items              : "owns"
+    Atlas      ||--o{ Recipes              : "owns"
+    Atlas      ||--o{ Nodes              : "owns"
+    Atlas      ||--o{ Categories              : "owns"
+	Categories ||--o{ Nodes              : "categorizes"
+	Categories ||--o{ Recipes            : "constrains"
+	Categories ||--o{ Categories         : "parent of"
+	Icons      ||--o{ Items              : "illustrates"
+	Icons      ||--o{ Recipes            : "illustrates"
+	Icons      ||--o{ Nodes              : "illustrates"
+	Icons      ||--o{ Categories         : "illustrates"
+	Items      ||--o{ RecipeRequirements : "is"
+	Nodes      ||--o{ NodeRecipes        : "has"
+	Nodes      ||--o{ NodePorts          : "has"
+	Recipes    ||--o{ RecipeRequirements : "has"
+	Recipes    ||--o{ NodeRecipes        : "has"
+```

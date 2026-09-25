@@ -35,16 +35,30 @@ type TransientAction = (typeof TransientAction)[keyof typeof TransientAction];
 
 export type ActionType = ReversibleAction | TransientAction;
 
+export interface NodeRecipeUpdate {
+  nodeId: ProcessrNodeId;
+  recipeId: RecipeId | null;
+  ports: readonly PortInstance[];
+  invalidEdges: ReadonlyMap<EdgeId, Edge>
+}
+
+const EdgeInvalidationBehavior = {
+  Delete: 'delete',
+  Highlight: 'highlight'
+} as const;
+
+export type EdgeInvalidationBehavior = (typeof EdgeInvalidationBehavior)[keyof typeof EdgeInvalidationBehavior];
+
 interface GraphActionPayloadMap {
-  [ReversibleAction.AddNode]: { readonly node: ProcessrNode; readonly portInstances: Readonly<Record<PortInstanceId, PortInstance>> };
+  [ReversibleAction.AddNode]: { readonly node: ProcessrNode; readonly portInstances: ReadonlyMap<PortInstanceId, PortInstance> };
   [ReversibleAction.RemoveNode]: { readonly nodeId: ProcessrNodeId };
-  [ReversibleAction.SetNodePositions]: { readonly positions: Readonly<Record<string, Position>> };
-  [ReversibleAction.SetNodeRecipe]: { readonly nodeId: ProcessrNodeId; readonly recipeId: RecipeId | null; readonly ports: readonly PortInstance[]; readonly invalidEdges: Readonly<Record<string, Edge>>; readonly behavior: 'delete' | 'highlight' };
-  [ReversibleAction.SetMultiNodeRecipes]: { readonly updates: readonly { nodeId: ProcessrNodeId; recipeId: RecipeId | null; ports: readonly PortInstance[]; invalidEdges: Readonly<Record<string, Edge>> }[]; readonly behavior: 'delete' | 'highlight' };
+  [ReversibleAction.SetNodePositions]: { readonly positions: ReadonlyMap<ProcessrNodeId, Position> };
+  [ReversibleAction.SetNodeRecipe]: { readonly update: NodeRecipeUpdate, readonly behavior: EdgeInvalidationBehavior };
+  [ReversibleAction.SetMultiNodeRecipes]: { readonly updates: readonly NodeRecipeUpdate[]; readonly behavior:  EdgeInvalidationBehavior};
   [ReversibleAction.AddEdge]: { readonly edge: Edge };
   [ReversibleAction.RemoveEdge]: { readonly edgeId: EdgeId };
   [ReversibleAction.StackNodes]: { readonly survivorId: ProcessrNodeId; readonly removedIds: readonly ProcessrNodeId[]; readonly newCount: number };
-  [ReversibleAction.UnstackNode]: { readonly nodeId: ProcessrNodeId; readonly newNodes: readonly ProcessrNode[]; readonly newPortInstances: Readonly<Record<PortInstanceId, PortInstance>>; readonly newEdges: Readonly<Record<string, Edge>> };
+  [ReversibleAction.UnstackNode]: { readonly nodeId: ProcessrNodeId; readonly newNodes: ReadonlyMap<ProcessrNodeId, ProcessrNode>; readonly newPortInstances: ReadonlyMap<PortInstanceId, PortInstance>; readonly newEdges: ReadonlyMap<EdgeId, Edge> };
   [ReversibleAction.SetStackSize]: {readonly nodeId: ProcessrNodeId, readonly newStackSize: number};
   [TransientAction.SetViewport]: { readonly viewport: Viewport };
   [TransientAction.Undo]: undefined;
@@ -59,14 +73,14 @@ export type GraphAction<T extends ActionType = ActionType> = {
 
 interface GraphChangePayloadMap {
   [ReversibleAction.AddNode]: undefined;
-  [ReversibleAction.RemoveNode]: { readonly removedNode: ProcessrNode; readonly removedEdges: Readonly<Record<string, Edge>>; readonly removedPortInstances: Readonly<Record<PortInstanceId, PortInstance>> };
-  [ReversibleAction.SetNodePositions]: { readonly previousPositions: Readonly<Record<string, Position>> };
-  [ReversibleAction.SetNodeRecipe]: { readonly previousRecipeId: RecipeId | null; readonly previousPorts: readonly PortInstance[]; readonly changedEdges: Readonly<Record<string, Edge>> };
-  [ReversibleAction.SetMultiNodeRecipes]: { readonly previousRecipes: Readonly<Record<string, RecipeId | null>>; readonly previousPorts: Readonly<Record<string, readonly PortInstance[]>>; readonly changedEdges: Readonly<Record<string, Edge>> };
+  [ReversibleAction.RemoveNode]: { readonly removedNode: ProcessrNode; readonly removedEdges: ReadonlyMap<EdgeId, Edge>; readonly removedPortInstances: ReadonlyMap<PortInstanceId, PortInstance> };
+  [ReversibleAction.SetNodePositions]: { readonly previousPositions: ReadonlyMap<ProcessrNodeId, Position> };
+  [ReversibleAction.SetNodeRecipe]: { readonly previousRecipeId: RecipeId | null; readonly previousPorts: readonly PortInstance[]; readonly changedEdges: ReadonlyMap<EdgeId, Edge> };
+  [ReversibleAction.SetMultiNodeRecipes]: { readonly previousRecipes: ReadonlyMap<ProcessrNodeId, RecipeId | null>; readonly previousPorts: ReadonlyMap<ProcessrNodeId, readonly PortInstance[]>; readonly changedEdges: ReadonlyMap<EdgeId, Edge> };
   [ReversibleAction.AddEdge]: undefined;
   [ReversibleAction.RemoveEdge]: { readonly removedEdge: Edge };
-  [ReversibleAction.StackNodes]: { readonly originalSurvivorCount: number; readonly removedNodes: readonly ProcessrNode[]; readonly edgeSnapshot: Readonly<Record<string, Edge>>; readonly removedPortInstances: Readonly<Record<PortInstanceId, PortInstance>> };
-  [ReversibleAction.UnstackNode]: { readonly newNodeIds: readonly ProcessrNodeId[]; readonly newEdgeIds: readonly string[]; readonly originalCount: number };
+  [ReversibleAction.StackNodes]: { readonly originalSurvivorCount: number; readonly removedNodes: ReadonlyMap<ProcessrNodeId, ProcessrNode>; readonly edgeSnapshot: ReadonlyMap<EdgeId, Edge>; readonly removedPortInstances: ReadonlyMap<PortInstanceId, PortInstance> };
+  [ReversibleAction.UnstackNode]: { readonly newNodeIds: readonly ProcessrNodeId[]; readonly newEdgeIds: readonly EdgeId[]; readonly originalCount: number };
   [ReversibleAction.SetStackSize]: {readonly previousStackSize: number}
 }
 
@@ -95,9 +109,9 @@ export interface Graph {
   readonly name: string;
   readonly description?: string;
   readonly gamePackId: AtlasId;
-  readonly nodes: Readonly<Record<ProcessrNodeId, ProcessrNode>>;
-  readonly portInstances: Readonly<Record<PortInstanceId, PortInstance>>;
-  readonly edges: Readonly<Record<EdgeId, Edge>>;
+  readonly nodes: ReadonlyMap<ProcessrNodeId, ProcessrNode>;
+  readonly portInstances: ReadonlyMap<PortInstanceId, PortInstance>;
+  readonly edges: ReadonlyMap<EdgeId, Edge>;
   readonly viewport: Viewport;
   readonly history: GraphHistory;
   /** ISO 8601 timestamps. */

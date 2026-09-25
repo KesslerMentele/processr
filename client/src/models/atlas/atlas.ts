@@ -1,5 +1,5 @@
-import type { AtlasId, ItemId, RecipeId, NodeTemplateId, CategoryId } from "./ids.ts";
-import type { Metadata } from "./common.ts";
+import type { AtlasId, ItemId, RecipeId, NodeTemplateId, CategoryId } from "../ids.ts";
+import type { Metadata } from "../common.ts";
 import type { Item, Category } from "./items.ts";
 import type { Recipe } from "./recipes.ts";
 import type { NodeTemplate } from "./nodes.ts";

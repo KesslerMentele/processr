@@ -1,6 +1,6 @@
 import type { GraphId, AtlasId } from "../ids.ts";
 import type { Graph } from "../graph/graph.ts";
-import type { Atlas } from "../atlas.ts";
+import type { Atlas } from "../atlas/atlas.ts";
 
 /**
  * Increment when making breaking changes to the schema.

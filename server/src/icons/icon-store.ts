@@ -1,8 +1,5 @@
-import { DatabaseSync } from 'node:sqlite';
 import { createHash } from 'node:crypto';
-import { mkdirSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { getDb } from '../db/store.js';
 
 export interface IconRecord {
     id: string;
@@ -14,33 +11,7 @@ export interface StoredIcon extends IconRecord {
     data: Uint8Array;
 }
 
-const DEFAULT_DB_PATH = join(dirname(fileURLToPath(import.meta.url)), '../../data/icons.db');
-
 const DATA_URL_PATTERN = /^data:([^;,]+);base64,(.+)$/;
-
-let db: DatabaseSync | undefined;
-
-function getDb(): DatabaseSync {
-    if (!db) {
-        throw new Error('Icon store not initialized — call initIconStore() first.');
-    }
-    return db;
-}
-
-/** Opens the icon database (creating the table if missing). Pass `:memory:` in tests for isolation. */
-export function initIconStore(dbPath: string = DEFAULT_DB_PATH): void {
-    if (dbPath !== ':memory:') mkdirSync(dirname(dbPath), { recursive: true });
-    db = new DatabaseSync(dbPath);
-    db.exec(`
-        CREATE TABLE IF NOT EXISTS icons (
-            id TEXT PRIMARY KEY,
-            label TEXT,
-            mime TEXT NOT NULL,
-            data BLOB NOT NULL,
-            created_at TEXT NOT NULL
-        )
-    `);
-}
 
 function parseDataUrl(dataUrl: string): { mime: string; data: Buffer } {
     const match = DATA_URL_PATTERN.exec(dataUrl);

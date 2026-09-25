@@ -1,5 +1,5 @@
-import type { RecipeId, ItemId, NodeTemplateId, CategoryId } from "./ids.ts";
-import type { DisplayInfo, Metadata, TimeUnit } from "./common.ts";
+import type { RecipeId, ItemId, NodeTemplateId, CategoryId } from "../ids.ts";
+import type { DisplayInfo, Metadata, TimeUnit } from "../common.ts";
 
 /** A single item stack in a recipe — item ID + amount per cycle. */
 export interface RecipeItemStack {

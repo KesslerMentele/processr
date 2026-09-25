@@ -9,12 +9,12 @@ import {
   recipeId,
   PortDirection,
   portId, type Position,
-  processrNodeId
+  processrNodeId,
+  portInstanceId
 } from "../models";
-import { createGraph, createProcessrNode, cloneNode } from "../utils/graph-factory.ts";
+import { createGraph } from "../utils/graph-factory.ts";
 import { createEdge } from "../utils/edge-factory.ts";
 import { buildAtlasIndex } from "../features/atlas-editor/atlas-index.ts";
-import { portInstanceId } from "../models/ids.ts";
 
 
 

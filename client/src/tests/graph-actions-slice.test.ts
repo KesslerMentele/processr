@@ -14,9 +14,10 @@ import {
   type UISettingsSlice,
 } from "../models";
 import { buildAtlasIndex } from "../features/atlas-editor/atlas-index.ts";
-import { createGraph, createProcessrNode } from "../utils/graph-factory.ts";
+import { createGraph } from "../utils/graph-factory.ts";
 import { createEdge } from "../utils/edge-factory.ts";
 import createGraphActions from "../state/graph-actions-slice.ts";
+import { createProcessrNode } from "../utils/node-factory.ts";
 
 type HarnessState = GraphSlice & UISettingsSlice;
 
@@ -72,7 +73,7 @@ describe('loadAtlas', () => {
     const outputPort = Object.values(portInstancesA).find(p => p.template.direction === PortDirection.Output);
     const inputPort = Object.values(portInstancesB).find(p => p.template.direction === PortDirection.Input);
     if (!outputPort || !inputPort) throw new Error('fixture template should have an input and output port');
-    const edge = createEdge(nodeA.id, nodeB.id, {
+    const edge = createEdge(graph, atlas, nodeA.id, nodeB.id, {
       sourcePortId: outputPort.id,
       targetPortId: inputPort.id,
     });

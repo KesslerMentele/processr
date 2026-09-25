@@ -12,7 +12,7 @@ import {
 } from "../models";
 import { buildAtlasIndex } from "../features/atlas-editor/atlas-index.ts";
 import { createProcessrNode } from "../utils/graph-factory.ts";
-import { getInputPorts, getOutputPorts, getRates, withRenderPositions } from "../utils/node-utils.ts";
+import { getPorts, getOutputPorts, getRates, withRenderPositions } from "../utils/node-utils.ts";
 import { omitKey } from "../utils/graph-utils.ts";
 
 const template: NodeTemplate = {
@@ -96,8 +96,8 @@ describe('getInputPorts / getOutputPorts', () => {
     if (!missingPortId) throw new Error('fixture template should have an input port');
     const brokenPortInstances = omitKey(portInstances, missingPortId);
 
-    expect(() => getInputPorts(node, brokenPortInstances)).not.toThrow();
-    expect(getInputPorts(node, brokenPortInstances)).toHaveLength(0);
+    expect(() => getPorts(node, brokenPortInstances)).not.toThrow();
+    expect(getPorts(node, brokenPortInstances)).toHaveLength(0);
     // The output port is untouched and should still resolve normally.
     expect(getOutputPorts(node, brokenPortInstances)).toHaveLength(1);
   });

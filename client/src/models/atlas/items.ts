@@ -1,5 +1,5 @@
-import type { ItemId, CategoryId } from "./ids.ts";
-import type { DisplayInfo, Metadata } from "./common.ts";
+import type { ItemId, CategoryId } from "../ids.ts";
+import type { DisplayInfo, Metadata } from "../common.ts";
 
 /**
  * An Item is anything that can appear as an input or output of a recipe.
