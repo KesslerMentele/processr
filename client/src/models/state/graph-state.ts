@@ -3,7 +3,7 @@ import type { EdgeId, NodeTemplateId, ProcessrNodeId, RecipeId } from "../ids.ts
 import type { Position } from "../common.ts";
 import type { Edge } from "../graph/edge.ts";
 import type { Graph, Viewport } from "../graph/graph.ts";
-import type { Atlas, AtlasIndex } from "../atlas.ts";
+import type { Atlas, AtlasIndex } from "../atlas/atlas.ts";
 
 export interface SetGraphData {
   readonly graph?: Graph;
@@ -13,7 +13,7 @@ export interface SetGraphData {
 export interface GraphActionSlice {
   addNode: (nodeWithPorts: NodeWithPorts) => void;
   removeNode: (node: ProcessrNodeId) => void;
-  updateNodePositions: (positions: Readonly<Record<string, Position>>) => void;
+  updateNodePositions: (positions: ReadonlyMap<ProcessrNodeId, Position>) => void;
   setNodeRecipe: (nodeId: ProcessrNodeId, recipeId: RecipeId | null) => void;
   setNodeRecipes: (updates: { nodeId: ProcessrNodeId; recipeId: RecipeId | null }[]) => void;
   addEdge: (edge: Edge) => void;

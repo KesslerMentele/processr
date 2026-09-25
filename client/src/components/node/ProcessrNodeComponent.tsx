@@ -1,7 +1,7 @@
 import { type CSSProperties, type FC } from "react";
-import type { ProcessrNodeData } from "../../models";
+import { PortDirection, type ProcessrNodeData } from "../../models";
 import { type Node as RFNode, type NodeProps as RFNodeProps } from "@xyflow/react";
-import { getInputPorts, getOutputPorts, withRenderPositions } from "../../utils/node-utils.ts";
+import { getPorts, withRenderPositions } from "../../utils/node-utils.ts";
 import { useNodeComponentState } from "../../hooks/useNodeComponentState.ts";
 import type { PortInstance } from "../../models";
 import Port from "./Port.tsx";
@@ -28,13 +28,13 @@ const ProcessrNodeComponent: FC<ProcessrNodeComponentProps> = ({ data, selected 
     logger.warn(`[ProcessrNode] template not found: ${data.templateId} — Atlas may be missing this node type`);
   }
 
-  const inputs: PortInstance[] = getInputPorts(data, graph.portInstances).map((port, i): PortInstance  => ({
+  const inputs: PortInstance[] = getPorts(graph, data, PortDirection.Input).map((port, i): PortInstance  => ({
       ...port,
       stack: recipe?.inputs[i],
       item: recipe ? packIndex.itemsById.get(recipe.inputs[i]?.itemId) : undefined,
     }));
 
-  const outputs: PortInstance[] = getOutputPorts(data, graph.portInstances).map((port, i): PortInstance => ({
+  const outputs: PortInstance[] = getPorts(graph, data, PortDirection.Output).map((port, i): PortInstance => ({
       ...port,
       stack: recipe?.outputs[i],
       item: recipe ? packIndex.itemsById.get(recipe.outputs[i]?.itemId) : undefined,

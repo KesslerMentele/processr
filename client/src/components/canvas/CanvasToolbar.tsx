@@ -2,7 +2,6 @@ import type { FC } from 'react';
 import { Panel } from '@xyflow/react';
 import { LuMove, LuLassoSelect, LuSettings2, LuPackage, LuLayers, LuLayers2 } from 'react-icons/lu';
 import { useToolbarState } from '../../hooks/useToolbarState.ts';
-import type { ProcessrNode } from "../../models";
 import SettingsPanel from "./SettingsPanel.tsx";
 
 const CanvasToolbar: FC = () => {
@@ -20,10 +19,13 @@ const CanvasToolbar: FC = () => {
   } = useToolbarState();
 
   const canStack = selectedNodeIds.length > 1 &&
-    selectedNodeIds.map(id => (graph.nodes[id] as ProcessrNode | undefined)?.templateId).every((t, _, arr) => t !== undefined && t === arr[0]);
+    new Set(selectedNodeIds.flatMap(id => {
+      const node = graph.nodes.get(id);
+      return node ? [node.recipeId] : [];
+    })).size === 1;
 
-  const canUnstack = selectedNodeIds.length === 1 &&
-    ((graph.nodes[selectedNodeIds[0]] as ProcessrNode | undefined)?.count ?? 0) > 1;
+  const node = graph.nodes.get(selectedNodeIds[0]);
+  const canUnstack = selectedNodeIds.length === 1 && node && node.count > 1;
 
   return (
     <Panel position="top-right" className="canvas-toolbar">

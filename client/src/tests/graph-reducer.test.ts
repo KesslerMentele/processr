@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { graphReducer } from "../reducers/graph-reducer.ts";
-import { createGraph, createProcessrNode } from "../utils/graph-factory.ts";
+import { createGraph } from "../utils/graph-factory.ts";
 import { createEdge } from "../utils/edge-factory.ts";
 import {
   edgeId,
@@ -15,7 +15,8 @@ import {
   processrNodeId,
   recipeId,
 } from "../models";
-import { portInstanceId } from "../models/ids.ts";
+import { portInstanceId } from "../models";
+import { createProcessrNode } from "../utils/node-factory.ts";
 
 // --- Fixtures ---
 

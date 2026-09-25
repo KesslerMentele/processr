@@ -29,13 +29,13 @@ export {
 export type { Metadata, Position, Size, DisplayInfo } from "./common.ts";
 export { TimeUnit } from "./common.ts";
 
-// ---- Game Pack layer (static definitions) ----
-export type { Item, Category } from "./items.ts";
-export { ItemForm } from "./items.ts";
-export type { Recipe, RecipeItemStack } from "./recipes.ts";
-export type { NodeTemplate, PortTemplate, NodeStats } from "./nodes.ts";
-export { PortDirection } from "./nodes.ts";
-export type { Atlas, AtlasIndex, SemVer } from "./atlas.ts";
+// ---- Atlas layer (static definitions) ----
+export type { Item, Category } from "./atlas/items.ts";
+export { ItemForm } from "./atlas/items.ts";
+export type { Recipe, RecipeItemStack } from "./atlas/recipes.ts";
+export type { NodeTemplate, PortTemplate, NodeStats } from "./atlas/nodes.ts";
+export { PortDirection } from "./atlas/nodes.ts";
+export type { Atlas, AtlasIndex, SemVer } from "./atlas/atlas.ts";
 
 // ---- Graph layer (user-mutable instances) ----
 export type {
@@ -45,7 +45,7 @@ export type {
   NodeWithPorts,
 } from "./graph/processr-node.ts";
 export type { Edge } from "./graph/edge.ts";
-export type { Graph, Viewport, GraphAction, ActionType, GraphHistory, GraphChange, ReversibleAction } from "./graph/graph.ts";
+export type { Graph, Viewport, GraphAction, ActionType, GraphHistory, GraphChange, ReversibleAction, EdgeInvalidationBehavior, NodeRecipeUpdate } from "./graph/graph.ts";
 export type { ProcessrNodeData } from "./graph/graph-react-connector.ts";
 
 // ---- Serialization ----

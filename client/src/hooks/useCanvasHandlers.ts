@@ -115,8 +115,8 @@ export const useCanvasHandlers = () => {
 
   const onConnect = useCallback<OnConnect>((connection) => {
     logger.debug(`[Connect] onConnect source=${connection.source}:${connection.sourceHandle ?? 'none'} → target=${connection.target}:${connection.targetHandle ?? 'none'}`);
-    addEdge(fromRFConnection({ ...connection, id: newEdgeId() } as RFEdge));
-  }, [addEdge]);
+    addEdge(fromRFConnection({ ...connection, id: newEdgeId() } as RFEdge, graph, atlasIndex));
+  }, [addEdge, graph, atlasIndex]);
 
   const onMoveEnd = useCallback<OnMoveEnd>((_event, viewport) => {
     setViewport(viewport);
