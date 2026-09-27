@@ -10,8 +10,15 @@ import type { Atlas } from "../atlas/atlas.ts";
  * A v1 document has no `portInstances` key and embeds full port objects on
  * each node — loading it as v2 would crash the canvas the moment a node
  * tried to resolve its ports.
+ *
+ * v3: `Graph.nodes`/`portInstances`/`edges` are `Map`s, which `JSON.stringify`
+ * silently drops to `{}`. The on-disk (localStorage) shape now stores those
+ * three fields as JSON strings produced by `serializeMap` (see
+ * `utils/persistence.ts`) instead of embedding them directly. A v2 document
+ * saved under the old (broken) encoding has empty `{}` for all three fields
+ * and can't be recovered — it's treated as unreadable rather than migrated.
  */
-export const DOCUMENT_FORMAT_VERSION = 2;
+export const DOCUMENT_FORMAT_VERSION = 3;
 
 /**
  * A complete serializable document. Saved to localStorage or exported

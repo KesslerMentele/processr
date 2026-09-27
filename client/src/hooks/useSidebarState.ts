@@ -13,7 +13,12 @@ export const useSidebarState = () => {
   })));
 
   const selectedNodes = useMemo(
-    () => state.selectedNodeIds.map(id => state.graph.nodes[id]).filter(Boolean),
+    () => state.selectedNodeIds.flatMap(id => {
+      const node = state.graph.nodes.get(id);
+      return node
+        ? [node]
+        : [];
+    }),
     [state.selectedNodeIds, state.graph.nodes]
   );
 

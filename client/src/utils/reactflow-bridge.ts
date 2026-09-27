@@ -31,9 +31,9 @@ export const fromRFConnection = (rfEge:RFEdge, graph: Graph, atlasIndex: AtlasIn
   }
   logger.debug(`[fromRFConnection] source=${rfEge.source}:${rfEge.sourceHandle} target=${rfEge.target}:${rfEge.targetHandle}`);
   return createEdge(
+    graph, atlasIndex,
     processrNodeId(rfEge.source),
     processrNodeId(rfEge.target),
-    graph, atlasIndex,
     { sourcePortId: portInstanceId(rfEge.sourceHandle), targetPortId: portInstanceId(rfEge.targetHandle) }
   );
 };

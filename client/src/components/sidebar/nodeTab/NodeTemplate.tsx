@@ -2,11 +2,11 @@ import type { NodeTemplate } from "../../../models";
 import { type FC, type MouseEvent, type RefObject, useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useDraggable } from "@neodrag/react";
-import { createProcessrNode } from "../../../utils/graph-factory.ts";
 import { useProcessrStore } from "../../../state/store.ts";
 import { useReactFlow, type XYPosition } from "@xyflow/react";
 import { useModal } from "../../../hooks/useModal.ts";
 import { useContextMenu } from "../../../hooks/useContextMenu.ts";
+import { createProcessrNode } from "../../../utils/node-factory.ts";
 
 
 export const DraggableNodeTemplate: FC<{template: NodeTemplate; onEdit: () => void}> = ({ template, onEdit }) => {
@@ -14,6 +14,7 @@ export const DraggableNodeTemplate: FC<{template: NodeTemplate; onEdit: () => vo
   const addNode = useProcessrStore.use.addNode();
   const setSelectedNodeId = useProcessrStore.use.setSelectedNodeIds();
   const atlasIndex = useProcessrStore.use.atlasIndex();
+  const graph = useProcessrStore.use.graph();
   const { screenToFlowPosition } = useReactFlow();
   const { toggleModal } = useModal();
   const { toggleContextMenu } = useContextMenu();
@@ -37,11 +38,11 @@ export const DraggableNodeTemplate: FC<{template: NodeTemplate; onEdit: () => vo
         const position = screenToFlowPosition(screenPosition);
         const compatibleRecipes = atlasIndex.recipesByNodeType.get(template.id) ?? [];
         const autoRecipeId = compatibleRecipes.length === 1 ? compatibleRecipes[0].id : null;
-        const nodeWithPorts = createProcessrNode(template, position, autoRecipeId ? { recipeId: autoRecipeId } : undefined, atlasIndex);
+        const nodeWithPorts = createProcessrNode(atlasIndex,graph, template, position, autoRecipeId ? { recipeId: autoRecipeId } : undefined);
         addNode(nodeWithPorts);
         setSelectedNodeId([nodeWithPorts.node.id]);
       }
-    }, [addNode, atlasIndex, screenToFlowPosition, setSelectedNodeId, template],
+    }, [addNode, atlasIndex, graph, screenToFlowPosition, setSelectedNodeId, template],
   );
 
   useDraggable(draggableRef as RefObject<HTMLElement>, {

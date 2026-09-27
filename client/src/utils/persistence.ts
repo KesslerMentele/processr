@@ -1,16 +1,49 @@
-import type { Atlas, Graph, ProcessrGraph } from "../models";
+import type { Atlas, Edge, EdgeId, Graph, PortInstance, PortInstanceId, ProcessrNode, ProcessrNodeId } from "../models";
 import { DOCUMENT_FORMAT_VERSION } from "../models";
 import { logger } from "./logger.ts";
 
 const GRAPH_KEY = "processr:graph";
 
+const serializeMap = <K, V>(map: ReadonlyMap<K, V>):string => {
+  return JSON.stringify(Object.fromEntries(map));
+};
+
+const deserializeMap = <K extends string, V>(json: string): ReadonlyMap<K, V> => {
+  const record = JSON.parse(json) as Record<K, V>;
+  return new Map(Object.entries(record) as [K, V][]);
+};
+
+/**
+ * On-disk shape of a saved graph. `Map`s don't survive `JSON.stringify` (they
+ * serialize to `{}`), so `nodes`/`portInstances`/`edges` are stored as JSON
+ * strings via `serializeMap` instead of embedding the Graph's real Maps.
+ *
+ * `history` (undo/redo) is not persisted — it's dropped on save and starts
+ * empty on load, since its GraphChange payloads bury Maps at arbitrary depth
+ * (e.g. `previousPorts`, `edgeSnapshot`) that would need the same treatment.
+ */
+interface SerializedGraph {
+  readonly formatVersion: number;
+  readonly graph: Omit<Graph, 'nodes' | 'portInstances' | 'edges'> & {
+    readonly nodes: string;
+    readonly portInstances: string;
+    readonly edges: string;
+  };
+}
+
 export const saveProcessrGraph = (graph: Graph): void => {
-  const doc: ProcessrGraph = {
+  const doc: SerializedGraph = {
     formatVersion: DOCUMENT_FORMAT_VERSION,
-    graph
+    graph: {
+      ...graph,
+      nodes: serializeMap(graph.nodes),
+      portInstances: serializeMap(graph.portInstances),
+      edges: serializeMap(graph.edges),
+      history: { past: [], future: [] },
+    },
   };
   localStorage.setItem(GRAPH_KEY, JSON.stringify(doc));
-  logger.info(`[saveProcessrGraph] id=${graph.id} nodes=${String(Object.keys(graph.nodes).length)} edges=${String(Object.keys(graph.edges).length)}`);
+  logger.info(`[saveProcessrGraph] id=${graph.id} nodes=${String(graph.nodes.size)} edges=${String(graph.edges.size)}`);
 };
 
 export const loadProcessrGraph = (): Graph | null => {
@@ -19,13 +52,21 @@ export const loadProcessrGraph = (): Graph | null => {
     logger.debug(`[loadProcessrGraph] no saved graph found`);
     return null;
   }
-  const doc = JSON.parse(raw) as ProcessrGraph;
+  const doc = JSON.parse(raw) as SerializedGraph;
   if (doc.formatVersion !== DOCUMENT_FORMAT_VERSION) {
     logger.warn(`[loadProcessrGraph] format mismatch — stored=${String(doc.formatVersion)} expected=${String(DOCUMENT_FORMAT_VERSION)}`);
     return null;
   }
-  logger.info(`[loadProcessrGraph] id=${doc.graph.id} nodes=${String(Object.keys(doc.graph.nodes).length)} edges=${String(Object.keys(doc.graph.edges).length)}`);
-  return doc.graph;
+  const { nodes, portInstances, edges, ...rest } = doc.graph;
+  const graph: Graph = {
+    ...rest,
+    nodes: deserializeMap<ProcessrNodeId, ProcessrNode>(nodes),
+    portInstances: deserializeMap<PortInstanceId, PortInstance>(portInstances),
+    edges: deserializeMap<EdgeId, Edge>(edges),
+    history: { past: [], future: [] },
+  };
+  logger.info(`[loadProcessrGraph] id=${graph.id} nodes=${String(graph.nodes.size)} edges=${String(graph.edges.size)}`);
+  return graph;
 };
 
 export const clearProcessrGraph = (): void => {

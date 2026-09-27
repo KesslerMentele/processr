@@ -16,9 +16,8 @@ import {
 import { edgeId, type ProcessrNodeData, type ProcessrNodeId, processrNodeId } from "../models";
 import { useProcessrStore } from "../state/store.ts";
 import { fromRFConnection } from "../utils/reactflow-bridge.ts";
-import { newEdgeId } from "../utils/id.ts";
 import { logger } from "../utils/logger.ts";
-import { areItemsCompatible } from "../utils/graph-utils.ts";
+import { areItemsCompatible, newEdgeId } from "../utils/graph-utils.ts";
 
 export const useCanvasHandlers = () => {
   const graph = useProcessrStore.use.graph();
@@ -81,7 +80,7 @@ export const useCanvasHandlers = () => {
     // eslint-disable-next-line functional/immutable-data
     isDragging.current = false;
     setSelectedNodeIds(nodes.map(n => processrNodeId(n.id)));
-    updateNodePositions(Object.fromEntries(nodes.map(n => [processrNodeId(n.id), n.position])));
+    updateNodePositions(new Map(nodes.map(n => [processrNodeId(n.id), n.position])));
   }, [setSelectedNodeIds, updateNodePositions]);
 
   const onConnectStart = useCallback<OnConnectStart>((_event, params) => {
@@ -98,7 +97,7 @@ export const useCanvasHandlers = () => {
 
     if (connection.source === connection.target) { logger.debug('[isValidConnection] REJECT: self-loop'); return false; }
 
-    if (Object.values(graph.edges).some(e =>
+    if (graph.edges.values().some(e =>
       e.sourceNodeId === connection.source &&
       e.targetNodeId === connection.target &&
       e.sourcePortId === (connection.sourceHandle ?? null) &&
